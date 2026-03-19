@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
 import Navigation from './components/Common/Navigation';
 import Home from './pages/Home';
 import Register from './pages/register';
@@ -19,11 +20,13 @@ import BrowseHospitals from './pages/BrowseHospitals';
 import BrowseDoctors from './pages/BrowseDoctors';
 import HospitalView from './pages/HospitalView';
 import DoctorView from './pages/DoctorView';
+import PaymentSuccess from './pages/PaymentSuccess';
 import HospitalDepartments from './pages/HospitalDepartments';
 import DepartmentDoctors from './pages/DepartmentDoctors';
 import BookAppointment from './pages/BookAppointment';
 import Reports from './pages/Reports';
 import DoctorSchedules from './pages/DoctorSchedules';
+import AllNotifications from './pages/AllNotifications';
 import { PaymentVerify } from './components/Payment';
 import './styles/theme.css';
 import './App.css';
@@ -31,7 +34,7 @@ import './App.css';
 // Wrapper component to conditionally show navbar
 const AppContent = () => {
   const location = useLocation();
-  const hideNavbarPaths = ['/login', '/register', '/auth/google/callback', '/payment/verify'];
+  const hideNavbarPaths = ['/login', '/register', '/auth/google/callback', '/payment/verify', '/payment/success'];
   const shouldHideNavbar = hideNavbarPaths.includes(location.pathname);
 
   return (
@@ -66,8 +69,11 @@ const AppContent = () => {
         {/* Reports */}
         <Route path="/my-reports" element={<Reports />} />
         <Route path="/reports" element={<Reports />} />
+        {/* Notifications */}
+        <Route path="/notifications" element={<AllNotifications />} />
         {/* Payment */}
         <Route path="/payment/verify" element={<PaymentVerify />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
       </Routes>
     </>
   );
@@ -75,11 +81,13 @@ const AppContent = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
