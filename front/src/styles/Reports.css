@@ -6,24 +6,30 @@
 }
 
 .page-header {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
   color: white;
-  padding: 30px 40px;
+  padding: 50px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-height: 150px;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .page-header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .page-header p {
-  margin: 5px 0 0;
-  opacity: 0.9;
-  font-size: 14px;
+  margin: 8px 0 0;
+  opacity: 0.95;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .page-content {
@@ -45,19 +51,21 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  font-size: 14px;
 }
 
 .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #0d6a89 0%, #1589a0 100%);
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 31, 63, 0.4);
+  box-shadow: 0 8px 16px rgba(14, 123, 158, 0.3);
 }
 
 .btn-primary:disabled {
@@ -66,18 +74,18 @@
 }
 
 .btn-secondary {
-  background: rgba(0, 31, 63, 0.1);
-  color: #001f3f;
-  border: 1px solid #001f3f;
-  padding: 8px 16px;
-  border-radius: 5px;
+  background: transparent;
+  color: #0E7B9E;
+  border: 2px solid #0E7B9E;
+  padding: 10px 20px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s;
 }
 
 .btn-secondary:hover {
-  background: #001f3f;
+  background: #0E7B9E;
   color: white;
 }
 
@@ -87,6 +95,18 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-group {
@@ -107,7 +127,7 @@
   width: 100%;
   padding: 10px;
   border: 1px solid #ddd;
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: 14px;
   font-family: inherit;
   transition: border-color 0.3s;
@@ -117,8 +137,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #001f3f;
-  box-shadow: 0 0 5px rgba(0, 31, 63, 0.3);
+  border-color: #0E7B9E;
+  box-shadow: 0 0 5px rgba(14, 123, 158, 0.3);
 }
 
 .reports-grid {
@@ -133,7 +153,7 @@
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: transform 0.2s, box-shadow 0.2s;
-  border-left: 4px solid #001f3f;
+  border-left: 4px solid #0E7B9E;
 }
 
 .report-card:hover {
@@ -196,13 +216,52 @@
 }
 
 .report-details a {
-  color: #001f3f;
+  color: #0E7B9E;
   text-decoration: none;
   font-weight: 600;
 }
 
 .report-details a:hover {
   text-decoration: underline;
+}
+
+.report-file-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-view-file,
+.btn-download-file {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-view-file {
+  background: #0E7B9E;
+  color: white;
+}
+
+.btn-view-file:hover {
+  background: #0a5f7a;
+  text-decoration: none;
+  transform: translateY(-1px);
+}
+
+.btn-download-file {
+  background: #28a745;
+  color: white;
+}
+
+.btn-download-file:hover {
+  background: #1e7e34;
+  text-decoration: none;
+  transform: translateY(-1px);
 }
 
 .empty-state {
@@ -255,7 +314,7 @@
   background: #fee;
   color: #c33;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 4px;
   margin-bottom: 20px;
   border-left: 4px solid #c33;
 }
@@ -266,5 +325,5 @@
   align-items: center;
   min-height: 100vh;
   font-size: 18px;
-  color: #001f3f;
+  color: #0E7B9E;
 }

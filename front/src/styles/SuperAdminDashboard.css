@@ -1,16 +1,9 @@
-/* Super Admin Dashboard - Modern Design System */
+/* Super Admin Dashboard - Using Doctor Dashboard Classes */
+/* All styling is inherited from DoctorDashboard.css */
 
 .superadmin-dashboard {
   min-height: 100vh;
-  background: var(--background);
-  color: var(--foreground);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.dashboard-main {
-  padding: 2rem;
-  max-width: 1400px;
-  margin: 0 auto;
+  background: #f0f4f8;
 }
 
 /* Header */

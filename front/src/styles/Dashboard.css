@@ -6,7 +6,7 @@
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
   color: white;
   padding: 20px 40px;
   display: flex;
@@ -52,7 +52,7 @@
   border: 1px solid rgba(255, 255, 255, 0.5);
   color: white;
   padding: 8px 16px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s;
@@ -73,7 +73,7 @@
   background: #fee;
   color: #c33;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 4px;
   margin-bottom: 20px;
   border-left: 4px solid #c33;
 }
@@ -109,7 +109,7 @@
   margin: 0;
   font-size: 36px;
   font-weight: 700;
-  color: #001f3f;
+  color: #0E7B9E;
 }
 
 .info-card p {
@@ -129,11 +129,11 @@
 }
 
 .action-btn {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
   color: white;
   border: none;
   padding: 12px 24px;
-  border-radius: 5px;
+  border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -142,7 +142,7 @@
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 31, 63, 0.4);
+  box-shadow: 0 5px 15px rgba(14, 123, 158, 0.4);
 }
 
 .loading {
@@ -151,5 +151,5 @@
   align-items: center;
   min-height: 100vh;
   font-size: 18px;
-  color: #001f3f;
+  color: #0E7B9E;
 }

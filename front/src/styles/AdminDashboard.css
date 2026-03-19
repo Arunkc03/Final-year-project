@@ -1,11 +1,14 @@
-/* Admin Dashboard Styles */
-.admin-dashboard-page {
-  min-height: 100vh;
-  background: #f8f9fa;
+/* Admin Dashboard - Use Doctor Dashboard Classes */
+.admin-dashboard-page .dd-page,
+.admin-dashboard-page .dd-hero,
+.admin-dashboard-page .dd-stats-bar,
+.admin-dashboard-page .dd-card,
+.admin-dashboard-page .dd-main {
+  /* Inherit styles from DoctorDashboard.css */
 }
 
 .admin-dashboard {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0a6a89 0%, #0E7B9E 40%, #12a4b4 100%);
 }
 
 .dashboard-header {
@@ -13,9 +16,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 2rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.12);
 }
 
 .header-content h1 {
@@ -38,16 +41,17 @@
 
 .user-info {
   padding: 0.5rem 1rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 20px;
   font-size: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .logout-btn {
   padding: 0.6rem 1.2rem;
-  background: #ff6b6b;
+  background: rgba(255, 255, 255, 0.18);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: 20px;
   cursor: pointer;
   font-weight: 500;
@@ -55,9 +59,9 @@
 }
 
 .logout-btn:hover {
-  background: #ff5252;
+  background: rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .dashboard-main {
@@ -91,7 +95,7 @@
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
 }
 
 .info-card h2 {
@@ -147,22 +151,17 @@
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.8rem;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.10);
 }
 
 .stat-card h3 {
@@ -177,7 +176,7 @@
   margin: 0.5rem 0 0 0;
   font-size: 2rem;
   font-weight: 700;
-  color: #001f3f;
+  color: #0E7B9E;
 }
 
 .stat-desc {
@@ -221,16 +220,16 @@
 .action-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-  border-color: #001f3f;
+  border-color: #0E7B9E;
 }
 
 .action-card.primary {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
   color: white;
 }
 
 .action-card.primary:hover {
-  box-shadow: 0 8px 25px rgba(0, 31, 63, 0.4);
+  box-shadow: 0 8px 25px rgba(14, 123, 158, 0.4);
 }
 
 .action-icon {
@@ -341,9 +340,9 @@
 }
 
 .department-dropdown:focus {
-  border-color: #006400;
+  border-color: #0E7B9E;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 100, 0, 0.1);
+  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
 }
 
 .departments-grid {
@@ -360,9 +359,10 @@
   transition: all 0.3s ease;
 }
 
-.department-card:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
+/* Remove hover effect inside admin dashboard to keep cards static */
+.admin-dashboard-page .department-card:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .department-header {
@@ -458,6 +458,14 @@
   justify-content: center;
   background: #e8f5e9;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.doctor-avatar-small-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
   flex-shrink: 0;
 }
 
@@ -623,7 +631,7 @@
 .dept-form .form-group textarea {
   padding: 0.75rem;
   border: 1px solid #ddd;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
 }
@@ -780,7 +788,7 @@
   background: #28a745;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
@@ -853,6 +861,60 @@
 /* Doctor Form Modal */
 .doctor-form-modal .doctor-form {
   padding: 1.5rem;
+}
+
+/* Doctor Image Upload */
+.doctor-image-upload {
+  margin-bottom: 16px;
+}
+
+.doctor-image-upload-area {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #D1D5DB;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F9FAFB;
+  transition: border-color 0.2s;
+}
+
+.doctor-image-upload-area:hover {
+  border-color: #2563EB;
+}
+
+.doctor-image-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.doctor-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: #9CA3AF;
+  font-size: 12px;
+}
+
+.remove-image-btn {
+  margin-top: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: #DC2626;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.remove-image-btn:hover {
+  background: #FCA5A5;
+  color: #fff;
 }
 
 .doctor-form .form-row {
@@ -971,7 +1033,7 @@
 .doctor-actions .delete-btn {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
   font-weight: 500;
@@ -1021,6 +1083,13 @@
   padding: 1rem;
   background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
   border-radius: 50%;
+}
+
+.avatar-large-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
 .doctor-view-details {
