@@ -1,7 +1,7 @@
 /* Home Page Styles */
 .home-container {
   min-height: 100vh;
-  background: #fff;
+  background: var(--color-bg-white);
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
@@ -166,12 +166,12 @@
 }
 
 .hero-btn-primary {
-  background: #e74c3c;
+  background: var(--color-accent);
   color: white;
 }
 
 .hero-btn-primary:hover {
-  background: #d63620;
+  background: var(--color-accent-dark);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
 }
@@ -190,7 +190,7 @@
 
 /* Services Bar */
 .services-bar {
-  background: white;
+  background: var(--color-bg-white);
   padding: 40px 60px;
   box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.08);
   margin-top: -50px;
@@ -215,7 +215,7 @@
 .service-icon {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #e74c3c 0%, #e85d4a 100%);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #e85d4a 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -229,7 +229,7 @@
   margin: 0 0 8px 0;
   font-size: 16px;
   font-weight: 700;
-  color: #e74c3c;
+  color: var(--color-accent);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -237,7 +237,7 @@
 .service-info p {
   margin: 0;
   font-size: 14px;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.5;
 }
 
@@ -404,13 +404,13 @@
 
 .hero-text h2 {
   font-size: 32px;
-  color: #333;
+  color: var(--color-text-primary);
   margin: 0 0 20px;
 }
 
 .hero-text p {
   font-size: 16px;
-  color: #666;
+  color: var(--color-text-secondary);
   line-height: 1.6;
   max-width: 600px;
   margin: 0 auto;

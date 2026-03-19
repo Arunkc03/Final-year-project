@@ -92,7 +92,7 @@
 }
 
 .info-card {
-  background: white;
+  background: var(--color-bg-white);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
@@ -100,7 +100,7 @@
 
 .info-card h2 {
   margin: 0 0 1.5rem 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1.3rem;
 }
 
@@ -117,7 +117,7 @@
 }
 
 .info-label {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 0.85rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -125,7 +125,7 @@
 }
 
 .info-value {
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -148,7 +148,7 @@
 }
 
 .stat-card {
-  background: white;
+  background: var(--color-bg-white);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
@@ -166,7 +166,7 @@
 
 .stat-card h3 {
   margin: 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 0.9rem;
   font-weight: 600;
   text-transform: uppercase;
@@ -181,7 +181,7 @@
 
 .stat-desc {
   margin: 0.3rem 0 0 0;
-  color: #999;
+  color: var(--color-text-tertiary);
   font-size: 0.8rem;
 }
 
@@ -209,7 +209,7 @@
   justify-content: center;
   gap: 0.8rem;
   padding: 1.5rem;
-  background: white;
+  background: var(--color-bg-white);
   border: 2px solid transparent;
   border-radius: 12px;
   cursor: pointer;
@@ -269,7 +269,7 @@
 }
 
 .feature-card {
-  background: white;
+  background: var(--color-bg-white);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -283,20 +283,20 @@
 
 .feature-card h3 {
   margin: 0 0 0.8rem 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .feature-card p {
   margin: 0;
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   line-height: 1.5;
 }
 
 /* Departments Section */
 .departments-section {
-  background: white;
+  background: var(--color-bg-white);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
@@ -305,7 +305,7 @@
 
 .departments-section h2 {
   margin: 0 0 1.5rem 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1.4rem;
 }
 
@@ -315,18 +315,18 @@
   gap: 1rem;
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid var(--color-border-lighter);
 }
 
 .department-filter label {
   font-weight: 600;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 0.95rem;
 }
 
 .department-dropdown {
   padding: 0.75rem 1rem;
-  border: 2px solid #e9ecef;
+  border: 2px solid var(--color-border-lighter);
   border-radius: 8px;
   font-size: 0.95rem;
   min-width: 250px;
@@ -336,7 +336,7 @@
 }
 
 .department-dropdown:hover {
-  border-color: #28a745;
+  border-color: var(--color-success);
 }
 
 .department-dropdown:focus {
@@ -352,10 +352,10 @@
 }
 
 .department-card {
-  background: #f8f9fa;
+  background: var(--color-bg-light);
   border-radius: 12px;
   padding: 1.5rem;
-  border: 1px solid #e9ecef;
+  border: 1px solid var(--color-border-lighter);
   transition: all 0.3s ease;
 }
 
@@ -374,7 +374,7 @@
 
 .department-header h3 {
   margin: 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1.2rem;
 }
 
@@ -387,17 +387,17 @@
 }
 
 .status-badge.active {
-  background: #d4edda;
+  background: var(--color-success-light);
   color: #155724;
 }
 
 .status-badge.inactive {
-  background: #f8d7da;
+  background: var(--color-error-bg);
   color: #721c24;
 }
 
 .department-desc {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin: 0 0 1rem 0;
   line-height: 1.5;
@@ -406,7 +406,7 @@
 .department-info {
   margin-bottom: 1rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border-lighter);
 }
 
 .department-info p {
@@ -417,7 +417,7 @@
 
 .doctors-list h4 {
   margin: 0 0 0.8rem 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1rem;
   font-weight: 600;
 }
@@ -433,8 +433,8 @@
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1rem;
-  background: white;
-  border: 1px solid #e9ecef;
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border-lighter);
   border-radius: 8px;
   margin-bottom: 0.5rem;
   transition: all 0.2s ease;
@@ -442,7 +442,7 @@
 
 .doctor-list-item:hover {
   background: #f0f7f0;
-  border-color: #28a745;
+  border-color: var(--color-success);
 }
 
 .doctor-list-item:last-child {
@@ -478,12 +478,12 @@
 
 .doctor-list-info strong {
   font-size: 0.95rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .doctor-qual {
   font-size: 0.8rem;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .doctor-exp-badge {
@@ -505,13 +505,13 @@
 }
 
 .no-doctors {
-  color: #999;
+  color: var(--color-text-tertiary);
   font-style: italic;
   font-size: 0.9rem;
   margin: 0;
   padding: 1rem;
   text-align: center;
-  background: #f8f9fa;
+  background: var(--color-bg-pale);
   border-radius: 8px;
 }
 
@@ -576,7 +576,7 @@
 
 .add-dept-btn {
   padding: 0.6rem 1.2rem;
-  background: #28a745;
+  background: var(--color-success);
   color: white;
   border: none;
   border-radius: 8px;
@@ -586,13 +586,13 @@
 }
 
 .add-dept-btn:hover {
-  background: #218838;
+  background: var(--color-success-dark);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
 }
 
 .dept-form-container {
-  background: white;
+  background: var(--color-bg-white);
   padding: 1.5rem;
   border-radius: 12px;
   margin-bottom: 1.5rem;
@@ -601,7 +601,7 @@
 
 .dept-form-container h3 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .dept-form .form-row {
@@ -623,14 +623,14 @@
 .dept-form .form-group label {
   font-weight: 500;
   margin-bottom: 0.5rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .dept-form .form-group input,
 .dept-form .form-group select,
 .dept-form .form-group textarea {
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 4px;
   font-size: 1rem;
   transition: border-color 0.3s ease;
@@ -640,7 +640,7 @@
 .dept-form .form-group select:focus,
 .dept-form .form-group textarea:focus {
   outline: none;
-  border-color: #28a745;
+  border-color: var(--color-success);
 }
 
 .dept-form .form-actions {
@@ -649,7 +649,7 @@
 
 .dept-form .submit-btn {
   padding: 0.75rem 1.5rem;
-  background: #28a745;
+  background: var(--color-success);
   color: white;
   border: none;
   border-radius: 8px;
@@ -660,7 +660,7 @@
 }
 
 .dept-form .submit-btn:hover:not(:disabled) {
-  background: #218838;
+  background: var(--color-success-dark);
   transform: translateY(-2px);
 }
 
@@ -670,7 +670,7 @@
 }
 
 .success-message {
-  background: #d4edda;
+  background: var(--color-success-light);
   color: #155724;
   padding: 1rem;
   border-radius: 8px;
@@ -680,18 +680,18 @@
 
 /* Combined Form Styles */
 .combined-form {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, var(--color-bg-light) 0%, var(--color-border-lighter) 100%);
 }
 
 .combined-form h3 {
-  color: #333;
+  color: var(--color-text-primary);
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   border-bottom: 2px solid #0d6efd;
 }
 
 .form-section {
-  background: white;
+  background: var(--color-bg-white);
   padding: 1.5rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
@@ -704,12 +704,12 @@
 
 .form-section h4 {
   margin: 0 0 1rem 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1.1rem;
 }
 
 .section-hint {
-  color: #666;
+  color: var(--color-text-secondary);
   font-size: 0.9rem;
   margin-bottom: 1rem;
 }
@@ -723,7 +723,7 @@
 .dept-select {
   flex: 1;
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.95rem;
   background: white;
@@ -737,7 +737,7 @@
 
 .open-doctor-form-btn {
   padding: 0.75rem 1.5rem;
-  background: #28a745;
+  background: var(--color-success);
   color: white;
   border: none;
   border-radius: 8px;
@@ -748,7 +748,7 @@
 }
 
 .open-doctor-form-btn:hover {
-  background: #218838;
+  background: var(--color-success-dark);
   transform: translateY(-1px);
 }
 
@@ -779,13 +779,13 @@
 
 .doctors-list-header h4 {
   margin: 0;
-  color: #333;
+  color: var(--color-text-primary);
   font-size: 1rem;
 }
 
 .add-doctor-btn {
   padding: 0.4rem 0.8rem;
-  background: #28a745;
+  background: var(--color-success);
   color: white;
   border: none;
   border-radius: 4px;
@@ -796,7 +796,7 @@
 }
 
 .add-doctor-btn:hover {
-  background: #218838;
+  background: var(--color-success-dark);
   transform: translateY(-1px);
 }
 
@@ -816,7 +816,7 @@
 }
 
 .modal-content {
-  background: white;
+  background: var(--color-bg-white);
   border-radius: 12px;
   max-width: 600px;
   width: 100%;
@@ -830,7 +830,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e9ecef;
+  border-bottom: 1px solid var(--color-border-lighter);
   position: sticky;
   top: 0;
   background: white;
@@ -840,7 +840,7 @@
 .modal-header h2 {
   margin: 0;
   font-size: 1.25rem;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .close-modal-btn {
@@ -848,14 +848,14 @@
   border: none;
   font-size: 1.75rem;
   cursor: pointer;
-  color: #999;
+  color: var(--color-text-tertiary);
   padding: 0;
   line-height: 1;
   transition: color 0.3s ease;
 }
 
 .close-modal-btn:hover {
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 /* Doctor Form Modal */
@@ -943,7 +943,7 @@
 .doctor-form .form-group input,
 .doctor-form .form-group textarea {
   padding: 0.75rem;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   font-size: 0.95rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
@@ -962,7 +962,7 @@
   gap: 1rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--color-border-lighter);
 }
 
 .doctor-form .cancel-btn {
@@ -982,7 +982,7 @@
 
 .doctor-form .submit-btn {
   padding: 0.75rem 1.5rem;
-  background: #28a745;
+  background: var(--color-success);
   color: white;
   border: none;
   border-radius: 8px;
@@ -992,7 +992,7 @@
 }
 
 .doctor-form .submit-btn:hover:not(:disabled) {
-  background: #218838;
+  background: var(--color-success-dark);
 }
 
 .doctor-form .submit-btn:disabled {
@@ -1014,7 +1014,7 @@
 /* Doctor ID in list */
 .doctor-id {
   font-size: 0.75rem;
-  color: #666;
+  color: var(--color-text-secondary);
   background: #f0f0f0;
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
@@ -1102,7 +1102,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.75rem;
-  background: #f8f9fa;
+  background: var(--color-bg-pale);
   border-radius: 8px;
 }
 
@@ -1113,7 +1113,7 @@
 
 .detail-row.full-width p {
   margin: 0.5rem 0 0 0;
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .detail-row label {
@@ -1123,7 +1123,7 @@
 }
 
 .detail-row span {
-  color: #333;
+  color: var(--color-text-primary);
 }
 
 .modal-footer {
@@ -1132,7 +1132,7 @@
   gap: 1rem;
   margin-top: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid var(--color-border-lighter);
 }
 
 .modal-footer .close-btn {
