@@ -1,110 +1,123 @@
 .hospital-detail {
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 0;
+  max-width: 1400px;
   margin: 0 auto;
+  background: #f9fafb;
+  min-height: 100vh;
 }
 
 /* Header Section */
 .hospital-detail .header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 3rem;
-  border-bottom: 2px solid #e5e7eb;
-  padding-bottom: 2rem;
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  color: white;
+  padding: 40px 40px;
+  margin-bottom: 30px;
+  border-bottom: none;
 }
 
 .hospital-detail .header-section h1 {
-  margin: 0;
-  font-size: 2.5rem;
-  color: #1f2937;
+  margin: 0 0 12px 0;
+  font-size: 36px;
+  color: white;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .hospital-detail .header-section .address {
-  margin: 0.5rem 0 1rem 0;
-  color: #6b7280;
-  font-size: 1rem;
+  margin: 0 0 20px 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
 }
 
 .hospital-detail .header-actions {
   display: flex;
-  gap: 1rem;
+  gap: 15px;
+  flex-wrap: wrap;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  padding: 8px 16px;
+  border-radius: 20px;
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 12px;
   text-transform: uppercase;
-  margin-top: 0.5rem;
+  margin-top: 10px;
 }
 
 .status-badge.active {
-  background-color: #dcfce7;
-  color: #166534;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .status-badge.inactive {
-  background-color: #fee2e2;
-  color: #991b1b;
+  background-color: #fee;
+  color: #c33;
 }
 
 /* Content Section */
 .hospital-content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 30px;
+  padding: 0 40px 40px 40px;
 }
 
-/* Success and Error Messages */
+/* Messages */
 .success-message {
-  padding: 1rem;
-  background-color: #dcfce7;
-  border: 1px solid #86efac;
-  border-radius: 0.5rem;
-  color: #166534;
-  margin-bottom: 1rem;
+  padding: 15px 20px;
+  background-color: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 4px;
+  color: #1b5e20;
+  margin-bottom: 20px;
+  border-left: 4px solid #66bb6a;
 }
 
 .error-message {
-  padding: 1rem;
-  background-color: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-radius: 0.5rem;
-  color: #991b1b;
-  margin-bottom: 1rem;
+  padding: 15px 20px;
+  background-color: #fee;
+  border: 1px solid #f88;
+  border-radius: 4px;
+  color: #c33;
+  margin-bottom: 20px;
+  border-left: 4px solid #e74c3c;
 }
 
 .info {
-  padding: 1rem;
-  background-color: #dbeafe;
-  border: 1px solid #93c5fd;
-  border-radius: 0.5rem;
-  color: #1e40af;
-  margin: 0.5rem 0;
+  padding: 15px 20px;
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 4px;
+  color: #1565c0;
+  margin: 10px 0;
+  border-left: 4px solid #1976d2;
 }
 
 /* Info Section */
 .info-section {
-  background-color: #f9fafb;
-  padding: 2rem;
-  border-radius: 0.75rem;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .info-section h2 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.5rem;
+  margin-bottom: 25px;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 700;
+  border-bottom: 2px solid #0E7B9E;
+  padding-bottom: 15px;
 }
 
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
 }
 
 .info-item {
@@ -117,46 +130,51 @@
 }
 
 .info-item label {
-  font-weight: 600;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-  font-size: 0.875rem;
+  font-weight: 700;
+  color: #0E7B9E;
+  margin-bottom: 8px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .info-item p {
   margin: 0;
-  color: #1f2937;
-  font-size: 1rem;
-  padding: 0.5rem 0;
+  color: #1a1a1a;
+  font-size: 15px;
+  padding: 8px 0;
+  line-height: 1.5;
 }
 
 /* Edit Section */
 .edit-section {
-  background-color: #f9fafb;
-  padding: 2rem;
-  border-radius: 0.75rem;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .edit-section h2 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.5rem;
+  margin-bottom: 25px;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 700;
+  border-bottom: 2px solid #e74c3c;
+  padding-bottom: 15px;
 }
 
 .hospital-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 20px;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  gap: 20px;
 }
 
 .form-group {
@@ -165,30 +183,30 @@
 }
 
 .form-group label {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #1f2937;
-  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1a1a1a;
+  font-size: 14px;
 }
 
 .form-group input,
 .form-group textarea,
 .form-group select {
-  padding: 1rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 4px;
   font-family: inherit;
-  font-size: 1.05rem;
-  color: #1f2937;
-  transition: border-color 0.2s;
+  font-size: 14px;
+  color: #1a1a1a;
+  transition: all 0.3s ease;
 }
 
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: #0E7B9E;
+  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
 }
 
 .form-group textarea {
@@ -198,95 +216,155 @@
 
 .form-actions {
   display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 .btn-primary,
-.btn-secondary {
-  padding: 1.25rem 2.5rem;
+.btn-secondary,
+.btn-link {
+  padding: 12px 24px;
   border: none;
-  border-radius: 0.5rem;
-  font-size: 1.1rem;
-  font-weight: 600;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .btn-primary {
-  background-color: #3b82f6;
+  background-color: #e74c3c;
   color: white;
 }
 
 .btn-primary:hover {
-  background-color: #2563eb;
+  background-color: #d63620;
   transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
 }
 
 .btn-secondary {
-  background-color: #e5e7eb;
-  color: #1f2937;
+  background-color: #f5f5f5;
+  color: #1a1a1a;
+  border: 2px solid #e0e0e0;
 }
 
 .btn-secondary:hover {
-  background-color: #d1d5db;
+  background-color: #e8e8e8;
   transform: translateY(-2px);
+}
+
+.btn-link {
+  background: none;
+  border: none;
+  color: #0E7B9E;
+  padding: 0;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.btn-link:hover {
+  color: #0d6087;
 }
 
 .btn-view {
   width: 100%;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 20px;
 }
 
 /* Booking Section */
 .booking-section {
-  background-color: #f3f4f6;
-  padding: 2rem;
-  border-radius: 0.75rem;
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .booking-section h2 {
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  color: #1f2937;
-  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #1a1a1a;
+  font-size: 24px;
+  font-weight: 700;
+  border-bottom: 2px solid #0E7B9E;
+  padding-bottom: 15px;
 }
 
 .booking-section form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 15px;
+}
+
+.booking-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  .hospital-detail {
-    padding: 1rem;
+@media (max-width: 1024px) {
+  .hospital-content {
+    padding: 0 30px 30px 30px;
   }
 
   .hospital-detail .header-section {
-    flex-direction: column;
-    gap: 1rem;
+    padding: 30px 30px;
+  }
+
+  .info-section,
+  .edit-section,
+  .booking-section {
+    padding: 25px;
+  }
+
+  .info-section h2,
+  .edit-section h2,
+  .booking-section h2 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hospital-detail {
+    padding: 0;
+  }
+
+  .hospital-content {
+    padding: 0 15px 25px 15px;
+    gap: 20px;
+  }
+
+  .hospital-detail .header-section {
+    padding: 20px 15px;
+    margin-bottom: 20px;
   }
 
   .hospital-detail .header-section h1 {
-    font-size: 1.75rem;
+    font-size: 24px;
+  }
+
+  .hospital-detail .header-section .address {
+    font-size: 14px;
   }
 
   .hospital-detail .header-actions {
-    width: 100%;
     flex-direction: column;
+    gap: 10px;
   }
 
   .hospital-detail .header-actions button {
     width: 100%;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
   }
 
   .form-row {
@@ -298,6 +376,68 @@
   }
 
   .form-actions button {
+    width: 100%;
+  }
+
+  .info-section,
+  .edit-section,
+  .booking-section {
+    padding: 20px 15px;
+    border-radius: 4px;
+  }
+
+  .info-section h2,
+  .edit-section h2,
+  .booking-section h2 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+
+  .booking-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .hospital-content {
+    padding: 0 10px 15px 10px;
+    gap: 15px;
+  }
+
+  .hospital-detail .header-section {
+    padding: 15px 10px;
+    margin-bottom: 15px;
+  }
+
+  .hospital-detail .header-section h1 {
+    font-size: 20px;
+  }
+
+  .info-section,
+  .edit-section,
+  .booking-section {
+    padding: 15px 10px;
+  }
+
+  .info-section h2,
+  .edit-section h2,
+  .booking-section h2 {
+    font-size: 16px;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
     width: 100%;
   }
 
@@ -359,7 +499,7 @@
 }
 
 .file-input:hover {
-  border-color: #001f3f;
+  border-color: #0E7B9E;
   background: #f0f9ff;
 }
 

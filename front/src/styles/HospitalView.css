@@ -5,9 +5,54 @@
 }
 
 .hospital-view-container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
+}
+
+.hv-two-col {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 24px;
+  align-items: start;
+  margin-bottom: 30px;
+}
+
+/* Full-width layout when admin is hidden */
+.departments-section.full-width {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .hv-two-col {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .departments-section.full-width {
+    grid-column: auto;
+  }
+
+  .departments-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dept-stats {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .dept-doctor-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .btn-view-small {
+    align-self: stretch;
+    text-align: center;
+  }
 }
 
 .hospital-info-section {
@@ -298,16 +343,20 @@
 
 /* Admin Section */
 .admin-section {
-  background: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  margin-bottom: 30px;
+  margin-bottom: 0;
+  height: 100%;
+  color: white;
 }
 
 .admin-section h2 {
   margin: 0 0 20px;
-  color: #333;
+  color: white;
+  font-size: 1.25rem;
+  font-weight: 600;
 }
 
 .admin-card {
@@ -315,8 +364,9 @@
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 .admin-avatar {
@@ -326,20 +376,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .admin-info h3 {
   margin: 0 0 8px;
-  color: #333;
+  color: white;
   font-size: 1.3rem;
+  font-weight: 600;
 }
 
 .admin-info p {
   margin: 4px 0;
-  color: #555;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
 }
 
@@ -349,7 +400,8 @@
   border-radius: 12px;
   padding: 30px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-  margin-bottom: 30px;
+  margin-bottom: 0;
+  height: 100%;
 }
 
 .departments-section h2 {
@@ -359,21 +411,22 @@
 
 .departments-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 20px;
 }
 
 .department-card {
-  background: #f8f9fa;
+  background: white;
   border-radius: 10px;
   padding: 20px;
   transition: transform 0.3s, box-shadow 0.3s;
-  border-left: 4px solid #006400;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .department-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .dept-header {
@@ -398,14 +451,17 @@
 
 .dept-stats {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .dept-stat {
   font-size: 13px;
-  color: #555;
+  color: #4a5568;
+  background: #edf2f7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
 }
 
 .dept-status {
@@ -419,7 +475,7 @@
 
 .dept-status.status-active {
   background: #e8f5e9;
-  color: #006400;
+  color: #0E7B9E;
 }
 
 .dept-status.status-inactive {
@@ -457,16 +513,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px;
-  background: white;
+  padding: 12px;
+  background: #f7fafc;
   border-radius: 8px;
-  border: 1px solid #e9ecef;
+  border: 1px solid #e2e8f0;
   transition: all 0.2s ease;
 }
 
 .dept-doctor-item:hover {
-  background: #f0f7f0;
-  border-color: #28a745;
+  background: #f0f8f0;
+  border-color: #38a169;
 }
 
 .doctor-avatar-small {
@@ -506,18 +562,19 @@
 
 .btn-view-small {
   padding: 6px 12px;
-  background: #e8f5e9;
-  color: #006400;
+  background: #4299e1;
+  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease;
+  flex-shrink: 0;
 }
 
 .btn-view-small:hover {
-  background: #c8e6c9;
+  background: #3182ce;
 }
 
 .no-doctors-dept {
@@ -527,7 +584,7 @@
   margin: 0;
   padding: 10px;
   background: #f8f9fa;
-  border-radius: 6px;
+  border-radius: 4px;
   text-align: center;
 }
 
@@ -660,7 +717,7 @@
 .booking-form .form-group textarea {
   padding: 12px;
   border: 2px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 14px;
   transition: border-color 0.3s;
   font-family: inherit;
@@ -700,7 +757,7 @@
   background: #e8f5e9;
   color: #2e7d32;
   padding: 12px;
-  border-radius: 6px;
+  border-radius: 4px;
   margin-bottom: 20px;
   text-align: center;
 }
@@ -709,7 +766,7 @@
   background: #ffebee;
   color: #c62828;
   padding: 12px;
-  border-radius: 6px;
+  border-radius: 4px;
   margin-bottom: 20px;
   text-align: center;
 }

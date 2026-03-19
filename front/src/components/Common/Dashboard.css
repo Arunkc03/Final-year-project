@@ -56,7 +56,7 @@
   margin: 0;
   font-size: 32px;
   font-weight: bold;
-  color: #001f3f;
+  color: #0E7B9E;
 }
 
 .dashboard-actions {
@@ -79,7 +79,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #001f3f 0%, #003d82 100%);
+  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
   color: white;
 }
 
@@ -96,8 +96,8 @@
 
 .btn-secondary:hover {
   background: white;
-  border-color: #001f3f;
-  color: #001f3f;
+  border-color: #0E7B9E;
+  color: #0E7B9E;
 }
 
 .upcoming-section {
@@ -118,7 +118,7 @@
 }
 
 .appointment-card {
-  border-left: 4px solid #001f3f;
+  border-left: 4px solid #0E7B9E;
   padding: 15px;
   background: #f9f9f9;
   border-radius: 5px;
