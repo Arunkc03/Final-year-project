@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 /**
  * Appointment Model
@@ -42,7 +43,7 @@ class Appointment extends Model
         'updated_at' => 'datetime',
     ];
 
-    // ========== Relationships ==========
+    // ========== Relationships =========="
     
     /**
      * Get the patient who booked this appointment

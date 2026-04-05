@@ -2,7 +2,6 @@ import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { AuthContext } from '../context/AuthContext';
-import PageHero from '../components/PageHero/PageHero';
 import '../styles/HospitalView.css';
 
 const HospitalView = () => {
@@ -27,8 +26,8 @@ const HospitalView = () => {
   });
   const [bookingMessage, setBookingMessage] = useState('');
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [createdAppointment, setCreatedAppointment] = useState(null);
+  const [availableSlots, setAvailableSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -96,8 +95,65 @@ const HospitalView = () => {
     }
   }, [searchParams, loading, token, user]);
 
-  const handleBookingChange = (e) => {
-    setBooking({ ...booking, [e.target.name]: e.target.value });
+  const handleBookingChange = async (e) => {
+    const { name, value } = e.target;
+    const updatedBooking = { ...booking, [name]: value };
+    setBooking(updatedBooking);
+
+    // Fetch available slots when doctor or date changes
+    if ((name === 'doctor_id' || name === 'appointment_date') && updatedBooking.doctor_id && updatedBooking.appointment_date) {
+      await fetchAvailableSlots(updatedBooking.doctor_id, updatedBooking.appointment_date);
+    }
+  };
+
+  const fetchAvailableSlots = async (doctorId, date) => {
+    setSlotsLoading(true);
+    try {
+      console.log('Fetching slots for doctor:', doctorId, 'date:', date);
+      const res = await api.request(`/doctors/${doctorId}/schedules?date=${date}`);
+      console.log('API response:', res);
+      
+      if (res && res.status === 'success') {
+        const schedules = res.data || [];
+        console.log('Schedules returned:', schedules);
+        const slots = [];
+        
+        // Generate available slots from schedules
+        schedules.forEach(schedule => {
+          const duration = schedule.slot_duration || 30;
+          const [startH, startM] = schedule.start_time.split(':').map(Number);
+          console.log('Processing schedule:', { duration, start_time: schedule.start_time, available_slots: schedule.available_slots });
+          
+          for (let i = 0; i < schedule.available_slots; i++) {
+            let slotStartMin = startH * 60 + startM + (i * duration);
+            const slotEndMin = slotStartMin + duration;
+            
+            const slotStartHour = Math.floor(slotStartMin / 60);
+            const slotStartMins = slotStartMin % 60;
+            const slotEndHour = Math.floor(slotEndMin / 60);
+            const slotEndMins = slotEndMin % 60;
+            
+            const startTime = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMins).padStart(2, '0')}`;
+            const endTime = `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMins).padStart(2, '0')}`;
+            
+            slots.push({
+              value: startTime,
+              label: `${startTime} - ${endTime}`
+            });
+          }
+        });
+        
+        console.log('Generated slots:', slots);
+        setAvailableSlots(slots);
+      } else {
+        console.log('No success status in response');
+        setAvailableSlots([]);
+      }
+    } catch (err) {
+      console.error('Error fetching slots:', err);
+      setAvailableSlots([]);
+    }
+    setSlotsLoading(false);
   };
 
   const handleLoginRedirect = () => {
@@ -111,7 +167,7 @@ const HospitalView = () => {
     navigate(`/register?redirect=${encodeURIComponent(returnUrl)}`);
   };
 
-  // Step 1: When user clicks "Confirm Booking", show payment modal first
+  // Step 1: When user clicks "Confirm Booking", directly initiate Khalti payment
   const handleBookAppointment = async (e) => {
     e.preventDefault();
     if (!token || user?.role !== 'patient') {
@@ -125,60 +181,69 @@ const HospitalView = () => {
       return;
     }
 
-    // Show payment modal first - appointment will be created after payment
-    setShowPaymentModal(true);
-    setBookingMessage('');
-  };
-
-  // Step 2: After successful payment, create the appointment
-  const handlePaymentSuccess = async (paymentData) => {
-    setBookingLoading(true);
     try {
-      const response = await api.bookAppointment({
-        doctor_id: booking.doctor_id,
-        department_id: booking.department_id,
+      setBookingLoading(true);
+      setBookingMessage('');
+
+      // Step 1: Create appointment
+      const bookingResponse = await api.bookAppointment({
+        doctor_id: parseInt(booking.doctor_id),
+        department_id: parseInt(booking.department_id) || null,
         date: booking.appointment_date,
         time: booking.appointment_time,
         reason: booking.reason,
-        hospital_id: id,
-        payment_completed: true,
-        payment_reference: paymentData?.transaction_id || null
+        hospital_id: parseInt(id)
       }, token);
 
-      if (response.status === 'success') {
-        setShowPaymentModal(false);
-        setCreatedAppointment(response.appointment);
-        setBookingMessage('Payment successful! Appointment booked and pending doctor approval.');
-        setBooking({
-          doctor_id: '',
-          department_id: '',
-          appointment_date: '',
-          appointment_time: '',
-          reason: ''
-        });
-        setTimeout(() => {
-          navigate('/dashboard/patient');
-        }, 2000);
+      if (bookingResponse.status !== 'success') {
+        throw new Error(bookingResponse.message || 'Failed to create appointment');
+      }
+
+      const appointment = bookingResponse.appointment;
+      console.log('Full appointment response:', appointment);
+      const amount = appointment.payment_amount || getSelectedDoctorFee();
+      console.log('Payment amount to send:', { amount, payment_amount: appointment.payment_amount, selected_fee: getSelectedDoctorFee() });
+
+      // Validate appointment data before payment
+      if (!appointment.id) {
+        throw new Error('Appointment created but missing ID - cannot proceed to payment');
+      }
+      if (!amount || amount <= 0) {
+        throw new Error('Invalid payment amount - appointment fee not set correctly');
+      }
+
+      // Step 2: Initiate Khalti payment directly (no modal)
+      console.log('Initiating Khalti payment:', {
+        appointment_id: appointment.id,
+        amount: amount,
+      });
+
+      const paymentResponse = await api.khalti.initiate({
+        appointment_id: appointment.id,
+        amount: amount
+      }, token);
+
+      console.log('Payment response:', paymentResponse);
+
+      if (paymentResponse.status === 'success' && paymentResponse.data?.payment_url) {
+        // Redirect directly to Khalti payment UI
+        console.log('Redirecting to Khalti:', paymentResponse.data.payment_url);
+        window.location.href = paymentResponse.data.payment_url;
+      } else if (paymentResponse.data?.pidx) {
+        // Fallback: redirect using pidx
+        const khaltiUrl = `https://a.khalti.com/?pidx=${encodeURIComponent(paymentResponse.data.pidx)}`;
+        window.location.href = khaltiUrl;
       } else {
-        setBookingMessage(response.message || 'Failed to create appointment after payment');
+        const errorMsg = paymentResponse.message || paymentResponse.error || 'Failed to initiate payment';
+        throw new Error(errorMsg);
       }
     } catch (err) {
-      setBookingMessage('Error creating appointment. Please contact support with your payment reference.');
+      console.error('Payment error:', err);
+      const errorMessage = err.message || 'Payment failed';
+      setBookingMessage(`Error: ${errorMessage}`);
     } finally {
       setBookingLoading(false);
     }
-  };
-
-  // Handle payment error
-  const handlePaymentError = (error) => {
-    setShowPaymentModal(false);
-    setBookingMessage(`Payment failed: ${error}. Please try again.`);
-  };
-
-  // Handle payment cancel
-  const handlePaymentCancel = () => {
-    setShowPaymentModal(false);
-    setBookingMessage('Payment cancelled. Complete payment to book your appointment.');
   };
 
   // Get selected doctor's consultation fee
@@ -187,161 +252,78 @@ const HospitalView = () => {
     return selectedDoctor?.consultation_fee || 500;
   };
 
-  // Handle Khalti payment - payment first, then create appointment
-  const handleKhaltiPayment = async () => {
-    setBookingLoading(true);
-    try {
-      // First create a pending appointment to get an ID for payment
-      const bookingResponse = await api.bookAppointment({
-        doctor_id: booking.doctor_id,
-        department_id: booking.department_id,
-        date: booking.appointment_date,
-        time: booking.appointment_time,
-        reason: booking.reason,
-        hospital_id: id
-      }, token);
-
-      if (bookingResponse.status !== 'success') {
-        throw new Error(bookingResponse.message || 'Failed to create appointment');
-      }
-
-      const appointment = bookingResponse.appointment;
-      const amount = appointment.payment_amount || getSelectedDoctorFee();
-
-      // Now initiate Khalti payment
-      const paymentResponse = await api.khalti.initiate({
-        appointment_id: appointment.id,
-        amount: amount
-      }, token);
-
-      if (paymentResponse.status === 'success' && paymentResponse.data?.payment_url) {
-        // Redirect to Khalti payment page
-        window.location.href = paymentResponse.data.payment_url;
-      } else {
-        throw new Error(paymentResponse.message || 'Failed to initiate payment');
-      }
-    } catch (err) {
-      console.error('Payment error:', err);
-      handlePaymentError(err.message || 'Payment failed');
-    } finally {
-      setBookingLoading(false);
-    }
-  };
-  if (error) return <div className="error-message">{error}</div>;
-  if (!hospital) return <div className="error-message">Hospital not found</div>;
+  if (error) return <div className="hv-error">{error}</div>;
+  if (!hospital) return <div className="hv-error">Hospital not found</div>;
 
   return (
-    <div className="hospital-view-page">
-      <PageHero 
-        title={hospital.name} 
-        subtitle="View hospital details"
-      />
-
-      <div className="hospital-view-container">
-        {/* Hospital Info */}
-        <div className="hospital-info-section">
-          <div className="info-card">
-            <h2>Hospital Information</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">Address</span>
-                <span className="info-value">{hospital.address || 'Not specified'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">City</span>
-                <span className="info-value">{hospital.city || 'N/A'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">State</span>
-                <span className="info-value">{hospital.state || 'N/A'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Phone</span>
-                <span className="info-value">{hospital.phone || 'N/A'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Email</span>
-                <span className="info-value">{hospital.email || 'N/A'}</span>
-              </div>
-            </div>
-            {hospital.description && (
-              <div className="description">
-                <h3>About</h3>
-                <p>{hospital.description}</p>
-              </div>
+    <div className="hv-page">
+      {/* Hospital Header */}
+      <section className="hv-hospital-section">
+        <div className="hv-hospital-view">
+          <div className="hv-hospital-img-wrap">
+            {hospital.image ? (
+              <img src={`${api.getStorageUrl()}/${hospital.image}`} alt={hospital.name} className="hv-hospital-img" onError={e => { e.target.style.display = 'none'; }} />
+            ) : (
+              <div className="hv-hospital-img-placeholder">H</div>
             )}
           </div>
-        </div>
-
-        {/* Hospital Admin Section */}
-        {admin && (
-          <div className="admin-section">
-            <h2>👨‍💼 Hospital Administrator</h2>
-            <div className="admin-card">
-              <div className="admin-avatar">👤</div>
-              <div className="admin-info">
-                <h3>{admin.name}</h3>
-                <p>📧 {admin.email}</p>
-                {admin.identifier && <p>🆔 {admin.identifier}</p>}
-              </div>
+          <div className="hv-hospital-details">
+            <h1 className="hv-hospital-name">{hospital.name}</h1>
+            {hospital.address && <p>{hospital.address}</p>}
+            <div className="hv-hospital-meta">
+              {hospital.city && <span>{hospital.city}</span>}
+              {hospital.state && <span>{hospital.state}</span>}
+              {hospital.phone && <span>{hospital.phone}</span>}
+              {hospital.email && <span>{hospital.email}</span>}
             </div>
+            {hospital.description && <p className="hv-hospital-desc">{hospital.description}</p>}
           </div>
-        )}
+        </div>
+      </section>
 
-        {/* Departments Section with Doctors */}
-        <div className="departments-section">
-          <h2>🏥 Departments & Doctors</h2>
+      <div className="hv-content">
+        {/* Departments & Doctors */}
+        <div className="hv-panel hv-departments">
+          <h2 className="hv-panel-title">Departments & Doctors</h2>
           {departments.length > 0 ? (
-            <div className="departments-grid">
+            <div className="hv-dept-grid">
               {departments.map((dept) => {
-                // Get doctors for this department
                 const deptDoctors = doctors.filter(d => d.department_id == dept.id);
                 return (
-                  <div key={dept.id} className="department-card">
-                    <div className="dept-header">
-                      <h3>{dept.name}</h3>
-                      <span className={`dept-status status-${dept.status || 'active'}`}>
-                        {dept.status || 'Active'}
-                      </span>
+                  <div key={dept.id} className="hv-dept-card">
+                    <div className="hv-dept-header">
+                      <h3 className="hv-dept-name">{dept.name}</h3>
+                      <span className={`hv-dept-status ${dept.status === 'active' ? 'active' : ''}`}>{dept.status || 'Active'}</span>
                     </div>
-                    {dept.description && <p className="dept-desc">{dept.description}</p>}
-                    <div className="dept-stats">
-                      {dept.total_beds > 0 && (
-                        <span className="dept-stat">
-                          🛏️ {dept.available_beds || 0}/{dept.total_beds} beds
-                        </span>
-                      )}
-                      {dept.head_doctor && (
-                        <span className="dept-stat">👨‍⚕️ Head: {dept.head_doctor}</span>
-                      )}
+                    {dept.description && <p className="hv-dept-desc">{dept.description}</p>}
+                    <div className="hv-dept-stats">
+                      {dept.total_beds > 0 && <span>Beds: {dept.available_beds || 0}/{dept.total_beds}</span>}
+                      {dept.head_doctor && <span>Head: {dept.head_doctor}</span>}
                     </div>
-                    
-                    {/* Doctors under this department */}
-                    <div className="dept-doctors">
+                    <div className="hv-dept-doctors">
                       <h4>Doctors ({deptDoctors.length})</h4>
                       {deptDoctors.length > 0 ? (
-                        <div className="dept-doctors-list">
+                        <div className="hv-doctor-list">
                           {deptDoctors.map((doctor) => (
-                            <div key={doctor.id} className="dept-doctor-item">
-                              <div className="doctor-avatar-small">👨‍⚕️</div>
-                              <div className="doctor-info-compact">
-                                <h5>{doctor.name}</h5>
-                                <p>{doctor.qualification || 'Medical Professional'}</p>
-                                {doctor.consultation_fee > 0 && (
-                                  <span className="fee-small">${doctor.consultation_fee}</span>
+                            <div key={doctor.id} className="hv-doctor-item">
+                              <div className="hv-doctor-avatar">
+                                {doctor.user?.avatar ? (
+                                  <img src={`${api.getStorageUrl()}/${doctor.user.avatar}`} alt={doctor.name} />
+                                ) : (
+                                  <span>{(doctor.name || 'D').charAt(0).toUpperCase()}</span>
                                 )}
                               </div>
-                              <button 
-                                onClick={() => navigate(`/doctor/${doctor.id}`)} 
-                                className="btn-view-small"
-                              >
-                                View
-                              </button>
+                              <div className="hv-doctor-info">
+                                <strong>Dr. {doctor.name}</strong>
+                                <p>{doctor.qualification || 'Medical Professional'}</p>
+                                {doctor.consultation_fee > 0 && <span className="hv-doctor-fee">Rs. {doctor.consultation_fee}</span>}
+                              </div>
+                              <button onClick={() => navigate(`/doctor/${doctor.id}`)} className="hv-btn-view">View</button>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="no-doctors-dept">No doctors in this department</p>
+                        <p className="hv-no-data">No doctors in this department</p>
                       )}
                     </div>
                   </div>
@@ -349,32 +331,31 @@ const HospitalView = () => {
               })}
             </div>
           ) : (
-            <p className="no-departments">No departments listed for this hospital yet.</p>
+            <p className="hv-no-data">No departments listed for this hospital yet.</p>
           )}
-          
-          {/* Show doctors without department */}
+
+          {/* Doctors without department */}
           {doctors.filter(d => !d.department_id || !departments.find(dept => dept.id == d.department_id)).length > 0 && (
-            <div className="other-doctors-section">
+            <div className="hv-other-doctors">
               <h3>Other Doctors</h3>
-              <div className="dept-doctors-list">
+              <div className="hv-doctor-list">
                 {doctors
                   .filter(d => !d.department_id || !departments.find(dept => dept.id == d.department_id))
                   .map((doctor) => (
-                    <div key={doctor.id} className="dept-doctor-item">
-                      <div className="doctor-avatar-small">👨‍⚕️</div>
-                      <div className="doctor-info-compact">
-                        <h5>{doctor.name}</h5>
-                        <p>{doctor.qualification || 'Medical Professional'}</p>
-                        {doctor.consultation_fee > 0 && (
-                          <span className="fee-small">${doctor.consultation_fee}</span>
+                    <div key={doctor.id} className="hv-doctor-item">
+                      <div className="hv-doctor-avatar">
+                        {doctor.user?.avatar ? (
+                          <img src={`${api.getStorageUrl()}/${doctor.user.avatar}`} alt={doctor.name} />
+                        ) : (
+                          <span>{(doctor.name || 'D').charAt(0).toUpperCase()}</span>
                         )}
                       </div>
-                      <button 
-                        onClick={() => navigate(`/doctor/${doctor.id}`)} 
-                        className="btn-view-small"
-                      >
-                        View
-                      </button>
+                      <div className="hv-doctor-info">
+                        <strong>Dr. {doctor.name}</strong>
+                        <p>{doctor.qualification || 'Medical Professional'}</p>
+                        {doctor.consultation_fee > 0 && <span className="hv-doctor-fee">Rs. {doctor.consultation_fee}</span>}
+                      </div>
+                      <button onClick={() => navigate(`/doctor/${doctor.id}`)} className="hv-btn-view">View</button>
                     </div>
                   ))}
               </div>
@@ -382,219 +363,98 @@ const HospitalView = () => {
           )}
         </div>
 
-        {/* Book Appointment Section - Only show for patients or non-logged in users */}
+        {/* Book Appointment Section */}
         {(!user || user?.role === 'patient') && (
-        <div ref={bookingRef} className="booking-section">
-          <div className="booking-header">
-            <h2>📅 Book an Appointment</h2>
-            {!showBooking && (
-              <button onClick={() => setShowBooking(true)} className="btn-book-main">
-                Book an Appointment »
-              </button>
-            )}
-          </div>
-
-          {showBooking && (
-            <>
-              {!token ? (
-                <div className="login-prompt-box">
-                  <p>Please login to book an appointment at {hospital.name}</p>
-                  <div className="prompt-actions">
-                    <button onClick={handleLoginRedirect} className="btn-login">
-                      Login
-                    </button>
-                    <button onClick={handleRegisterRedirect} className="btn-register">
-                      Register
-                    </button>
+          <div ref={bookingRef} className="hv-panel hv-booking">
+            <h2 className="hv-panel-title">Book an Appointment</h2>
+            {!showBooking ? (
+              <div className="hv-booking-cta">
+                <p>Schedule a visit at {hospital.name}</p>
+                <button onClick={() => setShowBooking(true)} className="hv-btn primary">Book an Appointment</button>
+              </div>
+            ) : !token ? (
+              <div className="hv-login-prompt">
+                <p>Please login to book an appointment at {hospital.name}</p>
+                <div className="hv-auth-btns">
+                  <button onClick={handleLoginRedirect} className="hv-btn primary">Login</button>
+                  <button onClick={handleRegisterRedirect} className="hv-btn secondary">Register</button>
+                </div>
+              </div>
+            ) : user?.role !== 'patient' ? (
+              <div className="hv-login-prompt">
+                <p>You are logged in as <strong>{user?.role}</strong>. Only patients can book appointments.</p>
+                <div className="hv-auth-btns">
+                  <button onClick={handleLoginRedirect} className="hv-btn primary">Login as Patient</button>
+                  <button onClick={handleRegisterRedirect} className="hv-btn secondary">Register as Patient</button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleBookAppointment} className="hv-form">
+                {bookingMessage && (
+                  <div className={bookingMessage.includes('success') ? 'hv-success' : 'hv-error-msg'}>{bookingMessage}</div>
+                )}
+                <div className="hv-form-row">
+                  <div className="hv-form-group">
+                    <label>Department *</label>
+                    <select name="department_id" value={booking.department_id} onChange={handleBookingChange} required>
+                      <option value="">Choose a department</option>
+                      {departments.map(dept => <option key={dept.id} value={dept.id}>{dept.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="hv-form-group">
+                    <label>Doctor *</label>
+                    <select name="doctor_id" value={booking.doctor_id} onChange={handleBookingChange} required>
+                      <option value="">Choose a doctor</option>
+                      {doctors.filter(d => !booking.department_id || d.department_id == booking.department_id).map(doc => (
+                        <option key={doc.id} value={doc.id}>{doc.name} - {doc.qualification || 'Medical Professional'}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              ) : user?.role !== 'patient' ? (
-                <div className="login-prompt-box">
-                  <p>You are logged in as <strong>{user?.role}</strong>. Only patients can book appointments.</p>
-                  <p className="prompt-hint">Please login with a patient account or register as a new patient.</p>
-                  <div className="prompt-actions">
-                    <button onClick={handleLoginRedirect} className="btn-login">
-                      Login as Patient
-                    </button>
-                    <button onClick={handleRegisterRedirect} className="btn-register">
-                      Register as Patient
-                    </button>
+                <div className="hv-form-row">
+                  <div className="hv-form-group">
+                    <label>Date *</label>
+                    <input type="date" name="appointment_date" value={booking.appointment_date} onChange={handleBookingChange} min={new Date().toISOString().split('T')[0]} required />
                   </div>
-                </div>
-              ) : (
-                <form onSubmit={handleBookAppointment} className="booking-form">
-                  {bookingMessage && (
-                    <div className={bookingMessage.includes('success') ? 'success-msg' : 'error-msg'}>
-                      {bookingMessage}
-                    </div>
-                  )}
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Select Department *</label>
-                      <select
-                        name="department_id"
-                        value={booking.department_id}
-                        onChange={handleBookingChange}
-                        required
-                      >
-                        <option value="">Choose a department</option>
-                        {departments.map((dept) => (
-                          <option key={dept.id} value={dept.id}>{dept.name}</option>
+                  <div className="hv-form-group">
+                    <label>Time Slot *</label>
+                    {slotsLoading ? (
+                      <select disabled>
+                        <option>Loading available slots...</option>
+                      </select>
+                    ) : availableSlots.length > 0 ? (
+                      <select name="appointment_time" value={booking.appointment_time} onChange={handleBookingChange} required>
+                        <option value="">Select a time slot</option>
+                        {availableSlots.map((slot, idx) => (
+                          <option key={idx} value={slot.value}>{slot.label}</option>
                         ))}
                       </select>
-                    </div>
-
-                    <div className="form-group">
-                      <label>Select Doctor *</label>
-                      <select
-                        name="doctor_id"
-                        value={booking.doctor_id}
-                        onChange={handleBookingChange}
-                        required
-                      >
-                        <option value="">Choose a doctor</option>
-                        {doctors
-                          .filter(d => !booking.department_id || d.department_id == booking.department_id)
-                          .map((doc) => (
-                            <option key={doc.id} value={doc.id}>
-                              {doc.name} - {doc.qualification || 'Medical Professional'}
-                            </option>
-                          ))}
+                    ) : (
+                      <select disabled>
+                        <option>No available slots for this date</option>
                       </select>
-                    </div>
+                    )}
                   </div>
-
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Appointment Date *</label>
-                      <input
-                        type="date"
-                        name="appointment_date"
-                        value={booking.appointment_date}
-                        onChange={handleBookingChange}
-                        min={new Date().toISOString().split('T')[0]}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Preferred Time *</label>
-                      <select
-                        name="appointment_time"
-                        value={booking.appointment_time}
-                        onChange={handleBookingChange}
-                        required
-                      >
-                        <option value="">Select time</option>
-                        <option value="09:00">09:00 AM</option>
-                        <option value="10:00">10:00 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="12:00">12:00 PM</option>
-                        <option value="14:00">02:00 PM</option>
-                        <option value="15:00">03:00 PM</option>
-                        <option value="16:00">04:00 PM</option>
-                        <option value="17:00">05:00 PM</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Reason for Visit</label>
-                    <textarea
-                      name="reason"
-                      value={booking.reason}
-                      onChange={handleBookingChange}
-                      placeholder="Briefly describe your symptoms or reason for appointment"
-                      rows="3"
-                    />
-                  </div>
-
-                  {booking.doctor_id && (
-                    <div className="consultation-fee-info">
-                      <span>💰 Consultation Fee: </span>
-                      <strong>Rs. {getSelectedDoctorFee()}</strong>
-                    </div>
-                  )}
-
-                  <button type="submit" className="btn-submit btn-payment" disabled={bookingLoading}>
-                    {bookingLoading ? 'Processing...' : '💳 Proceed to Payment »'}
-                  </button>
-                </form>
-              )}
-            </>
-          )}
-        </div>
+                </div>
+                <div className="hv-form-group">
+                  <label>Reason for Visit</label>
+                  <textarea name="reason" value={booking.reason} onChange={handleBookingChange} placeholder="Describe your symptoms or reason..." rows="3" />
+                </div>
+                {booking.doctor_id && (
+                  <div className="hv-fee-info">Consultation Fee: <strong>Rs. {getSelectedDoctorFee()}</strong></div>
+                )}
+                <button type="submit" className="hv-btn primary hv-btn-full" disabled={bookingLoading}>
+                  {bookingLoading ? 'Processing...' : 'Proceed to Payment'}
+                </button>
+              </form>
+            )}
+          </div>
         )}
 
-        <div className="back-link">
-          <button onClick={() => navigate('/browse-hospitals')} className="btn-link">
-            ← Back to Hospitals
-          </button>
+        <div className="hv-back">
+          <button onClick={() => navigate(-1)} className="hv-btn link">← Go Back</button>
         </div>
       </div>
-
-      {/* Payment Modal - Shows BEFORE appointment is created */}
-      {showPaymentModal && (
-        <div className="payment-modal-overlay">
-          <div className="payment-modal">
-            <div className="payment-modal-header">
-              <h2>💳 Complete Payment First</h2>
-              <button 
-                className="close-btn" 
-                onClick={handlePaymentCancel}
-                aria-label="Close"
-              >
-                ×
-              </button>
-            </div>
-            <div className="payment-modal-body">
-              <div className="appointment-summary">
-                <h3>Booking Details</h3>
-                <p><strong>Doctor:</strong> {doctors.find(d => d.id == booking.doctor_id)?.name || 'N/A'}</p>
-                <p><strong>Hospital:</strong> {hospital?.name}</p>
-                <p><strong>Date:</strong> {booking.appointment_date ? new Date(booking.appointment_date).toLocaleDateString() : 'N/A'}</p>
-                <p><strong>Time:</strong> {booking.appointment_time || 'N/A'}</p>
-                <p><strong>Amount:</strong> Rs. {getSelectedDoctorFee()}</p>
-              </div>
-              
-              <p className="payment-notice">
-                ⚠️ Complete payment to confirm your booking. Your appointment will be created after successful payment.
-              </p>
-              
-              <div className="payment-options">
-                <button 
-                  className="khalti-pay-btn"
-                  onClick={handleKhaltiPayment}
-                  disabled={bookingLoading}
-                >
-                  {bookingLoading ? (
-                    <>Processing...</>
-                  ) : (
-                    <>
-                      <img 
-                        src="https://khalti.com/static/khalti-icon.png" 
-                        alt="Khalti" 
-                        className="khalti-icon"
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                      Pay Rs. {getSelectedDoctorFee()} with Khalti
-                    </>
-                  )}
-                </button>
-                
-                <button 
-                  className="btn-cancel-payment"
-                  onClick={handlePaymentCancel}
-                  disabled={bookingLoading}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

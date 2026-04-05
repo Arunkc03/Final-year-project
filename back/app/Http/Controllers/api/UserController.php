@@ -158,6 +158,84 @@ class UserController extends Controller
         return response()->json(['status' => 'success', 'message' => 'Logged out']);
     }
 
+    // List all users (admin/super_admin) — filter by role if ?role= given
+    public function adminUsers(Request $request)
+    {
+        $query = User::with('hospital:id,name')->orderBy('created_at', 'desc');
+
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        $users = $query->paginate(50);
+
+        return response()->json(['status' => 'success', 'data' => $users]);
+    }
+
+    // System-level user list (super_admin only)
+    public function systemUsers(Request $request)
+    {
+        return $this->adminUsers($request);
+    }
+
+    // Show single user
+    public function show($id)
+    {
+        $user = User::with('hospital:id,name')->find($id);
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+        }
+        return response()->json(['status' => 'success', 'data' => $user]);
+    }
+
+    // Admin update user
+    public function adminUpdate(Request $request, $id)
+    {
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name'  => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'role'  => 'sometimes|in:patient,doctor,admin,super_admin',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $user->fill($request->only(['name', 'email', 'role']))->save();
+
+        return response()->json(['status' => 'success', 'message' => 'User updated', 'data' => $user]);
+    }
+
+    // Delete (permanently remove) a user account
+    public function destroy($id)
+    {
+        $caller = auth()->user();
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'User not found'], 404);
+        }
+
+        // Prevent deleting yourself or other super admins
+        if ($user->id === $caller->id) {
+            return response()->json(['status' => 'error', 'message' => 'Cannot delete your own account'], 403);
+        }
+
+        if ($user->isSuperAdmin()) {
+            return response()->json(['status' => 'error', 'message' => 'Cannot delete a super admin'], 403);
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(['status' => 'success', 'message' => 'User account removed']);
+    }
+
     // Update user profile
     public function updateProfile(Request $request)
     {
@@ -176,10 +254,22 @@ class UserController extends Controller
             'city' => 'sometimes|nullable|string|max:100',
             'state' => 'sometimes|nullable|string|max:100',
             'postal_code' => 'sometimes|nullable|string|max:20',
+            'avatar' => 'sometimes|nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        // Handle avatar upload
+        if ($request->hasFile('avatar')) {
+            // Delete old avatar if exists
+            if ($user->avatar && \Storage::disk('public')->exists($user->avatar)) {
+                \Storage::disk('public')->delete($user->avatar);
+            }
+            
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $avatarPath;
         }
 
         // Update only provided fields

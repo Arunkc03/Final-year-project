@@ -2,8 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import PageHero from '../components/PageHero/PageHero';
-import '../styles/PatientDashboard.css';
+import '../styles/BookAppointment.css';
 
 const BookAppointment = () => {
   const navigate = useNavigate();
@@ -19,9 +18,6 @@ const BookAppointment = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [createdAppointment, setCreatedAppointment] = useState(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [bookingLoading, setBookingLoading] = useState(false);
   const [appointmentForm, setAppointmentForm] = useState({
     hospital_id: hospitalId || '',
     doctor_id: doctorId || '',
@@ -79,21 +75,32 @@ const BookAppointment = () => {
         console.log('Setting doctor from response.data:', response.data);
         setDoctor(response.data);
         // Update form with doctor's department and hospital
+        // Format date properly for input[type="date"]
+        const scheduledDate = response.data.available_from ? 
+          new Date(response.data.available_from).toISOString().split('T')[0] : 
+          new Date().toISOString().split('T')[0];
+        
         setAppointmentForm(prev => ({
           ...prev,
           doctor_id: doctorId,
           department_id: response.data.department_id || departmentId,
           hospital_id: response.data.hospital_id || hospitalId,
+          scheduled_date: scheduledDate,
         }));
       } else if (response.doctor) {
         // Alternative response format
         console.log('Setting doctor from response.doctor:', response.doctor);
         setDoctor(response.doctor);
+        const scheduledDate = response.doctor.available_from ? 
+          new Date(response.doctor.available_from).toISOString().split('T')[0] : 
+          new Date().toISOString().split('T')[0];
+        
         setAppointmentForm(prev => ({
           ...prev,
           doctor_id: doctorId,
           department_id: response.doctor.department_id || departmentId,
           hospital_id: response.doctor.hospital_id || hospitalId,
+          scheduled_date: scheduledDate,
         }));
       } else if (response.id) {
         // Direct doctor object
@@ -130,6 +137,10 @@ const BookAppointment = () => {
   };
 
   const handleScheduleSelect = (schedule) => {
+    if (schedule.is_booked || schedule.display_status === 'booked') {
+      return;
+    }
+
     setSelectedSchedule(schedule);
     setAppointmentForm(prev => ({
       ...prev,
@@ -168,12 +179,36 @@ const BookAppointment = () => {
       console.log('Submitting appointment:', appointmentForm);
       const response = await api.bookAppointment(appointmentForm, token);
       console.log('Appointment response:', response);
+      
       if (response.status === 'success') {
-        // Store the appointment and show payment modal
-        setCreatedAppointment(response.appointment);
-        setShowPaymentModal(true);
+        // Appointment created, now initiate Khalti payment directly
+        const appointment = response.appointment;
+        const amount = appointment.payment_amount || getConsultationFee();
+        
+        console.log('Initiating Khalti payment:', {
+          appointment_id: appointment.id,
+          amount: amount,
+        });
+        
+        const paymentResponse = await api.khalti.initiate({
+          appointment_id: appointment.id,
+          amount: amount
+        }, token);
+
+        console.log('Payment response:', paymentResponse);
+        
+        if (paymentResponse.status === 'success' && paymentResponse.data?.payment_url) {
+          // Redirect directly to Khalti payment UI
+          console.log('Redirecting to Khalti:', paymentResponse.data.payment_url);
+          window.location.href = paymentResponse.data.payment_url;
+        } else if (paymentResponse.data?.pidx) {
+          // Fallback: redirect using pidx
+          const khaltiUrl = `https://a.khalti.com/?pidx=${encodeURIComponent(paymentResponse.data.pidx)}`;
+          window.location.href = khaltiUrl;
+        } else {
+          setError('Payment URL not received from server');
+        }
       } else {
-        // Show validation errors if present
         if (response.errors) {
           const errorMessages = Object.values(response.errors).flat().join(', ');
           setError(errorMessages);
@@ -221,7 +256,8 @@ const BookAppointment = () => {
       console.log('Initiating Khalti payment:', {
         appointment_id: createdAppointment.id,
         amount: amount,
-        token: token ? 'present' : 'missing'
+        token: token ? 'present' : 'missing',
+        appointment: createdAppointment
       });
       
       // Initiate Khalti payment
@@ -230,25 +266,90 @@ const BookAppointment = () => {
         amount: amount
       }, token);
 
-      console.log('Payment initiate response:', paymentResponse);
+      console.log('Payment initiate full response:', JSON.stringify(paymentResponse, null, 2));
+      console.log('Response structure:', {
+        hasData: !!paymentResponse?.data,
+        dataKeys: Object.keys(paymentResponse?.data || {}),
+        paymentUrl: paymentResponse?.data?.payment_url,
+        pidx: paymentResponse?.data?.pidx,
+      });
 
-      if (paymentResponse.status === 'success' && paymentResponse.data?.payment_url) {
-        console.log('Redirecting to Khalti:', paymentResponse.data.payment_url);
-        // Redirect to Khalti payment page
-        window.location.href = paymentResponse.data.payment_url;
-      } else if (paymentResponse.data?.payment_url) {
-        // Handle alternative response format
-        console.log('Redirecting to Khalti (alt format):', paymentResponse.data.payment_url);
-        window.location.href = paymentResponse.data.payment_url;
-      } else {
-        console.error('Invalid response format:', paymentResponse);
-        setError(paymentResponse.message || 'Failed to initiate payment. Please try again.');
+      // Handle error responses from backend
+      if (!paymentResponse || paymentResponse.status === 'error') {
+        const errorMsg = paymentResponse?.message || 'Payment initiation failed';
+        console.error('Backend error:', errorMsg, paymentResponse);
+        setError(errorMsg);
+        setBookingLoading(false);
+        return;
       }
+
+      // Check for payment URL in the successful response - try multiple paths
+      let paymentUrl = paymentResponse?.data?.payment_url || paymentResponse?.payment_url;
+      let pidx = paymentResponse?.data?.pidx || paymentResponse?.pidx;
+
+      console.log('Payment details extracted:', { 
+        paymentUrl, 
+        pidx,
+        paymentUrlType: typeof paymentUrl,
+        pidxType: typeof pidx,
+        isValidUrl: paymentUrl && typeof paymentUrl === 'string' && /^https?:\/\//.test(paymentUrl),
+      });
+
+      // Validate URLs before redirecting
+      if (paymentUrl && typeof paymentUrl === 'string' && /^https?:\/\//.test(paymentUrl)) {
+        console.log('Redirecting to Khalti payment URL:', paymentUrl);
+        // Validate URL before navigation
+        try {
+          new URL(paymentUrl);
+          window.location.href = paymentUrl;
+          return;
+        } catch (urlError) {
+          console.error('Invalid URL:', paymentUrl, urlError);
+          setError('Invalid payment URL received from server. Please contact support.');
+          setBookingLoading(false);
+          return;
+        }
+      }
+
+      if (pidx && typeof pidx === 'string' && pidx.trim()) {
+        const khaltiRedirectUrl = `https://a.khalti.com/?pidx=${encodeURIComponent(pidx)}`;
+        console.log('Redirecting to Khalti sandbox with pidx:', khaltiRedirectUrl);
+        try {
+          new URL(khaltiRedirectUrl);
+          window.location.href = khaltiRedirectUrl;
+          return;
+        } catch (urlError) {
+          console.error('Invalid Khalti URL:', khaltiRedirectUrl, urlError);
+          setError('Khalti payment gateway URL is invalid. Please try again later.');
+          setBookingLoading(false);
+          return;
+        }
+      }
+
+      // If we get here, neither URL nor pidx is valid
+      console.error('Invalid payment response structure:', {
+        fullResponse: paymentResponse,
+        paymentUrl,
+        pidx,
+      });
+      setError('Payment initiation failed: Invalid response from payment gateway. Please contact support.');
+      setBookingLoading(false);
+
     } catch (err) {
       console.error('Payment error:', err);
       console.error('Error details:', err.message, err.stack);
-      setError(err.message || 'Payment failed. Please try again.');
-    } finally {
+      // Show detailed error message from API response or error object
+      let errorMessage = 'Payment failed. Please try again.';
+      
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.toString && err.toString().includes('Error:')) {
+        errorMessage = err.toString().replace('Error: ', '');
+      }
+      
+      setError(errorMessage);
       setBookingLoading(false);
     }
   };
@@ -266,254 +367,129 @@ const BookAppointment = () => {
     return doctor?.consultation_fee || 500;
   };
 
-  if (loading) return <div className="loading">Loading...</div>;
+  if (loading) return <div className="ba-loading">Loading...</div>;
 
   return (
-    <div className="patient-dashboard-page">
-      <PageHero 
-        title="Book Appointment" 
-        subtitle={`Schedule your appointment with ${doctor?.name || doctor?.user?.name || 'Doctor'}`}
-      />
-      <div className="patient-dashboard">
-        <header className="dashboard-header">
-          <div className="header-content">
-            <h1>📅 Book Appointment</h1>
-            <p>Schedule your visit</p>
-          </div>
-          <div className="header-actions">
-            <button onClick={handleBack} className="btn-secondary">
-              ← Back to Doctors
-            </button>
-          </div>
-        </header>
-
-        <main className="dashboard-main">
-          {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
-
-          {/* Doctor Info */}
-          {doctor && (
-            <section className="patient-info">
-              <div className="info-card">
-                <h2>Doctor Information</h2>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">Name</span>
-                    <span className="info-value">{doctor.name || doctor.user?.name}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Email</span>
-                    <span className="info-value">{doctor.email || doctor.user?.email}</span>
-                  </div>
-                  {doctor.qualification && (
-                    <div className="info-item">
-                      <span className="info-label">Qualification</span>
-                      <span className="info-value">{doctor.qualification}</span>
-                    </div>
-                  )}
-                  {doctor.experience_years && (
-                    <div className="info-item">
-                      <span className="info-label">Experience</span>
-                      <span className="info-value">{doctor.experience_years} years</span>
-                    </div>
-                  )}
-                  {doctor.consultation_fee && (
-                    <div className="info-item">
-                      <span className="info-label">Consultation Fee</span>
-                      <span className="info-value">${doctor.consultation_fee}</span>
-                    </div>
-                  )}
-                  {doctor.department?.name && (
-                    <div className="info-item">
-                      <span className="info-label">Department</span>
-                      <span className="info-value">{doctor.department.name}</span>
-                    </div>
-                  )}
-                  {doctor.hospital?.name && (
-                    <div className="info-item">
-                      <span className="info-label">Hospital</span>
-                      <span className="info-value">{doctor.hospital.name}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </section>
-          )}
-
-          {/* Appointment Form */}
-          <section className="appointment-section">
-            <div className="section-header">
-              <h2>📋 Appointment Details</h2>
-              <p>Select your preferred date and time</p>
+    <div className="ba-page">
+      {/* Doctor Info Header */}
+      {doctor && (
+        <section className="ba-doctor-section">
+          <div className="ba-doctor-view">
+            <div className="ba-doctor-avatar">
+              {doctor.image ? (
+                <img src={`${api.getStorageUrl()}/${doctor.image}`} alt={doctor.name} className="ba-avatar-img" />
+              ) : (
+                <span className="ba-avatar-letter">{(doctor.name || 'D').charAt(0).toUpperCase()}</span>
+              )}
             </div>
-
-            {/* Available Schedules */}
-            {schedules.length > 0 && (
-              <div className="schedules-section" style={{ marginBottom: '1.5rem' }}>
-                <h3 style={{ marginBottom: '1rem', color: '#1e3a5f' }}>📅 Available Time Slots</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                  {schedules.map(schedule => (
-                    <div 
-                      key={schedule.id}
-                      onClick={() => handleScheduleSelect(schedule)}
-                      style={{
-                        padding: '1rem',
-                        border: selectedSchedule?.id === schedule.id ? '2px solid #4a90a4' : '1px solid #ddd',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        backgroundColor: selectedSchedule?.id === schedule.id ? '#e8f4f8' : 'white',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      <div style={{ fontWeight: '600', color: '#1e3a5f', marginBottom: '0.5rem' }}>
-                        {formatDate(schedule.date)}
-                      </div>
-                      <div style={{ color: '#4a90a4', fontWeight: '500' }}>
-                        {formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}
-                      </div>
-                      <div style={{ fontSize: '0.875rem', color: '#666', marginTop: '0.5rem' }}>
-                        {schedule.available_slots} slots available
-                      </div>
-                    </div>
-                  ))}
-                </div>
+            <div className="ba-doctor-details">
+              <h1 className="ba-doctor-name">Dr. {doctor.name || doctor.user?.name}</h1>
+              {doctor.department?.name && <span className="ba-dept-badge">{doctor.department.name}</span>}
+              <div className="ba-doctor-meta">
+                {doctor.qualification && <span>{doctor.qualification}</span>}
+                {doctor.experience_years > 0 && <span>{doctor.experience_years} yrs exp</span>}
+                {doctor.hospital?.name && <span>{doctor.hospital.name}</span>}
               </div>
-            )}
+              {doctor.consultation_fee > 0 && (
+                <div className="ba-fee">Rs. {doctor.consultation_fee} <small>consultation fee</small></div>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
-            {schedules.length === 0 && (
-              <div style={{ padding: '1rem', backgroundColor: '#fff3cd', borderRadius: '8px', marginBottom: '1rem' }}>
-                <p style={{ color: '#856404', margin: 0 }}>
-                  ℹ️ No pre-defined schedules available. You can still request an appointment time below.
-                </p>
-              </div>
-            )}
+      {/* Main Content */}
+      <div className="ba-content">
+        {error && <div className="ba-error">{error}</div>}
+        {success && <div className="ba-success">{success}</div>}
 
-            <form onSubmit={handleSubmit} className="appointment-form">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>Appointment Date *</label>
-                  <input 
-                    type="date" 
-                    name="date"
-                    value={appointmentForm.date}
-                    onChange={handleChange}
-                    min={new Date().toISOString().split('T')[0]}
-                    required
-                  />
-                </div>
+        {/* Schedule Selection */}
+        <div className="ba-panel">
+          <h2 className="ba-panel-title">Select Time Slot</h2>
 
-                <div className="form-group">
-                  <label>Appointment Time *</label>
-                  <input 
-                    type="time" 
-                    name="time"
-                    value={appointmentForm.time}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label>Reason for Visit</label>
-                <textarea 
-                  name="reason"
-                  value={appointmentForm.reason}
-                  onChange={handleChange}
-                  placeholder="Describe your reason for the appointment..."
-                  rows="4"
-                ></textarea>
-              </div>
-
-              <button 
-                type="submit" 
-                className="btn-primary btn-book"
-                disabled={submitting}
-              >
-                {submitting ? 'Booking...' : '📅 Confirm Appointment'}
-              </button>
-            </form>
-          </section>
-        </main>
-
-        {/* Payment Modal */}
-        {showPaymentModal && createdAppointment && (
-          <div className="modal-overlay">
-            <div className="modal-payment">
-              <div className="payment-header">
-                <h2>💳 Complete Payment</h2>
-                <button 
-                  className="modal-close"
-                  onClick={handlePaymentCancel}
-                  disabled={bookingLoading}
+          {schedules.length > 0 ? (
+            <div className="ba-schedules">
+              {schedules.map(schedule => (
+                <div
+                  key={schedule.id}
+                  className={`ba-slot ${selectedSchedule?.id === schedule.id ? 'ba-slot-active' : ''} ${(schedule.is_booked || schedule.display_status === 'booked') ? 'ba-slot-booked' : ''}`}
+                  onClick={() => !(schedule.is_booked || schedule.display_status === 'booked') && handleScheduleSelect(schedule)}
                 >
-                  ✕
-                </button>
-              </div>
-
-              <div className="payment-content">
-                {error && (
-                  <div className="error-message" style={{marginBottom: '1.5rem', padding: '1rem', background: '#fee', border: '1px solid #fcc', borderRadius: '6px', color: '#c00'}}>
-                    ⚠️ {error}
-                  </div>
-                )}
-                
-                <div className="appointment-summary">
-                  <h3>Appointment Summary</h3>
-                  <div className="summary-item">
-                    <span className="label">Doctor:</span>
-                    <span className="value">{doctor?.name || doctor?.user?.name || 'Dr. Unknown'}</span>
-                  </div>
-                  <div className="summary-item">
-                    <span className="label">Date:</span>
-                    <span className="value">{createdAppointment.date}</span>
-                  </div>
-                  <div className="summary-item">
-                    <span className="label">Time:</span>
-                    <span className="value">{createdAppointment.time}</span>
-                  </div>
-                  <div className="summary-item">
-                    <span className="label">Consultation Fee:</span>
-                    <span className="value amount">Rs. {getConsultationFee()}</span>
+                  <div className="ba-slot-date">{formatDate(schedule.date)}</div>
+                  <div className="ba-slot-time">{formatTime(schedule.start_time)} - {formatTime(schedule.end_time)}</div>
+                  <div className="ba-slot-avail">
+                    {(schedule.is_booked || schedule.display_status === 'booked')
+                      ? 'Booked'
+                      : `${schedule.remaining_slots ?? schedule.available_slots} slots left`}
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : (
+            <div className="ba-no-schedules">
+              No pre-defined schedules available. You can request an appointment time below.
+            </div>
+          )}
+        </div>
 
-                <p className="payment-notice">
-                  ⚠️ Complete payment to confirm your appointment. Your appointment will be auto-confirmed after successful payment.
-                </p>
-
-                <div className="payment-options">
-                  <button 
-                    className="khalti-pay-btn"
-                    onClick={handleKhaltiPayment}
-                    disabled={bookingLoading}
-                  >
-                    {bookingLoading ? 'Processing...' : '💳 Pay with Khalti'}
-                  </button>
-                  
-                  <button 
-                    className="btn-cancel-payment"
-                    onClick={handlePaymentCancel}
-                    disabled={bookingLoading}
-                  >
-                    Cancel
-                  </button>
-                </div>
+        {/* Appointment Form */}
+        <div className="ba-panel">
+          <h2 className="ba-panel-title">Appointment Details</h2>
+          <form onSubmit={handleSubmit} className="ba-form">
+            <div className="ba-form-row">
+              <div className="ba-form-group">
+                <label>Date *</label>
+                <input
+                  type="date"
+                  name="date"
+                  value={appointmentForm.date}
+                  onChange={handleChange}
+                  min={new Date().toISOString().split('T')[0]}
+                  required
+                />
+              </div>
+              <div className="ba-form-group">
+                <label>Time *</label>
+                <input
+                  type="time"
+                  name="time"
+                  value={appointmentForm.time}
+                  onChange={handleChange}
+                  required
+                />
               </div>
             </div>
-          </div>
-        )}
-
-        {success && (
-          <div className="success-modal-overlay">
-            <div className="success-modal">
-              <div className="success-icon">✓</div>
-              <h2>{success}</h2>
-              <p>Redirecting to dashboard...</p>
+            <div className="ba-form-group">
+              <label>Reason for Visit</label>
+              <textarea
+                name="reason"
+                value={appointmentForm.reason}
+                onChange={handleChange}
+                placeholder="Describe your reason for the appointment..."
+                rows="3"
+              />
             </div>
-          </div>
-        )}
+            <div className="ba-form-actions">
+              <button type="submit" className="ba-btn primary" disabled={submitting}>
+                {submitting ? 'Booking...' : 'Confirm Appointment'}
+              </button>
+              <button type="button" className="ba-btn secondary" onClick={handleBack}>
+                ← Go Back
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
+
+      {success && (
+        <div className="ba-modal-overlay">
+          <div className="ba-modal ba-success-modal">
+            <div className="ba-success-icon">✓</div>
+            <h2>{success}</h2>
+            <p>Redirecting to dashboard...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

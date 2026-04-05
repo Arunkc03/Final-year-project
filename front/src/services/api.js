@@ -75,6 +75,36 @@ const api = {
     return res.json ? await res.json() : res;
   },
 
+  getAdmins: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/admins`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  deleteAdmin: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/admins/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  getPatients: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/users?role=patient`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  deletePatient: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
   getHospital: async (id, token) => {
     const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
     const res = await fetch(`${API_BASE_URL}/public/hospital/${id}`, {
@@ -84,8 +114,11 @@ const api = {
   },
 
   // Public doctors endpoints
-  getDoctors: async () => {
-    const res = await fetch(`${API_BASE_URL}/public/doctors`);
+  getDoctors: async (hospitalId) => {
+    const url = hospitalId 
+      ? `${API_BASE_URL}/public/doctors?hospital_id=${hospitalId}`
+      : `${API_BASE_URL}/public/doctors`;
+    const res = await fetch(url);
     return res.json ? await res.json() : res;
   },
 
@@ -118,6 +151,7 @@ const api = {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(data),
@@ -141,6 +175,7 @@ const api = {
     const res = await fetch(`${API_BASE_URL}/hospitals/${id}`, {
       method: 'POST',
       headers: {
+        'Accept': 'application/json',
         'Authorization': `Bearer ${token}`,
       },
       body: formData,
@@ -150,13 +185,13 @@ const api = {
 
   // Doctor endpoints (admin-protected)
   createDoctor: async (data, token) => {
+    const isFormData = data instanceof FormData;
+    const headers = { 'Authorization': `Bearer ${token}` };
+    if (!isFormData) headers['Content-Type'] = 'application/json';
     const res = await fetch(`${API_BASE_URL}/doctors`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
+      headers,
+      body: isFormData ? data : JSON.stringify(data),
     });
     return res.json();
   },
@@ -172,6 +207,23 @@ const api = {
     const res = await fetch(`${API_BASE_URL}/doctors/${id}`, {
       method: 'DELETE',
       headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  updateDoctor: async (id, data, token) => {
+    const isFormData = data instanceof FormData;
+    // PHP cannot parse multipart/form-data for PUT requests, so use POST /update when sending files
+    const url = isFormData
+      ? `${API_BASE_URL}/doctors/${id}/update`
+      : `${API_BASE_URL}/doctors/${id}`;
+    const method = isFormData ? 'POST' : 'PUT';
+    const headers = { 'Authorization': `Bearer ${token}` };
+    if (!isFormData) headers['Content-Type'] = 'application/json';
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: isFormData ? data : JSON.stringify(data),
     });
     return res.json();
   },
@@ -198,6 +250,19 @@ const api = {
         'Authorization': `Bearer ${token}`,
       },
       body: formData,
+    });
+    return res.json();
+  },
+
+  getDoctorReviews: async (doctorId) => {
+    const res = await fetch(`${API_BASE_URL}/doctors/${doctorId}/reviews`);
+    return res.json();
+  },
+
+  deleteReport: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/reports/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
     });
     return res.json();
   },
@@ -315,6 +380,20 @@ const api = {
     return res.json();
   },
 
+  cancelAppointment: async (id, notes, token) => {
+    const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}/cancel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reason: notes || 'Deleted by doctor from dashboard',
+      }),
+    });
+    return res.json();
+  },
+
   // Schedule endpoints
   getSchedules: async (token) => {
     const res = await fetch(`${API_BASE_URL}/schedules`, {
@@ -367,6 +446,13 @@ const api = {
     return res.json();
   },
 
+  // Generic request method for flexible API calls
+  request: async (endpoint, token) => {
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
+    return res.json();
+  },
+
   // ========== KHALTI PAYMENT GATEWAY ==========
   khalti: {
     // Get Khalti public configuration
@@ -378,6 +464,8 @@ const api = {
     // Initiate Khalti payment
     initiate: async (data, token) => {
       try {
+        console.log('Khalti initiate request data:', data);
+        
         const res = await fetch(`${API_BASE_URL}/khalti/initiate`, {
           method: 'POST',
           headers: {
@@ -389,11 +477,41 @@ const api = {
         
         const responseData = await res.json();
         console.log('Khalti initiate response status:', res.status);
-        console.log('Khalti initiate response data:', responseData);
+        console.log('Khalti initiate full response data:', JSON.stringify(responseData, null, 2));
         
         if (!res.ok) {
-          console.error('Khalti initiate error:', responseData);
-          throw new Error(responseData.message || `HTTP ${res.status}`);
+          console.error('Khalti initiate error response:', responseData);
+          
+          // Extract detailed error message from response - prioritize message field
+          let errorMessage = 'Payment initiation failed';
+          
+          if (responseData.message) {
+            errorMessage = responseData.message;
+          } else if (responseData.detail) {
+            errorMessage = responseData.detail;
+          } else if (responseData.errors && typeof responseData.errors === 'object') {
+            // Handle validation errors object
+            const errorKeys = Object.keys(responseData.errors);
+            if (errorKeys.length > 0) {
+              const firstErrorField = errorKeys[0];
+              const firstError = responseData.errors[firstErrorField];
+              errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
+            }
+          } else if (responseData.error) {
+            errorMessage = String(responseData.error);
+          }
+          
+          console.error('Extracted error message:', errorMessage);
+          console.error('Full error response:', responseData);
+          throw new Error(errorMessage);
+        }
+        
+        // Check for error status in response data (even if HTTP was 200)
+        if (responseData.status === 'error') {
+          const errorMsg = responseData.message || 'Payment initiation failed';
+          console.error('API returned error status:', errorMsg);
+          console.error('Error details:', responseData);
+          throw new Error(errorMsg);
         }
         
         return responseData;
@@ -475,6 +593,96 @@ const api = {
         return { status: 'error', recommended_specialty: null };
       }
     },
+  },
+
+  // Profile endpoints
+  updateProfile: async (formData, token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/profile`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error('Profile update error response:', res.status, errorData);
+        throw new Error(`API returned ${res.status}: ${res.statusText}`);
+      }
+      
+      return res.json();
+    } catch (error) {
+      console.error('Profile update fetch error:', error);
+      throw error;
+    }
+  },
+
+  // Doctor image upload (for doctor's own profile)
+  uploadDoctorImage: async (formData, token) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/doctor/upload-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      
+      if (!res.ok) {
+        const errorData = await res.text();
+        console.error('Doctor image upload error:', res.status, errorData);
+        throw new Error(`API returned ${res.status}: ${res.statusText}`);
+      }
+      
+      return res.json();
+    } catch (error) {
+      console.error('Doctor image upload error:', error);
+      throw error;
+    }
+  },
+
+  // Submit review for doctor
+  submitReview: async (data, token) => {
+    const res = await fetch(`${API_BASE_URL}/reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
+  // Get authenticated user's own reviews (all statuses — for doctor/admin views)
+  getMyReviews: async (token) => {
+    const res = await fetch(`${API_BASE_URL}/reviews`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  // Delete a review (admin or review owner)
+  deleteReview: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
+  },
+
+  // Doctor marks appointment as completed
+  completeAppointment: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}/complete`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    return res.json();
   },
 };
 

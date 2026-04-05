@@ -1,0 +1,15 @@
+[33meff6e18[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mworktree-agent-ae0f370f[m[33m)[m HEAD@{0}: reset: moving to origin/main
+[33m20628ad[m[33m ([m[1;32mcopilot/worktree-2026-03-29T11-51-01[m[33m, [m[1;32mcopilot/worktree-2026-03-29T11-49-04[m[33m, [m[1;32mcopilot/worktree-2026-03-20T11-55-29[m[33m)[m HEAD@{1}: checkout: moving from copilot/vscode-mnbvxyh8-m8rr to main
+[33m65af2b9[m[33m ([m[1;31morigin/copilot/vscode-mnbvxyh8-m8rr[m[33m, [m[1;32mcopilot/vscode-mnbvxyh8-m8rr[m[33m)[m HEAD@{2}: commit: Checkpoint from VS Code for cloud agent session
+[33m20628ad[m[33m ([m[1;32mcopilot/worktree-2026-03-29T11-51-01[m[33m, [m[1;32mcopilot/worktree-2026-03-29T11-49-04[m[33m, [m[1;32mcopilot/worktree-2026-03-20T11-55-29[m[33m)[m HEAD@{3}: checkout: moving from main to copilot/vscode-mnbvxyh8-m8rr
+[33m20628ad[m[33m ([m[1;32mcopilot/worktree-2026-03-29T11-51-01[m[33m, [m[1;32mcopilot/worktree-2026-03-29T11-49-04[m[33m, [m[1;32mcopilot/worktree-2026-03-20T11-55-29[m[33m)[m HEAD@{4}: checkout: moving from copilot/vscode-mnbp4b1o-vepp to main
+[33mf20df7e[m[33m ([m[1;32mcopilot/vscode-mnbp4b1o-vepp[m[33m)[m HEAD@{5}: commit: Checkpoint from VS Code for cloud agent session
+[33m20628ad[m[33m ([m[1;32mcopilot/worktree-2026-03-29T11-51-01[m[33m, [m[1;32mcopilot/worktree-2026-03-29T11-49-04[m[33m, [m[1;32mcopilot/worktree-2026-03-20T11-55-29[m[33m)[m HEAD@{6}: checkout: moving from main to copilot/vscode-mnbp4b1o-vepp
+[33m20628ad[m[33m ([m[1;32mcopilot/worktree-2026-03-29T11-51-01[m[33m, [m[1;32mcopilot/worktree-2026-03-29T11-49-04[m[33m, [m[1;32mcopilot/worktree-2026-03-20T11-55-29[m[33m)[m HEAD@{7}: reset: moving to HEAD
+[33m20628ad[m[33m ([m[1;32mcopilot/worktree-2026-03-29T11-51-01[m[33m, [m[1;32mcopilot/worktree-2026-03-29T11-49-04[m[33m, [m[1;32mcopilot/worktree-2026-03-20T11-55-29[m[33m)[m HEAD@{8}: commit: Apply CSS variables to key dashboard and home page styles
+[33m224dd37[m HEAD@{9}: commit: Replace all hardcoded colors with CSS variables across all pages and components
+[33m29dd330[m HEAD@{10}: commit: Add complete theme customization system with CSS variables for light/dark mode
+[33meff6e18[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;32mworktree-agent-ae0f370f[m[33m)[m HEAD@{11}: commit: Remove markdown files and add gitignore
+[33ma5d7906[m HEAD@{12}: pull origin main --allow-unrelated-histories: Merge made by the 'ort' strategy.
+[33m1b621f2[m HEAD@{13}: Branch: renamed refs/heads/master to refs/heads/main
+[33m1b621f2[m HEAD@{15}: commit (initial): Initial commit: Complete hospital doctor management system

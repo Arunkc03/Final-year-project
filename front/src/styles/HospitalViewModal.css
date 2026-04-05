@@ -1,0 +1,434 @@
+/* HospitalViewModal.css */
+
+.hvm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.hvm-modal {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: hvm-slide-in 0.25s ease;
+}
+
+@keyframes hvm-slide-in {
+  from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Header ── */
+.hvm-header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.75rem;
+  z-index: 10;
+  border-radius: 18px 18px 0 0;
+}
+
+.hvm-header h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.hvm-close-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #6b7280;
+}
+
+.hvm-close-btn:hover {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.hvm-close-btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+}
+
+/* ── Body ── */
+.hvm-body {
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Hospital Image ── */
+.hvm-image-wrap {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.hvm-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Info Grid ── */
+.hvm-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+.hvm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.hvm-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.hvm-field-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9ca3af;
+}
+
+.hvm-field-label svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.hvm-field-value {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #111827;
+}
+
+.hvm-field-value.large {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+/* ── Admin Section (purple gradient) ── */
+.hvm-admin-section {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-radius: 14px;
+  padding: 1.5rem;
+  color: #fff;
+}
+
+.hvm-admin-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.hvm-admin-section-title svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.hvm-admin-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.hvm-admin-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hvm-admin-avatar svg {
+  width: 28px;
+  height: 28px;
+  stroke: #fff;
+  fill: none;
+}
+
+.hvm-admin-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.hvm-admin-detail {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.88);
+  margin-bottom: 0.25rem;
+}
+
+.hvm-admin-detail svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  flex-shrink: 0;
+}
+
+.hvm-no-admin {
+  color: rgba(255,255,255,0.85);
+  font-weight: 500;
+}
+
+/* ── Departments Section (green) ── */
+.hvm-dept-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+.hvm-dept-title svg {
+  width: 20px;
+  height: 20px;
+  stroke: #16a34a;
+  fill: none;
+}
+
+.hvm-dept-card {
+  background: #16a34a;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.hvm-dept-card:last-child {
+  margin-bottom: 0;
+}
+
+.hvm-dept-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.hvm-dept-card-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.hvm-dept-badge {
+  background: rgba(255,255,255,0.95);
+  color: #16a34a;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+}
+
+.hvm-dept-meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+
+.hvm-dept-meta-item {
+  background: rgba(255,255,255,0.9);
+  color: #16a34a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+}
+
+.hvm-doctor-label {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.hvm-doctor-card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.hvm-doctor-card:last-child {
+  margin-bottom: 0;
+}
+
+.hvm-doctor-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hvm-doctor-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ade80, #16a34a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hvm-doctor-avatar svg {
+  width: 20px;
+  height: 20px;
+  stroke: #fff;
+  fill: none;
+}
+
+.hvm-doctor-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.hvm-doctor-qual {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.hvm-doctor-fee {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.hvm-doctor-delete-btn {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+}
+
+.hvm-doctor-delete-btn:hover:not(:disabled) {
+  background: #fecaca;
+  border-color: #f87171;
+  box-shadow: 0 2px 8px rgba(153, 27, 27, 0.15);
+}
+
+.hvm-doctor-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hvm-doctor-delete-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hvm-no-doctors {
+  color: rgba(255,255,255,0.8);
+  font-size: 0.88rem;
+}
+
+/* ── Registration Date ── */
+.hvm-date-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+/* ── Footer ── */
+.hvm-footer {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.hvm-btn-close {
+  width: 100%;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #4b5563, #374151);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.hvm-btn-close:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  transform: translateY(-1px);
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .hvm-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .hvm-field.full-width {
+    grid-column: 1;
+  }
+  .hvm-body {
+    padding: 1.25rem;
+  }
+}

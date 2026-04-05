@@ -20,13 +20,12 @@ import BrowseHospitals from './pages/BrowseHospitals';
 import BrowseDoctors from './pages/BrowseDoctors';
 import HospitalView from './pages/HospitalView';
 import DoctorView from './pages/DoctorView';
-import PaymentSuccess from './pages/PaymentSuccess';
 import HospitalDepartments from './pages/HospitalDepartments';
 import DepartmentDoctors from './pages/DepartmentDoctors';
 import BookAppointment from './pages/BookAppointment';
 import Reports from './pages/Reports';
 import DoctorSchedules from './pages/DoctorSchedules';
-import AllNotifications from './pages/AllNotifications';
+
 import { PaymentVerify } from './components/Payment';
 import './styles/theme.css';
 import './App.css';
@@ -70,10 +69,9 @@ const AppContent = () => {
         <Route path="/my-reports" element={<Reports />} />
         <Route path="/reports" element={<Reports />} />
         {/* Notifications */}
-        <Route path="/notifications" element={<AllNotifications />} />
+        
         {/* Payment */}
         <Route path="/payment/verify" element={<PaymentVerify />} />
-        <Route path="/payment/success" element={<PaymentSuccess />} />
       </Routes>
     </>
   );

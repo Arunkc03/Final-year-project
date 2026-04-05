@@ -57,10 +57,14 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('dashboardRoute');
   };
 
+  const updateUser = (updatedUserData) => {
+    setUser(updatedUserData);
+  };
+
   const isAuthenticated = !!token;
 
   return (
-    <AuthContext.Provider value={{ user, token, dashboardRoute, loading, setLoading, login, logout, isAuthenticated }}>
+    <AuthContext.Provider value={{ user, token, dashboardRoute, loading, setLoading, login, logout, updateUser, isAuthenticated }}>
       {children}
     </AuthContext.Provider>
   );

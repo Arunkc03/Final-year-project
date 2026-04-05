@@ -13,12 +13,13 @@ const Home = () => {
   const [booking, setBooking] = useState({ hospital_id: '', date: '' });
   const [message, setMessage] = useState('');
 
-  useEffect(() => {
-    // if logged in and not a patient, redirect to their dashboard
-    if (token && user && user.role !== 'patient') {
-      setTimeout(() => navigate(dashboardRoute || '/dashboard'), 500);
-    }
-  }, [token, user, dashboardRoute, navigate]);
+  const getImageSrc = (path) => {
+    if (!path) return '';
+    if (/^https?:\/\//i.test(path)) return path;
+    return `${api.getStorageUrl()}/${String(path).replace(/^\/+/, '')}`;
+  };
+
+
 
   useEffect(() => {
     // load hospital and doctor list for public view
@@ -169,103 +170,112 @@ const Home = () => {
 
       <main className="home-content">
 
-        <section className="features">
-          <h2>Key Features</h2>
-          <div className="features-grid">
-            <div className="feature-card">
-              <span className="feature-icon">👨‍💼</span>
-              <h3>Super Admin</h3>
-              <p>Create and manage hospitals with their admin accounts</p>
-            </div>
-            <div className="feature-card">
-              <span className="feature-icon">🏥</span>
-              <h3>Hospital Admin</h3>
-              <p>Manage doctors, patients, and hospital operations</p>
-            </div>
-            <div className="feature-card">
-              <span className="feature-icon">👨‍⚕️</span>
-              <h3>Doctors</h3>
-              <p>Access patient records and submit medical reports</p>
-            </div>
-            <div className="feature-card">
-              <span className="feature-icon">👤</span>
-              <h3>Patients</h3>
-              <p>Self-register, view medical records, and track health</p>
-            </div>
+        <section className="doctors-section">
+          <h2>Featured Doctors</h2>
+          <p className="section-description">Find and book appointments with our expert doctors</p>
+          <div className="doctors-grid">
+            {doctors.length === 0 ? (
+              <p className="no-data">No doctors available</p>
+            ) : (
+              doctors.slice(0, 6).map(doc => (
+                <div key={doc.id} className="doctor-card">
+                  <div className="doctor-avatar">
+                    {(doc.image || doc.user?.avatar) ? (
+                      <img 
+                        src={getImageSrc(doc.image || doc.user?.avatar)}
+                        alt={doc.user?.name || doc.name || 'Doctor'}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          const placeholder = e.target.nextElementSibling;
+                          if (placeholder) placeholder.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div className="avatar-placeholder" style={(doc.image || doc.user?.avatar) ? { display: 'none' } : {}}>
+                      {(doc.name || doc.user?.name)?.charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  <div className="doctor-info">
+                    <h3>Dr. {doc.name}</h3>
+                    {doc.hospital && <p className="doctor-hospital">{doc.hospital.name}</p>}
+                    {doc.identifier && <p className="doctor-id">ID: {doc.identifier}</p>}
+                    {doc.user?.average_rating > 0 && (
+                      <div className="doctor-rating">
+                        {'★'.repeat(Math.round(doc.user.average_rating))}{'☆'.repeat(5 - Math.round(doc.user.average_rating))}
+                        <span className="doctor-rating-value"> {Number(doc.user.average_rating).toFixed(1)} ({doc.user.total_reviews})</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="doctor-actions">
+                    <button 
+                      className="btn-link"
+                      onClick={() => navigate(`/doctor/${doc.id}`)}
+                    >
+                      View Profile
+                    </button>
+                    <button 
+                      className="btn-primary btn-small"
+                      onClick={() => {
+                        if (!token) {
+                          navigate('/login');
+                        } else {
+                          navigate(`/doctor/${doc.id}`);
+                        }
+                      }}
+                    >
+                      Book Now
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
-        <section className="roles">
-          <h2>System Roles</h2>
-          <div className="roles-grid">
-            <div className="role-card">
-              <h3>Super Admin</h3>
-              <ul>
-                <li>Create hospitals</li>
-                <li>Assign hospital admins</li>
-                <li>View system statistics</li>
-                <li>Can only login (no self-registration)</li>
-              </ul>
-            </div>
-            <div className="role-card">
-              <h3>Hospital Admin</h3>
-              <ul>
-                <li>Created by Super Admin</li>
-                <li>Add doctors to hospital</li>
-                <li>Manage hospital settings</li>
-                <li>Review patient reports</li>
-              </ul>
-            </div>
-            <div className="role-card">
-              <h3>Doctor</h3>
-              <ul>
-                <li>Added by Hospital Admin</li>
-                <li>View patient list</li>
-                <li>Submit medical reports</li>
-                <li>Identifier-based login</li>
-              </ul>
-            </div>
-            <div className="role-card">
-              <h3>Patient</h3>
-              <ul>
-                <li>Self-registration</li>
-                <li>View medical records</li>
-                <li>Get unique patient ID</li>
-                <li>Secure identifier login</li>
-                <li>Book appointments</li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <section className="cta">
-          <h2>Get Started</h2>
-          <div className="cta-buttons">
-            <button onClick={() => navigate('/login')} className="btn-primary">
-              Login
-            </button>
-            <button onClick={() => navigate('/register')} className="btn-secondary-outline">
-              Register as Patient
-            </button>
-          </div>
-        </section>
-
-        <section className="browse-section">
-          <h2>Browse Our Network</h2>
-          <p className="browse-description">Find the best healthcare providers in your area</p>
-          <div className="browse-cards">
-            <div className="browse-card" onClick={() => navigate('/browse-hospitals')}>
-              <div className="browse-card-icon">🏥</div>
-              <h3>Hospitals</h3>
-              <p>Explore our partner hospitals and book appointments</p>
-              <span className="browse-card-link">View All Hospitals »</span>
-            </div>
-            <div className="browse-card" onClick={() => navigate('/browse-doctors')}>
-              <div className="browse-card-icon">👨‍⚕️</div>
-              <h3>Doctors</h3>
-              <p>Find specialist doctors and healthcare professionals</p>
-              <span className="browse-card-link">View All Doctors »</span>
-            </div>
+        <section className="hospitals-section">
+          <h2>Partner Hospitals</h2>
+          <p className="section-description">Access healthcare from our trusted hospital partners</p>
+          <div className="hospitals-grid">
+            {hospitals.length === 0 ? (
+              <p className="no-data">No hospitals available</p>
+            ) : (
+              hospitals.slice(0, 6).map(hospital => (
+                <div key={hospital.id} className="hospital-card">
+                  <div className="hospital-image">
+                    {hospital.image ? (
+                      <img src={getImageSrc(hospital.image)} alt={hospital.name} />
+                    ) : (
+                      <div className="hospital-image-placeholder">🏥</div>
+                    )}
+                  </div>
+                  <div className="hospital-info">
+                    <h3>{hospital.name}</h3>
+                    {hospital.address && <p className="hospital-address">{hospital.address}</p>}
+                    {hospital.phone && <p className="hospital-phone">☎️ {hospital.phone}</p>}
+                  </div>
+                  <div className="hospital-actions">
+                    <button 
+                      className="btn-link"
+                      onClick={() => navigate(`/hospital/${hospital.id}`)}
+                    >
+                      View Details
+                    </button>
+                    <button 
+                      className="btn-primary btn-small"
+                      onClick={() => {
+                        if (!token) {
+                          navigate('/login');
+                        } else {
+                          navigate(`/hospital/${hospital.id}`);
+                        }
+                      }}
+                    >
+                      Book Appointment
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
       </main>

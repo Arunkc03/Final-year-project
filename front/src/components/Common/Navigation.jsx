@@ -7,7 +7,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import useTheme from '../../hooks/useTheme';
 import logo from '../../assets/images/Doctorsathi.png';
-import Notifications from './Notifications';
 import './Navigation.css';
 
 const Navigation = () => {
@@ -70,11 +69,6 @@ const Navigation = () => {
                 <button onClick={toggleTheme} className="nav-theme-toggle" title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}>
                   {theme === 'light' ? '🌙' : '☀️'}
                 </button>
-                {user?.role === 'patient' && (
-                  <div className="nav-notifications">
-                    <Notifications />
-                  </div>
-                )}
                 <span className="nav-user-name">Welcome, {user?.name}</span>
                 <button onClick={handleLogout} className="nav-link nav-btn-logout">
                   Logout

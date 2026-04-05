@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Models\Review;
 use App\Models\Appointment;
+use App\Models\Doctor;
 use Illuminate\Http\Request;
 
 /**
@@ -19,12 +20,16 @@ class ReviewController extends Controller
      */
     public function doctorReviews($doctorId)
     {
-        $reviews = Review::where('doctor_id', $doctorId)
+        // Accept either doctors.id or users.id and normalize to doctor user id
+        $doctorRecord = Doctor::find($doctorId);
+        $resolvedDoctorUserId = $doctorRecord ? $doctorRecord->user_id : $doctorId;
+
+        $reviews = Review::where('doctor_id', $resolvedDoctorUserId)
             ->approved()
             ->with('patient')
             ->paginate(10);
 
-        $doctor = \App\Models\User::find($doctorId);
+        $doctor = \App\Models\User::find($resolvedDoctorUserId);
         
         if (!$doctor) {
             return response()->json([
@@ -56,12 +61,20 @@ class ReviewController extends Controller
     {
         $user = auth()->user();
 
-        if ($user->isDoctor()) {
-            // Doctor sees reviews about them
-            $query = Review::where('doctor_id', $user->id);
+        if ($user->isAdmin() || $user->isSuperAdmin()) {
+            // Admin sees all reviews for doctors in their hospital (all statuses)
+            $query = Review::with(['patient', 'doctor'])
+                ->whereHas('doctor', function ($q) use ($user) {
+                    if ($user->isAdmin()) {
+                        $q->where('hospital_id', $user->hospital_id);
+                    }
+                });
+        } elseif ($user->isDoctor()) {
+            // Doctor sees reviews about them (all statuses)
+            $query = Review::where('doctor_id', $user->id)->with(['patient', 'doctor']);
         } else {
             // Patient sees reviews they wrote
-            $query = Review::where('patient_id', $user->id);
+            $query = Review::where('patient_id', $user->id)->with(['patient', 'doctor']);
         }
 
         // Filter by status
@@ -69,11 +82,11 @@ class ReviewController extends Controller
             $query->where('status', $request->status);
         }
 
-        $reviews = $query->with('doctor', 'patient')->paginate(10);
+        $reviews = $query->orderBy('created_at', 'desc')->paginate(50);
 
         return response()->json([
             'status' => 'success',
-            'data' => $reviews,
+            'data'   => $reviews,
         ]);
     }
 
@@ -93,36 +106,74 @@ class ReviewController extends Controller
         }
 
         $validated = $request->validate([
-            'doctor_id' => 'required|exists:users,id',
+            'doctor_id' => 'required|integer',
             'appointment_id' => 'nullable|exists:appointments,id',
             'rating' => 'required|integer|min:1|max:5',
             'comment' => 'nullable|string|max:1000',
         ]);
 
-        // Check if appointment belongs to patient if provided
+        $resolvedDoctorUserId = null;
+
+        // Check if appointment belongs to patient and is completed/confirmed
         if ($request->has('appointment_id')) {
-            $appointment = Appointment::find($request->appointment_id);
+            $appointment = Appointment::with('doctor')->find($request->appointment_id);
+            if (!$appointment) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Appointment not found',
+                ], 404);
+            }
+            
             if ($appointment->user_id !== auth()->id()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Unauthorized',
+                    'message' => 'This appointment does not belong to you',
                 ], 403);
+            }
+
+            // Allow review if appointment is completed, confirmed, or at least cancelled by doctor
+            $allowedStatuses = ['completed', 'confirmed'];
+            if (!in_array($appointment->status, $allowedStatuses)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'You can only review after appointment is confirmed or completed',
+                ], 422);
+            }
+
+            // Ensure patient is reviewing the doctor from this appointment
+            $appointmentDoctorUserId = $appointment->doctor ? (int) $appointment->doctor->user_id : null;
+
+            // For appointment-based reviews, trust appointment doctor to avoid ID ambiguity
+            if ($appointmentDoctorUserId) {
+                $resolvedDoctorUserId = $appointmentDoctorUserId;
             }
         }
 
-        // Check if doctor exists and is active
-        $doctor = \App\Models\User::find($request->doctor_id);
-        if (!$doctor || !$doctor->isDoctor() || !$doctor->is_active) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Doctor not found or inactive',
-            ], 422);
+        // Normalize doctor identifier: allow doctor user id or doctors table id
+        if (!$resolvedDoctorUserId) {
+            $inputDoctorId = (int) $request->doctor_id;
+            $doctorUser = \App\Models\User::where('id', $inputDoctorId)->where('role', 'doctor')->first();
+            if (!$doctorUser) {
+                $doctorRecord = Doctor::find($inputDoctorId);
+                if ($doctorRecord) {
+                    $doctorUser = \App\Models\User::find($doctorRecord->user_id);
+                }
+            }
+
+            if (!$doctorUser || !$doctorUser->isDoctor()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Doctor not found or inactive',
+                ], 422);
+            }
+
+            $resolvedDoctorUserId = $doctorUser->id;
         }
 
         // Check if patient already reviewed this doctor for this appointment
         if ($request->has('appointment_id')) {
             $existing = Review::where('patient_id', auth()->id())
-                ->where('doctor_id', $request->doctor_id)
+                ->where('doctor_id', $resolvedDoctorUserId)
                 ->where('appointment_id', $request->appointment_id)
                 ->first();
 
@@ -134,13 +185,14 @@ class ReviewController extends Controller
             }
         }
 
-        $review = Review::create(array_merge(
-            $validated,
-            [
-                'patient_id' => auth()->id(),
-                'status' => 'pending', // Awaiting admin approval
-            ]
-        ));
+        $review = Review::create([
+            'doctor_id' => $resolvedDoctorUserId,
+            'appointment_id' => $request->appointment_id,
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'] ?? null,
+            'patient_id' => auth()->id(),
+            'status' => 'pending', // Awaiting admin approval
+        ]);
 
         return response()->json([
             'status' => 'success',

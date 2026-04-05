@@ -23,66 +23,58 @@ const HospitalDashboard = ({ user, onLogout, onNavigate }) => {
   };
 
   return (
-    <div className="dashboard-container">
-      {/* Sidebar */}
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h2>HealthCare</h2>
-        </div>
+    <div className="hospital-dashboard">
+      {/* Top Navbar */}
+      <nav className="hospital-navbar">
+        <div className="navbar-container">
+          <div className="navbar-logo">
+            <h1>HealthCare</h1>
+          </div>
 
-        <nav className="sidebar-nav">
-          <button 
-            className={`nav-item ${activeNav === 'home' ? 'active' : ''}`}
-            onClick={() => navigateTo('home')}
-          >
-            Home
-          </button>
-          <button 
-            className={`nav-item ${activeNav === 'appointments' ? 'active' : ''}`}
-            onClick={() => navigateTo('appointments')}
-          >
-            Appointments
-          </button>
-          <button 
-            className={`nav-item ${activeNav === 'doctors' ? 'active' : ''}`}
-            onClick={() => navigateTo('doctors')}
-          >
-            Doctors
-          </button>
-          <button 
-            className={`nav-item ${activeNav === 'patients' ? 'active' : ''}`}
-            onClick={() => navigateTo('patients')}
-          >
-            Patients
-          </button>
-          <button 
-            className={`nav-item ${activeNav === 'settings' ? 'active' : ''}`}
-            onClick={() => navigateTo('settings')}
-          >
-            Settings
-          </button>
-        </nav>
+          <div className="navbar-menu">
+            <button 
+              className={`navbar-item ${activeNav === 'home' ? 'active' : ''}`}
+              onClick={() => navigateTo('home')}
+            >
+              Home
+            </button>
+            <button 
+              className={`navbar-item ${activeNav === 'appointments' ? 'active' : ''}`}
+              onClick={() => navigateTo('appointments')}
+            >
+              Appointments
+            </button>
+            <button 
+              className={`navbar-item ${activeNav === 'doctors' ? 'active' : ''}`}
+              onClick={() => navigateTo('doctors')}
+            >
+              Doctors
+            </button>
+            <button 
+              className={`navbar-item ${activeNav === 'patients' ? 'active' : ''}`}
+              onClick={() => navigateTo('patients')}
+            >
+              Patients
+            </button>
+            <button 
+              className={`navbar-item ${activeNav === 'settings' ? 'active' : ''}`}
+              onClick={() => navigateTo('settings')}
+            >
+              Settings
+            </button>
+          </div>
 
-        <div className="sidebar-footer">
-          <button className="logout-btn" onClick={onLogout}>
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="dashboard-main">
-        {/* Top Bar */}
-        <div className="top-bar">
-          <h1>Dashboard</h1>
-          <div className="user-profile">
-            <span>{user?.email}</span>
-            <div className="avatar">{user?.email?.charAt(0).toUpperCase()}</div>
+          <div className="navbar-actions">
+            <span className="user-email">{user?.email}</span>
+            <button className="btn-logout" onClick={onLogout}>
+              Logout
+            </button>
           </div>
         </div>
+      </nav>
 
-        {/* Content Section */}
-        <div className="dashboard-content">
+      {/* Main Content */}
+      <main className="hospital-main">
           {/* Today's Appointments */}
           <section className="dashboard-section">
             <div className="section-header">
@@ -136,10 +128,9 @@ const HospitalDashboard = ({ user, onLogout, onNavigate }) => {
               ))}
             </div>
           </section>
-        </div>
-      </main>
-    </div>
-  );
-};
-
-export default HospitalDashboard;
+        </main>
+      </div>
+    );
+  };
+  
+  export default HospitalDashboard;

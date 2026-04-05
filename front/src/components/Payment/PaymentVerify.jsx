@@ -3,7 +3,7 @@
  * Handles the callback from Khalti after payment
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import useKhalti from '../../hooks/useKhalti';
 import './PaymentVerify.css';
@@ -16,6 +16,7 @@ const PaymentVerify = () => {
   const [status, setStatus] = useState('verifying'); // verifying, success, failed, error
   const [message, setMessage] = useState('');
   const [paymentDetails, setPaymentDetails] = useState(null);
+  const hasVerifiedRef = useRef(false);
 
   useEffect(() => {
     const pidx = searchParams.get('pidx');
@@ -37,8 +38,11 @@ const PaymentVerify = () => {
       return;
     }
 
-    // Verify the payment
+    // Verify the payment once (guards against StrictMode double-effect in dev)
     const verify = async () => {
+      if (hasVerifiedRef.current) return;
+      hasVerifiedRef.current = true;
+
       try {
         const response = await verifyPayment(pidx);
         

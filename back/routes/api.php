@@ -80,12 +80,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // ========== USER PROFILE ==========
     Route::get('/profile', [UserController::class, 'profile'])->name('profile');
     Route::put('/profile', [UserController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update.post');
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
     Route::post('/change-password', [UserController::class, 'changePassword'])->name('password.change');
 
     // ========== REPORTS (All authenticated users) ==========
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.all');
     Route::get('/reports/{id}', [ReportController::class, 'show'])->name('reports.show.all');
+    Route::delete('/reports/{id}', [ReportController::class, 'destroy'])->name('reports.destroy');
 
     // ========== NOTIFICATIONS ==========
     Route::prefix('/notifications')->name('notifications.')->group(function () {
@@ -164,6 +166,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // ========== DOCTOR ROUTES ==========
     Route::middleware('role:doctor')->group(function () {
         
+        // Doctor Profile - Upload image
+        Route::post('/doctor/upload-image', [DoctorController::class, 'uploadImage'])->name('doctor.upload-image');
+        
         // Doctor Schedules
         Route::prefix('/schedules')->name('schedules.')->group(function () {
             Route::get('/', [DoctorScheduleController::class, 'index'])->name('index');
@@ -177,6 +182,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/doctor/appointments', [AppointmentController::class, 'doctorAppointments'])->name('doctor.appointments');
         Route::post('/doctor/appointments/{id}/accept', [AppointmentController::class, 'acceptAppointment'])->name('doctor.appointments.accept');
         Route::post('/doctor/appointments/{id}/reject', [AppointmentController::class, 'rejectAppointment'])->name('doctor.appointments.reject');
+        Route::post('/doctor/appointments/{id}/cancel', [AppointmentController::class, 'doctorCancelAppointment'])->name('doctor.appointments.cancel');
+        Route::post('/doctor/appointments/{id}/complete', [AppointmentController::class, 'completeAppointment'])->name('doctor.appointments.complete');
         
         // Appointments
         Route::get('/appointments', [AppointmentController::class, 'doctorAppointments'])->name('appointments');
@@ -222,6 +229,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{id}', [DoctorController::class, 'show'])->name('show');
             Route::post('/', [DoctorController::class, 'store'])->name('store');
             Route::put('/{id}', [DoctorController::class, 'update'])->name('update');
+            Route::post('/{id}/update', [DoctorController::class, 'update'])->name('update.post');
+            Route::post('/{id}/upload-image', [DoctorController::class, 'uploadImage'])->name('upload-image');
             Route::delete('/{id}', [DoctorController::class, 'destroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [DoctorController::class, 'toggleStatus'])->name('toggle-status');
         });
@@ -249,6 +258,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/', [ReviewController::class, 'index'])->name('index');
             Route::put('/{id}/approve', [ReviewController::class, 'approve'])->name('approve');
             Route::put('/{id}/reject', [ReviewController::class, 'reject'])->name('reject');
+            Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
         });
 
         // Payments
@@ -261,6 +271,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/users', [UserController::class, 'adminUsers'])->name('users.index');
         Route::get('/users/{id}', [UserController::class, 'show'])->name('users.show');
         Route::put('/users/{id}', [UserController::class, 'adminUpdate'])->name('users.update');
+        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 
     // ========== SUPER ADMIN ONLY ROUTES ==========

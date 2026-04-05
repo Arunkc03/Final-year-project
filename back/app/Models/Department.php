@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 /**
  * Department Model
@@ -31,7 +32,7 @@ class Department extends Model
         'deleted_at' => 'datetime',
     ];
 
-    // ========== Relationships ==========
+    // ========== Relationships =========="
     
     /**
      * Get the hospital that owns this department

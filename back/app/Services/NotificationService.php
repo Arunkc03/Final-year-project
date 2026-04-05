@@ -2,11 +2,13 @@
 
 namespace App\Services;
 
-
-use App\Models\Notification;
-use App\Models\User;
-use App\Models\Payment;
 use App\Models\Appointment;
+use App\Models\DoctorSchedule;
+use App\Models\Notification;
+use App\Models\Payment;
+use App\Models\Report;
+use App\Models\Review;
+use App\Models\User;
 
 /**
  * NotificationService
@@ -40,26 +42,38 @@ class NotificationService
 
         $data = $messages[$type] ?? $messages['booked'];
 
-        // Notify patient
-        Notification::create([
-            'user_id' => $appointment->user_id,
-            'title' => $data['title'],
-            'message' => $data['message'],
-            'type' => 'appointment',
-            'related_model' => 'Appointment',
-            'related_id' => $appointment->id,
-        ]);
+        // Notify patient - only if user exists
+        try {
+            if ($appointment->user_id && User::where('id', $appointment->user_id)->exists()) {
+                Notification::create([
+                    'user_id' => $appointment->user_id,
+                    'title' => $data['title'],
+                    'message' => $data['message'],
+                    'type' => 'appointment',
+                    'related_model' => 'Appointment',
+                    'related_id' => $appointment->id,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to create patient notification', ['error' => $e->getMessage()]);
+        }
 
-        // Notify doctor if confirmed/completed
+        // Notify doctor if confirmed/completed - only if user exists
         if (in_array($type, ['confirmed', 'completed'])) {
-            Notification::create([
-                'user_id' => $appointment->doctor_id,
-                'title' => $data['title'],
-                'message' => "Appointment with {$appointment->patient->name} on " . \Carbon\Carbon::parse($appointment->date)->format('M d, Y'),
-                'type' => 'appointment',
-                'related_model' => 'Appointment',
-                'related_id' => $appointment->id,
-            ]);
+            try {
+                if ($appointment->doctor_id && User::where('id', $appointment->doctor_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $appointment->doctor_id,
+                        'title' => $data['title'],
+                        'message' => "Appointment with " . ($appointment->user->name ?? 'Patient') . " on " . \Carbon\Carbon::parse($appointment->date)->format('M d, Y'),
+                        'type' => 'appointment',
+                        'related_model' => 'Appointment',
+                        'related_id' => $appointment->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create doctor notification', ['error' => $e->getMessage()]);
+            }
         }
     }
 
@@ -68,14 +82,20 @@ class NotificationService
      */
     public static function sendPaymentNotification(Payment $payment)
     {
-        Notification::create([
-            'user_id' => $payment->user_id,
-            'title' => 'Payment Successful',
-            'message' => "Payment of {$payment->amount} for appointment has been processed successfully.",
-            'type' => 'payment',
-            'related_model' => 'Payment',
-            'related_id' => $payment->id,
-        ]);
+        try {
+            if ($payment->user_id && User::where('id', $payment->user_id)->exists()) {
+                Notification::create([
+                    'user_id' => $payment->user_id,
+                    'title' => 'Payment Successful',
+                    'message' => "Payment of {$payment->amount} for appointment has been processed successfully.",
+                    'type' => 'payment',
+                    'related_model' => 'Payment',
+                    'related_id' => $payment->id,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to create payment notification', ['error' => $e->getMessage(), 'user_id' => $payment->user_id]);
+        }
     }
 
     /**
@@ -83,90 +103,132 @@ class NotificationService
      */
     public static function sendRefundNotification(Payment $payment)
     {
-        Notification::create([
-            'user_id' => $payment->user_id,
-            'title' => 'Refund Processed',
-            'message' => "Your refund of {$payment->amount} has been processed successfully.",
-            'type' => 'payment',
-            'related_model' => 'Payment',
-            'related_id' => $payment->id,
-        ]);
+        try {
+            if ($payment->user_id && User::where('id', $payment->user_id)->exists()) {
+                Notification::create([
+                    'user_id' => $payment->user_id,
+                    'title' => 'Refund Processed',
+                    'message' => "Your refund of {$payment->amount} has been processed successfully.",
+                    'type' => 'payment',
+                    'related_model' => 'Payment',
+                    'related_id' => $payment->id,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to create refund notification', ['error' => $e->getMessage(), 'user_id' => $payment->user_id]);
+        }
     }
 
     /**
      * Send review notification
      */
-    public static function sendReviewNotification(\App\Models\Review $review, $status = 'submitted')
+    public static function sendReviewNotification(Review $review, $status = 'submitted')
     {
         if ($status === 'submitted') {
-            Notification::create([
-                'user_id' => $review->doctor_id,
-                'title' => 'New Review Received',
-                'message' => "{$review->patient->name} has written a {$review->rating}-star review.",
-                'type' => 'review',
-                'related_model' => 'Review',
-                'related_id' => $review->id,
-            ]);
+            try {
+                if ($review->doctor_id && User::where('id', $review->doctor_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $review->doctor_id,
+                        'title' => 'New Review Received',
+                        'message' => "{$review->patient->name} has written a {$review->rating}-star review.",
+                        'type' => 'review',
+                        'related_model' => 'Review',
+                        'related_id' => $review->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create review notification', ['error' => $e->getMessage(), 'user_id' => $review->doctor_id]);
+            }
         } elseif ($status === 'approved') {
-            Notification::create([
-                'user_id' => $review->patient_id,
-                'title' => 'Review Approved',
-                'message' => 'Your review has been approved and is now visible to others.',
-                'type' => 'review',
-                'related_model' => 'Review',
-                'related_id' => $review->id,
-            ]);
+            try {
+                if ($review->patient_id && User::where('id', $review->patient_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $review->patient_id,
+                        'title' => 'Review Approved',
+                        'message' => 'Your review has been approved and is now visible to others.',
+                        'type' => 'review',
+                        'related_model' => 'Review',
+                        'related_id' => $review->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create review approved notification', ['error' => $e->getMessage(), 'user_id' => $review->patient_id]);
+            }
         } elseif ($status === 'rejected') {
-            Notification::create([
-                'user_id' => $review->patient_id,
-                'title' => 'Review Not Approved',
-                'message' => 'Your review could not be approved at this time.',
-                'type' => 'review',
-                'related_model' => 'Review',
-                'related_id' => $review->id,
-            ]);
+            try {
+                if ($review->patient_id && User::where('id', $review->patient_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $review->patient_id,
+                        'title' => 'Review Not Approved',
+                        'message' => 'Your review could not be approved at this time.',
+                        'type' => 'review',
+                        'related_model' => 'Review',
+                        'related_id' => $review->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create review rejected notification', ['error' => $e->getMessage(), 'user_id' => $review->patient_id]);
+            }
         }
     }
 
     /**
      * Send report notification
      */
-    public static function sendReportNotification(\App\Models\Report $report, $status = 'submitted')
+    public static function sendReportNotification(Report $report, $status = 'submitted')
     {
         if ($status === 'submitted') {
-            Notification::create([
-                'user_id' => $report->patient_id,
-                'title' => 'Report Submitted',
-                'message' => 'Your medical report has been submitted for review.',
-                'type' => 'report',
-                'related_model' => 'Report',
-                'related_id' => $report->id,
-            ]);
+            try {
+                if ($report->patient_id && User::where('id', $report->patient_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $report->patient_id,
+                        'title' => 'Report Submitted',
+                        'message' => 'Your medical report has been submitted for review.',
+                        'type' => 'report',
+                        'related_model' => 'Report',
+                        'related_id' => $report->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create report submitted notification', ['error' => $e->getMessage(), 'user_id' => $report->patient_id]);
+            }
         } elseif ($status === 'approved') {
-            Notification::create([
-                'user_id' => $report->patient_id,
-                'title' => 'Report Approved',
-                'message' => 'Your medical report has been approved.',
-                'type' => 'report',
-                'related_model' => 'Report',
-                'related_id' => $report->id,
-            ]);
+            try {
+                if ($report->patient_id && User::where('id', $report->patient_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $report->patient_id,
+                        'title' => 'Report Approved',
+                        'message' => 'Your medical report has been approved.',
+                        'type' => 'report',
+                        'related_model' => 'Report',
+                        'related_id' => $report->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create report approved notification', ['error' => $e->getMessage(), 'user_id' => $report->patient_id]);
+            }
         } elseif ($status === 'rejected') {
-            Notification::create([
-                'user_id' => $report->patient_id,
-                'title' => 'Report Rejected',
-                'message' => 'Your medical report has been rejected.',
-                'type' => 'report',
-                'related_model' => 'Report',
-                'related_id' => $report->id,
-            ]);
+            try {
+                if ($report->patient_id && User::where('id', $report->patient_id)->exists()) {
+                    Notification::create([
+                        'user_id' => $report->patient_id,
+                        'title' => 'Report Rejected',
+                        'message' => 'Your medical report has been rejected.',
+                        'type' => 'report',
+                        'related_model' => 'Report',
+                        'related_id' => $report->id,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to create report rejected notification', ['error' => $e->getMessage(), 'user_id' => $report->patient_id]);
+            }
         }
     }
 
     /**
      * Send schedule notification
      */
-    public static function sendScheduleNotification(\App\Models\DoctorSchedule $schedule, $type = 'created')
+    public static function sendScheduleNotification(DoctorSchedule $schedule, $type = 'created')
     {
         $messages = [
             'created' => 'You have created a new schedule.',
@@ -174,14 +236,20 @@ class NotificationService
             'cancelled' => 'Your schedule has been cancelled.',
         ];
 
-        Notification::create([
-            'user_id' => $schedule->doctor_id,
-            'title' => 'Schedule ' . ucfirst($type),
-            'message' => $messages[$type] ?? $messages['created'],
-            'type' => 'schedule',
-            'related_model' => 'DoctorSchedule',
-            'related_id' => $schedule->id,
-        ]);
+        try {
+            if ($schedule->doctor_id && User::where('id', $schedule->doctor_id)->exists()) {
+                Notification::create([
+                    'user_id' => $schedule->doctor_id,
+                    'title' => 'Schedule ' . ucfirst($type),
+                    'message' => $messages[$type] ?? $messages['created'],
+                    'type' => 'schedule',
+                    'related_model' => 'DoctorSchedule',
+                    'related_id' => $schedule->id,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to create schedule notification', ['error' => $e->getMessage(), 'user_id' => $schedule->doctor_id]);
+        }
     }
 
     /**
@@ -189,12 +257,18 @@ class NotificationService
      */
     public static function sendSystemNotification($userId, $title, $message, $type = 'system')
     {
-        Notification::create([
-            'user_id' => $userId,
-            'title' => $title,
-            'message' => $message,
-            'type' => $type,
-        ]);
+        try {
+            if ($userId && User::where('id', $userId)->exists()) {
+                Notification::create([
+                    'user_id' => $userId,
+                    'title' => $title,
+                    'message' => $message,
+                    'type' => $type,
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to create system notification', ['error' => $e->getMessage(), 'user_id' => $userId]);
+        }
     }
 
     /**
@@ -202,18 +276,30 @@ class NotificationService
      */
     public static function sendBulkNotification($userIds, $title, $message, $type = 'system')
     {
-        $notifications = array_map(function ($userId) use ($title, $message, $type) {
-            return [
-                'user_id' => $userId,
-                'title' => $title,
-                'message' => $message,
-                'type' => $type,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }, $userIds);
+        try {
+            // Filter to only existing users
+            $existingUserIds = User::whereIn('id', $userIds)->pluck('id')->toArray();
+            
+            if (empty($existingUserIds)) {
+                \Log::warning('No valid users found for bulk notification', ['requested_user_ids' => $userIds]);
+                return;
+            }
 
-        Notification::insert($notifications);
+            $notifications = array_map(function ($userId) use ($title, $message, $type) {
+                return [
+                    'user_id' => $userId,
+                    'title' => $title,
+                    'message' => $message,
+                    'type' => $type,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }, $existingUserIds);
+
+            Notification::insert($notifications);
+        } catch (\Exception $e) {
+            \Log::error('Failed to create bulk notifications', ['error' => $e->getMessage(), 'user_count' => count($userIds)]);
+        }
     }
 
     /**

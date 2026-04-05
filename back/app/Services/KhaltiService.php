@@ -58,23 +58,40 @@ class KhaltiService
             // Amount must be in paisa (1 NPR = 100 paisa)
             // Minimum 10 NPR (1000 paisa), Maximum 200,000 NPR (20,000,000 paisa)
             if ($payload['amount'] < 1000) {
-                throw new Exception('Minimum payment amount is 10 NPR (1000 paisa)');
+                throw new Exception('Minimum payment amount is 10 NPR (1000 paisa). Received: ' . $payload['amount']);
             }
 
             if ($payload['amount'] > 20000000) {
-                throw new Exception('Maximum payment amount is 200,000 NPR (20,000,000 paisa)');
+                throw new Exception('Maximum payment amount is 200,000 NPR (20,000,000 paisa). Received: ' . $payload['amount']);
             }
+
+            Log::info('Khalti: Sending request to API', [
+                'endpoint' => $this->baseUrl . '/epayment/initiate/',
+                'amount' => $payload['amount'],
+                'purchase_order_id' => $payload['purchase_order_id'],
+                'has_secret_key' => !empty($this->secretKey),
+                'customer_info' => $payload['customer_info'] ?? [],
+                'payload_keys' => array_keys($payload),
+            ]);
 
             $response = Http::withHeaders([
                 'Authorization' => 'Key ' . $this->secretKey,
                 'Content-Type' => 'application/json',
             ])->post($this->baseUrl . '/epayment/initiate/', $payload);
 
+            Log::info('Khalti: Response received', [
+                'status_code' => $response->status(),
+                'is_successful' => $response->successful(),
+                'response_body' => $response->body(),
+                'response_headers' => $response->headers(),
+            ]);
+
             if ($response->successful()) {
                 $data = $response->json();
                 Log::info('Khalti payment initiated successfully', [
                     'pidx' => $data['pidx'] ?? null,
                     'purchase_order_id' => $payload['purchase_order_id'],
+                    'response' => $data,
                 ]);
                 
                 return [
@@ -87,6 +104,11 @@ class KhaltiService
             Log::error('Khalti payment initiation failed', [
                 'status' => $response->status(),
                 'error' => $errorData,
+                'error_string' => $response->body(),
+                'request_payload' => [
+                    'amount' => $payload['amount'],
+                    'purchase_order_id' => $payload['purchase_order_id'],
+                ],
             ]);
 
             return [
@@ -229,17 +251,29 @@ class KhaltiService
      */
     public function buildPaymentPayload($payment, $appointment): array
     {
+        $customerInfo = [
+            'name' => $payment->user->name ?? 'Patient',
+            'email' => $payment->user->email ?? '',
+        ];
+        
+        // Only include phone if it exists
+        if ($payment->user->phone) {
+            $customerInfo['phone'] = $payment->user->phone;
+        }
+        
+        // Build return URL - handle both full URLs and paths
+        $returnUrl = $this->returnUrl;
+        if (!str_starts_with($returnUrl, 'http://') && !str_starts_with($returnUrl, 'https://')) {
+            $returnUrl = $this->websiteUrl . $returnUrl;
+        }
+        
         return [
-            'return_url' => $this->websiteUrl . $this->returnUrl,
+            'return_url' => $returnUrl,
             'website_url' => $this->websiteUrl,
             'amount' => self::toPaisa($payment->amount),
             'purchase_order_id' => 'APT-' . $appointment->id . '-PAY-' . $payment->id,
             'purchase_order_name' => 'Appointment Payment #' . $appointment->id,
-            'customer_info' => [
-                'name' => $payment->user->name ?? 'Patient',
-                'email' => $payment->user->email ?? '',
-                'phone' => $payment->user->phone ?? '',
-            ],
+            'customer_info' => $customerInfo,
             'amount_breakdown' => [
                 [
                     'label' => 'Consultation Fee',

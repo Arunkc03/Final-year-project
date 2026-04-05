@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import PageHero from '../components/PageHero/PageHero';
@@ -8,11 +8,14 @@ import '../styles/Hospitals.css';
 
 const Hospitals = () => {
   const navigate = useNavigate();
+  const { id: hospitalId } = useParams();
   const { user, token } = useContext(AuthContext);
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(!hospitalId); // Show form by default unless editing
+  const [editingHospitalId, setEditingHospitalId] = useState(hospitalId || null);
+  const [editingHospital, setEditingHospital] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,6 +29,8 @@ const Hospitals = () => {
     admin_name: '',
     admin_email: '',
     admin_password: '',
+    image: null,
+    imagePreview: '',
   });
 
   useEffect(() => {
@@ -35,6 +40,31 @@ const Hospitals = () => {
     }
     fetchHospitals();
   }, [token, user, navigate]);
+
+  useEffect(() => {
+    if (editingHospitalId && hospitals.length > 0) {
+      const hospital = hospitals.find(h => h.id == editingHospitalId);
+      if (hospital) {
+        setEditingHospital(hospital);
+        setFormData(prev => ({
+          ...prev,
+          name: hospital.name || '',
+          email: hospital.email || '',
+          phone: hospital.phone || '',
+          address: hospital.address || '',
+          city: hospital.city || '',
+          state: hospital.state || '',
+          country: hospital.country || '',
+          postal_code: hospital.postal_code || '',
+          description: hospital.description || '',
+          admin_name: hospital.admin?.name || hospital.admin_name || '',
+          admin_email: hospital.admin?.email || hospital.admin_email || '',
+          imagePreview: hospital.image ? `${api.getStorageUrl()}${hospital.image}` : '',
+        }));
+        setShowForm(true);
+      }
+    }
+  }, [editingHospitalId, hospitals]);
 
   const fetchHospitals = async () => {
     try {
@@ -60,7 +90,64 @@ const Hospitals = () => {
     setError('');
     
     try {
-      const response = await api.createHospital(formData, token);
+      let response;
+      
+      if (editingHospitalId) {
+        // For updates, use FormData to support image upload
+        const submitData = new FormData();
+        submitData.append('name', formData.name);
+        submitData.append('email', formData.email);
+        submitData.append('phone', formData.phone);
+        submitData.append('address', formData.address);
+        submitData.append('city', formData.city);
+        submitData.append('state', formData.state);
+        submitData.append('country', formData.country);
+        submitData.append('postal_code', formData.postal_code);
+        submitData.append('description', formData.description);
+        submitData.append('admin_name', formData.admin_name);
+        submitData.append('admin_email', formData.admin_email);
+        
+        if (formData.admin_password) {
+          submitData.append('admin_password', formData.admin_password);
+        }
+        
+        if (formData.image) {
+          submitData.append('image', formData.image);
+        }
+        
+        response = await api.updateHospitalWithImage(editingHospitalId, submitData, token);
+      } else {
+        // For creation, check if image exists
+        if (formData.image) {
+          const submitData = new FormData();
+          submitData.append('name', formData.name);
+          submitData.append('email', formData.email);
+          submitData.append('phone', formData.phone);
+          submitData.append('address', formData.address);
+          submitData.append('city', formData.city);
+          submitData.append('state', formData.state);
+          submitData.append('country', formData.country);
+          submitData.append('postal_code', formData.postal_code);
+          submitData.append('description', formData.description);
+          submitData.append('admin_name', formData.admin_name);
+          submitData.append('admin_email', formData.admin_email);
+          submitData.append('admin_password', formData.admin_password);
+          submitData.append('image', formData.image);
+          
+          // Create hospital with image
+          const res = await fetch(`${api.getStorageUrl().replace('/storage', '')}/api/hospitals`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+            body: submitData,
+          });
+          response = await res.json();
+        } else {
+          response = await api.createHospital(formData, token);
+        }
+      }
+      
       if (response.status === 'success') {
         setFormData({
           name: '',
@@ -75,18 +162,46 @@ const Hospitals = () => {
           admin_name: '',
           admin_email: '',
           admin_password: '',
+          image: null,
+          imagePreview: '',
         });
         setShowForm(false);
+        setEditingHospitalId(null);
+        setEditingHospital(null);
         fetchHospitals();
+        if (editingHospitalId) {
+          navigate('/hospitals');
+        }
       } else {
         const errorMsg = response.errors?.['admin_email']?.[0] 
           || response.errors?.general?.[0]
           || response.message 
-          || 'Failed to create hospital';
+          || (editingHospitalId ? 'Failed to update hospital' : 'Failed to create hospital');
         setError(errorMsg);
       }
     } catch (err) {
-      setError('Error creating hospital: ' + (err.message || 'Unknown error'));
+      setError((editingHospitalId ? 'Error updating' : 'Error creating') + ' hospital: ' + (err.message || 'Unknown error'));
+    }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value, type, files } = e.target;
+    
+    if (type === 'file') {
+      const file = files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setFormData(prev => ({ 
+            ...prev, 
+            image: file,
+            imagePreview: reader.result
+          }));
+        };
+        reader.readAsDataURL(file);
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
@@ -133,23 +248,95 @@ const Hospitals = () => {
 
         <div className="hospitals-header">
           <h2>Hospitals ({hospitals.length})</h2>
-          <button 
-            onClick={() => setShowForm(!showForm)} 
-            className="btn-primary"
-          >
-            {showForm ? 'Cancel' : '+ Create Hospital'}
-          </button>
+          {editingHospitalId ? (
+            <button 
+              onClick={() => {
+                setShowForm(false);
+                setEditingHospitalId(null);
+                setEditingHospital(null);
+                setFormData({
+                  name: '',
+                  email: '',
+                  phone: '',
+                  address: '',
+                  city: '',
+                  state: '',
+                  country: '',
+                  postal_code: '',
+                  description: '',
+                  admin_name: '',
+                  admin_email: '',
+                  admin_password: '',
+                  image: null,
+                  imagePreview: '',
+                });
+              }} 
+              className="btn-secondary"
+            >
+              Cancel Edit
+            </button>
+          ) : (
+            <button 
+              onClick={() => setShowForm(!showForm)} 
+              className="btn-primary"
+            >
+              {showForm ? 'Cancel' : '+ Create Hospital'}
+            </button>
+          )}
         </div>
 
         {showForm && (
           <form onSubmit={handleCreateHospital} className="hospital-form">
+            <h3>{editingHospitalId ? 'Edit Hospital' : 'Create New Hospital'}</h3>
+            
+            {editingHospital && editingHospital.admin && (
+              <div className="edit-info-box">
+                <h4>Current Admin</h4>
+                <p><strong>Name:</strong> {editingHospital.admin.name}</p>
+                <p><strong>Email:</strong> {editingHospital.admin.email}</p>
+              </div>
+            )}
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label>Hospital Image</label>
+                <div className="image-upload-group">
+                  {formData.imagePreview && (
+                    <div className="image-preview">
+                      <img src={formData.imagePreview} alt="Hospital preview" />
+                      <button 
+                        type="button"
+                        onClick={() => setFormData(prev => ({ ...prev, image: null, imagePreview: '' }))}
+                        className="btn-remove-image"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                  {!formData.imagePreview && (
+                    <label className="image-upload-placeholder">
+                      <input 
+                        type="file" 
+                        name="image"
+                        onChange={handleFormChange}
+                        accept="image/*"
+                        style={{ display: 'none' }}
+                      />
+                      📸 Click to upload hospital image
+                    </label>
+                  )}
+                </div>
+              </div>
+            </div>
+
             <div className="form-row">
               <div className="form-group">
                 <label>Hospital Name *</label>
                 <input
                   type="text"
+                  name="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="Hospital name"
                   required
                 />
@@ -158,8 +345,9 @@ const Hospitals = () => {
                 <label>Hospital Email</label>
                 <input
                   type="email"
+                  name="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="hospital@email.com"
                 />
               </div>
@@ -170,8 +358,9 @@ const Hospitals = () => {
                 <label>Phone</label>
                 <input
                   type="tel"
+                  name="phone"
                   value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="+1 (555) 123-4567"
                 />
               </div>
@@ -179,8 +368,9 @@ const Hospitals = () => {
                 <label>Address</label>
                 <input
                   type="text"
+                  name="address"
                   value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="Hospital address"
                 />
               </div>
@@ -191,8 +381,9 @@ const Hospitals = () => {
                 <label>City</label>
                 <input
                   type="text"
+                  name="city"
                   value={formData.city}
-                  onChange={(e) => setFormData({...formData, city: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="City"
                 />
               </div>
@@ -200,8 +391,9 @@ const Hospitals = () => {
                 <label>State</label>
                 <input
                   type="text"
+                  name="state"
                   value={formData.state}
-                  onChange={(e) => setFormData({...formData, state: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="State"
                 />
               </div>
@@ -212,8 +404,9 @@ const Hospitals = () => {
                 <label>Country</label>
                 <input
                   type="text"
+                  name="country"
                   value={formData.country}
-                  onChange={(e) => setFormData({...formData, country: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="Country"
                 />
               </div>
@@ -221,8 +414,9 @@ const Hospitals = () => {
                 <label>Postal Code</label>
                 <input
                   type="text"
+                  name="postal_code"
                   value={formData.postal_code}
-                  onChange={(e) => setFormData({...formData, postal_code: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="Postal code"
                 />
               </div>
@@ -231,8 +425,9 @@ const Hospitals = () => {
             <div className="form-group">
               <label>Description</label>
               <textarea
+                name="description"
                 value={formData.description}
-                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                onChange={handleFormChange}
                 placeholder="Hospital description"
                 rows="4"
               />
@@ -242,39 +437,47 @@ const Hospitals = () => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Admin Name *</label>
+                <label>Admin Name {editingHospitalId && '(Read-only)'}</label>
                 <input
                   type="text"
+                  name="admin_name"
                   value={formData.admin_name}
-                  onChange={(e) => setFormData({...formData, admin_name: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="Admin full name"
-                  required
+                  required={!editingHospitalId}
+                  disabled={editingHospitalId}
                 />
               </div>
               <div className="form-group">
                 <label>Admin Email *</label>
                 <input
                   type="email"
+                  name="admin_email"
                   value={formData.admin_email}
-                  onChange={(e) => setFormData({...formData, admin_email: e.target.value})}
+                  onChange={handleFormChange}
                   placeholder="admin@hospital.com"
                   required
                 />
               </div>
             </div>
 
-            <div className="form-group">
-              <label>Admin Password *</label>
-              <input
-                type="password"
-                value={formData.admin_password}
-                onChange={(e) => setFormData({...formData, admin_password: e.target.value})}
-                placeholder="At least 6 characters"
-                required
-              />
-            </div>
+            {!editingHospitalId && (
+              <div className="form-group">
+                <label>Admin Password *</label>
+                <input
+                  type="password"
+                  name="admin_password"
+                  value={formData.admin_password}
+                  onChange={handleFormChange}
+                  placeholder="At least 6 characters"
+                  required
+                />
+              </div>
+            )}
 
-            <button type="submit" className="btn-primary">Create Hospital</button>
+            <button type="submit" className="btn-primary">
+              {editingHospitalId ? 'Update Hospital' : 'Create Hospital'}
+            </button>
           </form>
         )}
 
@@ -287,9 +490,12 @@ const Hospitals = () => {
               <div className="hospital-card-info">
                 <h3>{hospital.name}</h3>
                 <p className="hospital-id">ID: {hospital.id}</p>
-                {hospital.email && <p>{hospital.email}</p>}
-                {hospital.address && <p>{hospital.address}</p>}
-                {hospital.phone && <p>{hospital.phone}</p>}
+                {hospital.email && <p><strong>Email:</strong> {hospital.email}</p>}
+                {hospital.address && <p><strong>Address:</strong> {hospital.address}</p>}
+                {hospital.phone && <p><strong>Phone:</strong> {hospital.phone}</p>}
+                {hospital.admin && (
+                  <p><strong>Admin:</strong> {hospital.admin.name || 'Not assigned'}</p>
+                )}
                 <p><strong>Status:</strong> <span className="status-active">{hospital.status || 'Active'}</span></p>
                 <div className="hospital-card-actions">
                   <button 
@@ -299,7 +505,7 @@ const Hospitals = () => {
                     View
                   </button>
                   <button 
-                    onClick={() => navigate(`/hospitals/${hospital.id}`)} 
+                    onClick={() => setEditingHospitalId(hospital.id)} 
                     className="btn-edit"
                   >
                     Edit

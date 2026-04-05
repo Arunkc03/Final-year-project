@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,6 +21,7 @@ class DoctorSchedule extends Model
         'date',
         'start_time',
         'end_time',
+        'slot_duration',
         'available_slots',
         'booked_slots',
         'status',
@@ -34,7 +36,7 @@ class DoctorSchedule extends Model
         'deleted_at' => 'datetime',
     ];
 
-    // ========== Relationships ==========
+    // ========== Relationships =========="
     
     /**
      * Get the doctor that owns this schedule
@@ -69,7 +71,11 @@ class DoctorSchedule extends Model
     {
         return $query->where('status', 'available')
                      ->whereDate('date', '>=', now())
-                     ->where('available_slots', '>', 'booked_slots');
+                     ->where(function ($q) {
+                         // available_slots > booked_slots OR booked_slots is NULL
+                         $q->whereColumn('available_slots', '>', 'booked_slots')
+                           ->orWhereNull('booked_slots');
+                     });
     }
 
     /**

@@ -71,53 +71,58 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-clean-page">
-      <div className="auth-clean-container">
-        <Link to="/" className="back-to-home">← Back to Home</Link>
-        
-        {/* Hospital Image */}
-        <div className="auth-logo-image">
-          <img src={hospitalImage} alt="Hospital" />
-        </div>
-        
-        <h2>Welcome Back</h2>
-        <p className="auth-subtitle">Sign in to your account</p>
+    <div className="auth-split-layout">
+      {/* Left Side - Image */}
+      <div className="auth-split-image-side">
+        <img src={hospitalImage} alt="Hospital" />
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="auth-split-form-side">
+        <div className="auth-split-form-container">
+          <Link to="/" className="back-to-home">← Back to Home</Link>
+
+          {/* Tabs */}
+          <div className="auth-split-tabs">
+            <button className="auth-split-tab active">Sign In</button>
+            <button className="auth-split-tab">Sign Up</button>
+          </div>
 
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            <div className="form-toggle">
+            {/* Email/ID Toggle */}
+            <div className="auth-split-toggle">
               <button
                 type="button"
                 className={!isIdentifier ? 'active' : ''}
                 onClick={() => setIsIdentifier(false)}
               >
-                Email Login
+                Email
               </button>
               <button
                 type="button"
                 className={isIdentifier ? 'active' : ''}
                 onClick={() => setIsIdentifier(true)}
               >
-                ID Login
+                ID
               </button>
             </div>
 
+            {/* Email/ID Input */}
             {isIdentifier ? (
               <div className="form-group">
-                <label>Your Identifier</label>
                 <input
                   type="text"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="e.g., PAT123456"
+                  placeholder="Your ID"
                   required
                 />
                 <small>Format: PAT/DOC/ADM/SUP + 6 chars</small>
               </div>
             ) : (
               <div className="form-group">
-                <label>Email Address</label>
                 <input
                   type="email"
                   value={email}
@@ -128,8 +133,8 @@ const Login = () => {
               </div>
             )}
 
+            {/* Password */}
             <div className="form-group">
-              <label>Password</label>
               <input
                 type="password"
                 value={password}
@@ -139,15 +144,27 @@ const Login = () => {
               />
             </div>
 
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login'}
+            {/* Checkbox + Forgot */}
+            <div className="auth-split-options">
+              <label className="auth-checkbox">
+                <input type="checkbox" />
+                Keep me logged in
+              </label>
+              <Link to="#" className="forgot-password">Forgot password?</Link>
+            </div>
+
+            {/* Sign In Button */}
+            <button type="submit" className="btn-split-primary" disabled={loading}>
+              {loading ? 'Logging in...' : 'Sign In'}
             </button>
           </form>
 
+          {/* Divider */}
           <div className="auth-divider">
             <span>or</span>
           </div>
 
+          {/* Google Button */}
           <button
             type="button"
             className="google-btn"
@@ -162,10 +179,12 @@ const Login = () => {
             Continue with Google
           </button>
 
+          {/* Footer */}
           <p className="auth-footer">
             New patient?{' '}
             <Link to="/register">Register here</Link>
           </p>
+        </div>
       </div>
     </div>
   );

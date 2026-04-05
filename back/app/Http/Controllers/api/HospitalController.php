@@ -236,7 +236,8 @@ class HospitalController extends Controller
             'postal_code' => 'nullable|string|max:20',
             'description' => 'nullable|string',
             'status' => 'sometimes|required|in:active,inactive',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'admin_email' => 'nullable|email|unique:hospitals,admin_email,'.$id,
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,avif|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -264,7 +265,8 @@ class HospitalController extends Controller
             'state',
             'country',
             'postal_code',
-            'status'
+            'status',
+            'admin_email'
         ]));
         
         $hospital->save();

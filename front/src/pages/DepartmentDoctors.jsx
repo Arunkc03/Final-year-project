@@ -133,6 +133,16 @@ const DepartmentDoctors = () => {
                     className="doctor-card"
                     onClick={() => handleDoctorClick(doctor.id)}
                   >
+                    {doctor.image && (
+                      <div className="doctor-avatar">
+                        <img 
+                          src={`${api.getStorageUrl()}/${doctor.image}`} 
+                          alt={doctor.name || doctor.user?.name} 
+                          className="doctor-avatar-img"
+                          onError={(e) => { e.target.parentElement.style.display = 'none'; }}
+                        />
+                      </div>
+                    )}
                     <div className="doctor-header">
                       <h3>{doctor.name || doctor.user?.name}</h3>
                       <span className="arrow-icon">→</span>

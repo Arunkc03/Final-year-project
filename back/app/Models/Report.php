@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,6 +15,7 @@ class Report extends Model
         'hospital_id',
         'patient_id',
         'doctor_id',
+        'appointment_id',
         'title',
         'description',
         'diagnosis',
@@ -23,6 +25,13 @@ class Report extends Model
         'reviewed_by',
         'reviewed_at',
         'notes',
+    ];
+
+    protected $casts = [
+        'reviewed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'deleted_at' => 'datetime',
     ];
 
     public function hospital()

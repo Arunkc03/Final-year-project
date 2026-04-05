@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Doctor extends Model
 {
@@ -17,6 +18,7 @@ class Doctor extends Model
         'consultation_fee',
         'daily_patient_limit',
         'bio',
+        'image',
         'is_active',
     ];
 
@@ -25,6 +27,8 @@ class Doctor extends Model
         'experience_years' => 'integer',
         'consultation_fee' => 'decimal:2',
         'daily_patient_limit' => 'integer',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     protected $appends = ['name', 'email', 'identifier'];

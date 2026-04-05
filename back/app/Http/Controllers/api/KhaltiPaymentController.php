@@ -6,8 +6,10 @@ use App\Models\Payment;
 use App\Models\Appointment;
 use App\Services\KhaltiService;
 use App\Services\NotificationService;
+use App\Mail\AppointmentConfirmed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * KhaltiPaymentController
@@ -48,6 +50,15 @@ class KhaltiPaymentController extends Controller
         $user = auth()->user();
         $appointment = Appointment::find($validated['appointment_id']);
 
+        Log::info('Payment initiation request', [
+            'user_id' => $user->id,
+            'appointment_id' => $appointment->id,
+            'appointment_payment_amount' => $appointment->payment_amount,
+            'appointment_payment_amount_type' => gettype($appointment->payment_amount),
+            'request_amount' => $validated['amount'],
+            'request_amount_type' => gettype($validated['amount']),
+        ]);
+
         // Verify ownership
         if ($appointment->user_id !== $user->id) {
             return response()->json([
@@ -64,11 +75,20 @@ class KhaltiPaymentController extends Controller
             ], 422);
         }
 
-        // Verify amount
-        if ($appointment->payment_amount != $validated['amount']) {
+        // Verify amount - use strict type comparison after converting to numbers
+        $appointmentAmount = (float) $appointment->payment_amount;
+        $requestAmount = (float) $validated['amount'];
+        
+        Log::info('Amount comparison', [
+            'appointment_amount_numeric' => $appointmentAmount,
+            'request_amount_numeric' => $requestAmount,
+            'amounts_match' => $appointmentAmount == $requestAmount,
+        ]);
+        
+        if ($appointmentAmount != $requestAmount) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Payment amount does not match appointment amount',
+                'message' => "Payment amount does not match appointment amount. Expected: {$appointmentAmount}, Got: {$requestAmount}",
             ], 422);
         }
 
@@ -88,17 +108,41 @@ class KhaltiPaymentController extends Controller
             ]);
         }
 
+        // Load user relationship to ensure it's available for payload building
+        $payment->load('user');
+
         // Build Khalti payment payload
         $payload = $this->khaltiService->buildPaymentPayload($payment, $appointment);
+
+        Log::info('Initiating Khalti payment with payload:', [
+            'amount' => $payload['amount'],
+            'purchase_order_id' => $payload['purchase_order_id'],
+            'customer_email' => $payload['customer_info']['email'] ?? null,
+        ]);
 
         // Initiate with Khalti
         $result = $this->khaltiService->initiatePayment($payload);
 
         if (!$result['success']) {
+            Log::error('Khalti payment initiation failed', [
+                'result' => $result,
+                'appointment_id' => $appointment->id,
+                'payload_amount' => $payload['amount'] ?? null,
+                'payload_keys' => array_keys($payload),
+            ]);
+            
+            // Extract Khalti's detailed error message
+            $khaltiError = $result['errors'] ?? [];
+            $detailedMessage = $result['message'] ?? 'Failed to initiate Khalti payment';
+            if (is_array($khaltiError) && isset($khaltiError['detail'])) {
+                $detailedMessage = $khaltiError['detail'];
+            }
+            
             return response()->json([
                 'status' => 'error',
-                'message' => $result['message'] ?? 'Failed to initiate Khalti payment',
+                'message' => $detailedMessage,
                 'errors' => $result['errors'] ?? null,
+                'debug' => config('app.debug') ? $result : null,
             ], 422);
         }
 
@@ -155,6 +199,30 @@ class KhaltiPaymentController extends Controller
             ], 404);
         }
 
+        // Idempotency: if already completed, do not process again (prevents duplicate mails)
+        if ($payment->status === 'completed') {
+            $appointment = $payment->appointment;
+            if ($appointment && $appointment->payment_status !== 'completed') {
+                $appointment->update(['payment_status' => 'completed']);
+            }
+            if ($appointment && $appointment->status !== 'confirmed') {
+                $appointment->update([
+                    'status' => 'confirmed',
+                    'confirmed_at' => $appointment->confirmed_at ?? now(),
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Payment already verified',
+                'data' => [
+                    'payment_id' => $payment->id,
+                    'transaction_id' => $payment->transaction_id,
+                    'status' => 'completed',
+                ],
+            ]);
+        }
+
         // Verify with Khalti
         $verification = $this->khaltiService->verifyPayment($pidx);
 
@@ -171,6 +239,8 @@ class KhaltiPaymentController extends Controller
 
         // Check if payment is completed
         if ($khaltiData['status'] === 'Completed') {
+            $wasCompleted = $payment->status === 'completed';
+
             $payment->update([
                 'status' => 'completed',
                 'transaction_id' => $khaltiData['transaction_id'] ?? $transactionId,
@@ -184,21 +254,21 @@ class KhaltiPaymentController extends Controller
             $appointment->update([
                 'payment_status' => 'completed',
                 'status' => 'confirmed',
-                'confirmed_at' => now(),
+                'confirmed_at' => $appointment->confirmed_at ?? now(),
             ]);
 
-            // Send payment notification to patient (in-app)
-            NotificationService::sendPaymentNotification($payment);
-            
-            // Send in-app notification about confirmed appointment
-            NotificationService::sendAppointmentNotification($appointment, 'confirmed');
-            
-            // Send email notification to patient
-            try {
-                \Illuminate\Support\Facades\Mail::to($appointment->user->email)
-                    ->send(new \App\Mail\AppointmentConfirmed($appointment, $payment));
-            } catch (\Exception $e) {
-                logger()->error('Appointment confirmation email error: ' . $e->getMessage());
+            // Send confirmation email only once (on first successful completion)
+            if (!$wasCompleted) {
+                try {
+                    $appointment->load(['user', 'hospital', 'doctor.user', 'department']);
+                    Mail::to($appointment->user->email)
+                        ->send(new AppointmentConfirmed($appointment, $payment));
+                } catch (\Exception $e) {
+                    Log::error('Failed to send appointment confirmation email', [
+                        'appointment_id' => $appointment->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             }
 
             // Log action
@@ -341,7 +411,13 @@ class KhaltiPaymentController extends Controller
                 ]);
 
                 $payment->appointment->update(['payment_status' => 'completed']);
-                NotificationService::sendPaymentNotification($payment);
+                
+                // Send notification (wrapped in try-catch to not fail webhook processing)
+                try {
+                    NotificationService::sendPaymentNotification($payment);
+                } catch (\Exception $e) {
+                    logger()->error('Payment notification error in webhook: ' . $e->getMessage());
+                }
 
                 Log::info('Khalti payment completed via webhook', [
                     'payment_id' => $payment->id,

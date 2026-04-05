@@ -10,19 +10,19 @@ use Illuminate\Support\Facades\Storage;
 
 class ReportController extends Controller
 {
-    // Create report (patient or doctor can submit)
+    // Create report (doctor submits report text - no file upload needed)
     public function store(Request $request)
     {
         $user = auth()->user();
 
         $validator = Validator::make($request->all(), [
             'patient_id' => 'required|exists:users,id',
+            'appointment_id' => 'nullable|exists:appointments,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'diagnosis' => 'nullable|string',
+            'diagnosis' => 'required|string|max:1000',
             'treatment' => 'nullable|string',
             'notes' => 'nullable|string',
-            'file_path' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
@@ -37,27 +37,25 @@ class ReportController extends Controller
         }
         $hospitalId = $hospitalId ?? $request->hospital_id ?? null;
 
-        $filePath = null;
-        if ($request->hasFile('file')) {
-            $filePath = $request->file('file')->store('reports', 'public');
-        } elseif ($request->filled('file_path')) {
-            $filePath = $request->file_path;
+        try {
+            $report = Report::create([
+                'hospital_id' => $hospitalId,
+                'patient_id' => $request->patient_id,
+                'doctor_id' => $user->isDoctor() ? $user->id : null,
+                'appointment_id' => $request->appointment_id ?? null,
+                'title' => $request->title,
+                'description' => $request->description,
+                'diagnosis' => $request->diagnosis,
+                'treatment' => $request->treatment,
+                'notes' => $request->notes,
+                'file_path' => null, // Store as text fields only, not file
+                'status' => 'pending',
+            ]);
+
+            return response()->json(['status'=>'success','report'=>$report], 201);
+        } catch (\Exception $e) {
+            return response()->json(['status'=>'error', 'message'=>$e->getMessage()], 500);
         }
-
-        $report = Report::create([
-            'hospital_id' => $hospitalId,
-            'patient_id' => $request->patient_id,
-            'doctor_id' => $user->isDoctor() ? $user->id : null,
-            'title' => $request->title,
-            'description' => $request->description,
-            'diagnosis' => $request->diagnosis,
-            'treatment' => $request->treatment,
-            'notes' => $request->notes,
-            'file_path' => $filePath,
-            'status' => 'pending',
-        ]);
-
-        return response()->json(['status'=>'success','report'=>$report], 201);
     }
 
     // List reports (restricted by role)
@@ -150,5 +148,29 @@ class ReportController extends Controller
         $report->save();
 
         return response()->json(['status'=>'success','report'=>$report]);
+    }
+
+    // Delete a pending report (patient can delete their own pending reports)
+    public function destroy($id)
+    {
+        $user = auth()->user();
+        $report = Report::findOrFail($id);
+
+        // Only the patient who owns the report can delete it, and only if pending
+        if ($report->patient_id !== $user->id) {
+            return response()->json(['message'=>'Unauthorized'], 403);
+        }
+
+        if ($report->status !== 'pending') {
+            return response()->json(['status'=>'error','message'=>'Only pending reports can be deleted'], 422);
+        }
+
+        if ($report->file_path && Storage::disk('public')->exists($report->file_path)) {
+            Storage::disk('public')->delete($report->file_path);
+        }
+
+        $report->delete();
+
+        return response()->json(['status'=>'success','message'=>'Report deleted']);
     }
 }

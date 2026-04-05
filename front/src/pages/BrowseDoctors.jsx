@@ -72,11 +72,10 @@ const BrowseDoctors = () => {
           {filteredDoctors.map((doctor) => (
             <div key={doctor.id} className="doctor-card">
               <div className="doctor-avatar">
-                {doctor.avatar ? (
-                  <img src={doctor.avatar} alt={doctor.name} />
-                ) : (
-                  <div className="avatar-placeholder">👨‍⚕️</div>
-                )}
+                {doctor.image ? (
+                  <img src={`${api.getStorageUrl()}/${doctor.image}`} alt={doctor.name} onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
+                ) : null}
+                <div className="avatar-placeholder" style={doctor.image ? {display:'none'} : {}}>👨‍⚕️</div>
               </div>
               <h3>{doctor.name}</h3>
               <p className="doctor-id">{doctor.identifier}</p>

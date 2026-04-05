@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Doctor;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class DoctorController extends Controller
@@ -38,9 +39,13 @@ class DoctorController extends Controller
         $user = auth()->user();
 
         if (!$user) {
-            // public list for patients
+            // public list for patients - only show doctors from active, non-deleted hospitals
             $query = Doctor::with('user', 'hospital', 'department')
-                ->where('is_active', true);
+                ->where('is_active', true)
+                ->whereHas('user')
+                ->whereHas('hospital', function ($q) {
+                    $q->where('status', 'active');
+                });
             
             // Filter by department if provided
             if ($request->has('department_id')) {
@@ -118,6 +123,12 @@ class DoctorController extends Controller
                 'identifier' => 'DOC'.Str::upper(Str::random(6)),
             ]);
 
+            // Handle image upload
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('doctors', 'public');
+            }
+
             // Create doctor profile
             $doctor = Doctor::create([
                 'user_id' => $doctorUser->id,
@@ -131,6 +142,7 @@ class DoctorController extends Controller
                 'bio' => $request->bio,
                 'daily_patient_limit' => $request->daily_patient_limit ?? 20,
                 'is_active' => true,
+                'image' => $imagePath,
             ]);
 
             return response()->json([
@@ -187,7 +199,10 @@ class DoctorController extends Controller
         $user = auth()->user();
         $doctor = Doctor::findOrFail($id);
 
-        if (!($user->isSuperAdmin() || ($user->isAdmin() && $user->hospital_id == $doctor->hospital_id))) {
+        // Allow doctor to update their own profile
+        $isOwnProfile = $user && $user->role === 'doctor' && $user->id === $doctor->user_id;
+
+        if (!($user->isSuperAdmin() || ($user->isAdmin() && $user->hospital_id == $doctor->hospital_id) || $isOwnProfile)) {
             return response()->json(['message'=>'Unauthorized'], 403);
         }
 
@@ -203,6 +218,7 @@ class DoctorController extends Controller
             'consultation_fee' => 'nullable|numeric|min:0',
             'bio' => 'nullable|string',
             'daily_patient_limit' => 'nullable|integer|min:1|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'password' => 'nullable|string|min:6',
         ]);
 
@@ -220,6 +236,19 @@ class DoctorController extends Controller
 
             // Update doctor profile
             $doctorData = $request->only(['department_id', 'license_number', 'specialization', 'qualification', 'experience_years', 'consultation_fee', 'bio', 'daily_patient_limit']);
+            
+            // Handle image upload
+            if ($request->hasFile('image')) {
+                // Delete old image if exists
+                if ($doctor->image && Storage::disk('public')->exists($doctor->image)) {
+                    Storage::disk('public')->delete($doctor->image);
+                }
+                
+                // Store new image
+                $imagePath = $request->file('image')->store('doctors', 'public');
+                $doctorData['image'] = $imagePath;
+            }
+
             $doctor->update($doctorData);
 
             return response()->json([
@@ -231,6 +260,56 @@ class DoctorController extends Controller
             return response()->json([
                 'status'=>'error',
                 'message'=>'Failed to update doctor: '.$e->getMessage()
+            ], 500);
+        }
+    }
+
+    // Upload doctor image
+    public function uploadImage(Request $request, $id = null)
+    {
+        $user = auth()->user();
+        
+        // If no ID provided and user is a doctor, use their own doctor ID
+        if (!$id && $user->role === 'doctor') {
+            $doctor = Doctor::where('user_id', $user->id)->firstOrFail();
+        } else {
+            $doctor = Doctor::findOrFail($id);
+        }
+
+        // Only doctor can upload their own image or admin/super admin
+        $isOwnProfile = $user && $user->role === 'doctor' && $user->id === $doctor->user_id;
+        
+        if (!($user->isSuperAdmin() || ($user->isAdmin() && $user->hospital_id == $doctor->hospital_id) || $isOwnProfile)) {
+            return response()->json(['message'=>'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status'=>'error','errors'=>$validator->errors()], 422);
+        }
+
+        try {
+            // Delete old image if exists
+            if ($doctor->image && Storage::disk('public')->exists($doctor->image)) {
+                Storage::disk('public')->delete($doctor->image);
+            }
+            
+            // Store new image
+            $imagePath = $request->file('image')->store('doctors', 'public');
+            $doctor->update(['image' => $imagePath]);
+
+            return response()->json([
+                'status'=>'success',
+                'message'=>'Doctor image uploaded successfully',
+                'doctor'=>$doctor->fresh()->load('user', 'hospital', 'department')
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'=>'error',
+                'message'=>'Failed to upload image: '.$e->getMessage()
             ], 500);
         }
     }

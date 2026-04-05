@@ -1,147 +1,114 @@
 /* Hospital Dashboard Styles */
 
-.dashboard-container {
-  display: flex;
+.hospital-dashboard {
   min-height: 100vh;
   background: var(--gray-light);
+  display: flex;
+  flex-direction: column;
 }
 
-/* Sidebar */
-.sidebar {
-  width: 250px;
+/* Navbar */
+.hospital-navbar {
   background: var(--white);
-  border-right: 1px solid var(--border-color);
-  padding: 1.5rem 0;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  height: 100vh;
-  left: 0;
-  top: 0;
-  overflow-y: auto;
-}
-
-.sidebar-header {
-  padding: 0 1.5rem 2rem;
-  border-bottom: 2px solid var(--accent-green);
-}
-
-.sidebar-header h2 {
-  color: var(--primary-green);
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.sidebar-nav {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  border-bottom: 1px solid var(--border-color);
   padding: 1rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.nav-item {
-  background: none;
-  border: none;
-  padding: 0.875rem 1.5rem;
-  text-align: left;
-  color: var(--gray-text);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.nav-item:hover {
-  background: var(--accent-green);
-  color: var(--primary-green);
-}
-
-.nav-item.active {
-  background: var(--accent-green);
-  color: var(--primary-green);
-  border-left: 3px solid var(--primary-green);
-}
-
-.sidebar-footer {
-  padding: 1.5rem;
-  border-top: 1px solid var(--border-color);
-}
-
-.logout-btn {
-  width: 100%;
-  padding: 0.75rem;
-  background: #FEE2E2;
-  color: #DC2626;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.logout-btn:hover {
-  background: #FECACA;
-}
-
-/* Main Content */
-.dashboard-main {
-  flex: 1;
-  margin-left: 250px;
-  padding: 2rem;
-}
-
-.top-bar {
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  background: var(--white);
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--border-color);
-}
-
-.top-bar h1 {
-  font-size: 1.75rem;
-  color: #111827;
-  margin: 0;
-}
-
-.user-profile {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.user-profile span {
-  color: var(--gray-text);
-  font-weight: 500;
-}
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  background: var(--primary-green);
-  color: var(--white);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-}
-
-/* Dashboard Content */
-.dashboard-content {
-  display: flex;
-  flex-direction: column;
   gap: 2rem;
 }
 
+.navbar-logo h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--primary-green);
+  font-weight: 700;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  align-items: center;
+}
+
+.navbar-item {
+  background: none;
+  border: none;
+  color: var(--gray-text);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.navbar-item:hover {
+  color: var(--primary-green);
+}
+
+.navbar-item.active {
+  color: var(--primary-green);
+  border-bottom: 3px solid var(--primary-green);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-email {
+  color: var(--gray-text);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.btn-logout {
+  background: #FEE2E2;
+  color: #DC2626;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  background: #FECACA;
+  transform: translateY(-2px);
+}
+
+/* Main Content */
+.hospital-main {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+  flex: 1;
+}
+
+/* Dashboard Content */
 .dashboard-section {
   background: var(--white);
   padding: 1.5rem;
   border-radius: 0.75rem;
   border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .dashboard-section h2 {
