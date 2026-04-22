@@ -240,7 +240,7 @@ const HospitalView = () => {
     } catch (err) {
       console.error('Payment error:', err);
       const errorMessage = err.message || 'Payment failed';
-      setBookingMessage(`Error: ${errorMessage}`);
+      setBookingMessage(errorMessage);
     } finally {
       setBookingLoading(false);
     }

@@ -6,13 +6,13 @@
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(42, 127, 255, 0.15);
 }
 
 .header-left {
@@ -70,12 +70,12 @@
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
+  background: #fdeef0;
+  color: #a4161a;
   padding: 15px;
   border-radius: 4px;
   margin-bottom: 20px;
-  border-left: 4px solid #c33;
+  border-left: 4px solid #DC3545;
 }
 
 .dashboard-grid {
@@ -109,7 +109,7 @@
   margin: 0;
   font-size: 36px;
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .info-card p {
@@ -129,7 +129,7 @@
 }
 
 .action-btn {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -142,7 +142,7 @@
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(14, 123, 158, 0.4);
+  box-shadow: 0 5px 15px rgba(42, 127, 255, 0.4);
 }
 
 .loading {
@@ -151,5 +151,6 @@
   align-items: center;
   min-height: 100vh;
   font-size: 18px;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
+

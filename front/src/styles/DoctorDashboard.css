@@ -1,10 +1,10 @@
-﻿/* Doctor Dashboard - Redesigned */
+/* Doctor Dashboard - Redesigned */
 
 .dd-page {
   min-height: 100vh;
   background: #ffffff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  color: #1a1a2e;
 }
 
 .dd-loading {
@@ -13,16 +13,16 @@
   align-items: center;
   min-height: 60vh;
   font-size: 1.1rem;
-  color: #666;
+  color: #545461;
 }
 
 .dd-error {
-  background: #fff0f0;
-  color: #c00;
+  background: #fdeef0;
+  color: #a4161a;
   padding: 12px 20px;
   margin: 0 40px 20px;
   border-radius: 6px;
-  border-left: 4px solid #c00;
+  border-left: 4px solid #DC3545;
 }
 
 .dd-empty {
@@ -32,7 +32,7 @@
   font-size: 0.95rem;
 }
 
-/* ── HOSPITAL SECTION ── */
+/* -- HOSPITAL SECTION -- */
 .dd-hospital-section {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -102,7 +102,7 @@
   color: #334155;
 }
 
-/* ── DOCTOR INFO PANEL (admin style) ── */
+/* -- DOCTOR INFO PANEL (admin style) -- */
 .dd-avatar-wrap {
   display: flex;
   align-items: center;
@@ -128,7 +128,7 @@
 .dd-avatar-letter {
   font-size: 1.6rem;
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 .dd-role-badge {
   font-size: 0.8rem;
@@ -208,7 +208,7 @@
 }
 .dd-photo-upload-btn:hover { background: #e5e9ec; }
 .dd-save-photo-btn {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: #fff;
   border: none;
   border-radius: 6px;
@@ -217,6 +217,91 @@
   cursor: pointer;
 }
 .dd-save-photo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.dd-profile-photo-actions {
+  margin-top: 16px;
+}
+
+.dd-profile-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dd-profile-main-title {
+  margin: 0;
+}
+
+.dd-edit-profile-btn {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dd-edit-profile-btn:hover {
+  border-color: #2a7fff;
+  color: #2a7fff;
+}
+
+.dd-inline-upload {
+  display: inline-flex;
+  margin-top: 10px;
+}
+
+.dd-profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dd-profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dd-form-group--full {
+  grid-column: 1 / -1;
+}
+
+.dd-cancel-btn,
+.dd-save-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dd-cancel-btn {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.dd-save-btn {
+  background: #2a7fff;
+  color: #ffffff;
+}
+
+.dd-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .dd-profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .dd-logout-btn {
   display: block;
@@ -234,7 +319,7 @@
 }
 .dd-logout-btn:hover { background: #c0392b; }
 
-/* ── PANELS ── */
+/* -- PANELS -- */
 .dd-panel {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -266,9 +351,9 @@
   min-width: 200px;
   transition: border-color 0.2s;
 }
-.dd-search-input:focus { border-color: #0E7B9E; }
+.dd-search-input:focus { border-color: #2A7FFF; }
 
-/* ── LAYOUT ROWS ── */
+/* -- LAYOUT ROWS -- */
 .dd-top-row {
   display: grid;
   grid-template-columns: 1fr 2.5fr;
@@ -295,7 +380,7 @@
   align-items: start;
 }
 
-/* ── TABS ── */
+/* -- TABS -- */
 .dd-tabs {
   display: flex;
   gap: 6px;
@@ -317,9 +402,9 @@
 }
 .dd-tab:hover { background: #e5e9ec; }
 .dd-tab.active {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: #fff;
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
 }
 .dd-tab-count {
   background: rgba(0,0,0,0.1);
@@ -329,7 +414,7 @@
 }
 .dd-tab.active .dd-tab-count { background: rgba(255,255,255,0.25); }
 
-/* ── TABLE ── */
+/* -- TABLE -- */
 .dd-appt-table-wrap,
 .dd-schedule-table-wrap {
   overflow-x: auto;
@@ -395,7 +480,7 @@
 }
 
 .dd-pagination-btn {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -430,7 +515,7 @@
 }
 .dd-status-badge.unavailable { background: #e2e3e5; color: #383d41; }
 
-/* ── BUTTONS ── */
+/* -- BUTTONS -- */
 .dd-appt-actions {
   display: flex;
   gap: 6px;
@@ -452,12 +537,24 @@
 .dd-btn.confirm:hover { background: #218838; }
 .dd-btn.decline { background: #dc3545; color: #fff; }
 .dd-btn.decline:hover { background: #c82333; }
-.dd-btn.report { background: #0E7B9E; color: #fff; }
-.dd-btn.report:hover { background: #0a6580; }
+.dd-btn.report { background: #2A7FFF; color: #fff; }
+.dd-btn.report:hover { background: #1F5FCC; }
+.dd-report-submitted {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e8f7ec;
+  color: #1f7a36;
+  border: 1px solid #b7e2c2;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 .dd-btn.delete { background: #dc3545; color: #fff; }
 .dd-btn.delete:hover { background: #c82333; }
 .dd-btn.cancel { background: #e0e0e0; color: #333; }
-.dd-btn.submit { background: #0E7B9E; color: #fff; }
+.dd-btn.submit { background: #2A7FFF; color: #fff; }
 .dd-btn.submit:hover { background: #0a6580; }
 
 .dd-btn-sm {
@@ -473,7 +570,7 @@
 .dd-btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .dd-add-btn {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: #fff;
   border: none;
   padding: 7px 18px;
@@ -485,7 +582,7 @@
 }
 .dd-add-btn:hover { background: #0a6580; }
 
-/* ── SCHEDULE FORM ── */
+/* -- SCHEDULE FORM -- */
 .dd-schedule-form {
   background: #f8fafb;
   border: 1px solid #e5e9ec;
@@ -532,10 +629,10 @@
 }
 .dd-form-group input:focus,
 .dd-form-group textarea:focus {
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
 }
 .dd-submit-btn {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: #fff;
   border: none;
   padding: 9px 22px;
@@ -546,9 +643,9 @@
   margin-top: 4px;
 }
 .dd-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.dd-submit-btn:hover { background: #0a6580; }
+.dd-submit-btn:hover { background: #1F5FCC; }
 
-/* ── SLOT PREVIEW ── */
+/* -- SLOT PREVIEW -- */
 .dd-slots-preview {
   background: #f0f9ff;
   border: 1px solid #bae6fd;
@@ -580,7 +677,7 @@
 
 .dd-slot-number {
   font-weight: 600;
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-size: 0.85rem;
   margin-bottom: 4px;
 }
@@ -591,7 +688,7 @@
 }
 
 .dd-slot-badge {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   padding: 3px 8px;
   border-radius: 4px;
@@ -610,7 +707,7 @@
   display: inline-block;
 }
 
-/* ── SLOT TIME SELECTION ── */
+/* -- SLOT TIME SELECTION -- */
 .dd-time-slots-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -631,15 +728,15 @@
 }
 
 .dd-time-slot-btn:hover {
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
   background: #f0f9ff;
 }
 
 .dd-time-slot-btn.selected {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
-  border-color: #0E7B9E;
-  box-shadow: 0 2px 8px rgba(14, 123, 158, 0.3);
+  border-color: #2A7FFF;
+  box-shadow: 0 2px 8px rgba(42, 127, 255, 0.3);
 }
 
 .dd-slot-start {
@@ -647,7 +744,7 @@
   font-weight: 600;
 }
 
-/* ── SELECTED SLOTS ── */
+/* -- SELECTED SLOTS -- */
 .dd-selected-slots {
   background: #f0f9ff;
   border: 1px solid #bae6fd;
@@ -670,7 +767,7 @@
 }
 
 .dd-selected-tag {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   padding: 5px 10px;
   border-radius: 20px;
@@ -680,10 +777,11 @@
   align-items: center;
 }
 
-/* ── REVIEWS ── */
+/* -- REVIEWS -- */
 .dd-review-card {
   border-bottom: 1px solid #f0f2f4;
   padding: 14px 0;
+  background: #ffffff;
 }
 .dd-review-card:last-child { border-bottom: none; }
 .dd-review-top {
@@ -694,23 +792,228 @@
 }
 .dd-review-top strong {
   font-size: 0.93rem;
-  color: #1a1a1a;
+  color: #0f172a;
+  font-weight: 700;
 }
 .dd-review-stars .star { font-size: 1rem; margin-right: 1px; }
 .dd-review-stars .star.filled { color: #f5a623; }
-.dd-review-stars .star.empty { color: #ddd; }
+.dd-review-stars .star.empty { color: #94a3b8; }
 .dd-review-comment {
-  color: #555;
+  color: #334155;
   font-size: 0.9rem;
-  margin: 4px 0;
-  line-height: 1.5;
+  margin: 8px 0;
+  line-height: 1.7;
 }
 .dd-review-date {
   font-size: 0.78rem;
-  color: #aaa;
+  color: #64748b;
+  font-weight: 600;
 }
 
-/* ── REPORT MODAL ── */
+.dd-review-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dd-review-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dd-review-delete-btn {
+  border: none;
+  background: #dc3545;
+  color: #fff;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dd-review-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dd-review-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.dd-review-status.pending {
+  background: #fff7db;
+  color: #8a5a00;
+}
+
+.dd-review-status.approved,
+.dd-review-status.active {
+  background: #e9f9ef;
+  color: #166534;
+}
+
+.dd-review-status.rejected {
+  background: #fef0f0;
+  color: #b42318;
+}
+
+.dd-review-status.hidden,
+.dd-review-status.inactive {
+  background: #eef2f7;
+  color: #475569;
+}
+
+.dd-review-modal {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
+  border-radius: 20px;
+  width: 95%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.22);
+}
+
+.dd-review-modal-header {
+  padding-bottom: 14px;
+}
+
+.dd-review-kicker {
+  margin: 0 0 6px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0b6b88;
+}
+
+.dd-review-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #ebf8ff 0%, #f8fafc 100%);
+  border-bottom: 1px solid #e5e9ec;
+}
+
+.dd-review-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #2A7FFF, #1F5FCC);
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.dd-review-hero-copy {
+  flex: 1;
+}
+
+.dd-review-hero-copy h3 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  color: #0f172a;
+}
+
+.dd-review-hero-copy p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.dd-review-modal-body {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) 1fr;
+  gap: 18px;
+  padding: 24px;
+}
+
+.dd-review-rating-panel {
+  padding: 20px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #0f172a 0%, #16324f 100%);
+  color: #fff;
+  text-align: center;
+}
+
+.dd-review-rating-number {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+
+.dd-review-stars.lg .star {
+  font-size: 1.3rem;
+}
+
+.dd-review-stars.lg .star.empty {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.dd-review-rating-panel p {
+  margin: 12px 0 0;
+  color: #e2e8f0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.dd-review-message-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #fff;
+  padding: 20px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.dd-review-message-card h4 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.dd-review-message-card p {
+  margin: 0;
+  color: #1e293b;
+  font-size: 0.96rem;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.dd-review-modal .modal-header h2 {
+  color: #0f172a;
+}
+
+.dd-review-modal .close-modal-btn {
+  color: #475569;
+}
+
+.dd-review-modal .close-modal-btn:hover {
+  color: #0f172a;
+}
+
+.dd-review-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 24px 24px;
+}
+
+/* -- REPORT MODAL -- */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -778,14 +1081,14 @@
 
 .dd-slot-preview {
   background: #f0f8ff;
-  border: 2px solid #0E7B9E;
+  border: 2px solid #2A7FFF;
   border-radius: 8px;
   padding: 12px 16px;
   margin-bottom: 16px;
 }
 .dd-slot-info {
   margin: 0;
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-size: 0.95rem;
   line-height: 1.4;
 }
@@ -796,7 +1099,7 @@
 
 .dd-slot-number {
   background: #e3f2fd;
-  color: #0E7B9E;
+  color: #2A7FFF;
   padding: 4px 12px;
   border-radius: 20px;
   font-size: 0.85rem;
@@ -829,7 +1132,7 @@
 
 .dd-slot-time {
   background: #e3f2fd;
-  color: #0E7B9E;
+  color: #2A7FFF;
   padding: 6px 14px;
   border-radius: 6px;
   font-size: 0.9rem;
@@ -844,7 +1147,7 @@
 }
 
 .dd-btn-sm.view {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   border: none;
   padding: 6px 14px;
@@ -855,7 +1158,7 @@
 }
 
 .dd-btn-sm.view:hover {
-  background: #005f7a;
+  background: #1F5FCC;
 }
 
 .dd-slots-scroll {
@@ -880,7 +1183,7 @@
 }
 
 .dd-slot-number-badge {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   width: 28px;
   height: 28px;
@@ -899,7 +1202,7 @@
   font-size: 0.9rem;
 }
 
-/* ── NEW GROUP VIEW ── */
+/* -- NEW GROUP VIEW -- */
 .dd-schedules-grouped {
   display: flex;
   flex-direction: column;
@@ -919,14 +1222,14 @@
   align-items: center;
   padding: 16px 20px;
   background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
-  border-bottom: 2px solid #0E7B9E;
+  border-bottom: 2px solid #2A7FFF;
 }
 
 .dd-date-label {
   margin: 0 0 12px 0;
   font-size: 1.2rem;
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .dd-schedules-summary {
@@ -943,7 +1246,7 @@
 
 .dd-time-badge {
   background: #e3f2fd;
-  color: #0E7B9E;
+  color: #2A7FFF;
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 0.85rem;
@@ -975,7 +1278,7 @@
 }
 
 .dd-btn-view-slots {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   border: none;
   padding: 8px 18px;
@@ -987,7 +1290,7 @@
 }
 
 .dd-btn-view-slots:hover {
-  background: #005f7a;
+  background: #1F5FCC;
 }
 
 .dd-btn-delete-all {
@@ -1027,7 +1330,7 @@
   justify-content: center;
   gap: 8px;
   background: white;
-  border: 2px solid #0E7B9E;
+  border: 2px solid #2A7FFF;
   border-radius: 8px;
   padding: 12px 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -1036,12 +1339,21 @@
 }
 
 .dd-slot-card:hover {
-  box-shadow: 0 4px 8px rgba(14, 123, 158, 0.2);
+  box-shadow: 0 4px 8px rgba(42, 127, 255, 0.2);
   transform: translateY(-2px);
 }
 
+.dd-slot-card.booked {
+  border-color: #d32f2f;
+  background: #fff5f5;
+}
+
+.dd-slot-card.booked .dd-slot-num {
+  background: #d32f2f;
+}
+
 .dd-slot-num {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   width: 32px;
   height: 32px;
@@ -1062,7 +1374,17 @@
   white-space: nowrap;
 }
 
-/* ── FOOTER ── */
+.dd-slot-booked-badge {
+  background: #d32f2f;
+  color: #fff;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+/* -- FOOTER -- */
 .dd-footer {
   background: #1a1a2e;
   color: #ccc;
@@ -1115,7 +1437,7 @@
   color: #777;
 }
 
-/* ── RESPONSIVE ── */
+/* -- RESPONSIVE -- */
 @media (max-width: 1024px) {
   .dd-top-row { grid-template-columns: 1fr; }
   .dd-middle-row { grid-template-columns: 1fr; }
@@ -1136,4 +1458,686 @@
   .dd-hospital-stats { justify-content: center; }
   .dd-panel-header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
   .dd-search-input { min-width: 0; width: 100%; }
+  .dd-review-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .dd-review-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .dd-review-modal-body {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+  .dd-review-hero {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .dd-review-modal-actions {
+    padding: 0 18px 18px;
+  }
 }
+
+/* ===== Dark Dashboard Refresh ===== */
+.dd-page {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: #e5e7eb;
+}
+
+.dd-hospital-section,
+.dd-panel,
+.dd-date-group,
+.dd-slot-card,
+.dd-review-card,
+.dd-review-modal,
+.dd-report-modal {
+  background: #1f2937;
+  border-color: #334155;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.dd-hospital-name,
+.dd-panel-title,
+.dd-detail-row span,
+.dd-mini-val,
+.dd-table th,
+.dd-table td,
+.dd-date-label,
+.dd-slot-time-range,
+.dd-review-top strong,
+.dd-review-rating-number,
+.dd-review-message-card h4,
+.dd-review-message-card p {
+  color: #f8fafc;
+}
+
+.dd-hospital-details p,
+.dd-hospital-desc,
+.dd-detail-row label,
+.dd-mini-label,
+.dd-empty,
+.dd-review-date,
+.dd-review-comment,
+.dd-review-hero-copy p,
+.dd-review-rating-panel p {
+  color: #cbd5e1;
+}
+
+.dd-hstat,
+.dd-mini-stat,
+.dd-table thead,
+.dd-date-header,
+.dd-slots-list-container {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.dd-table td,
+.dd-table th,
+.dd-detail-row,
+.dd-review-card,
+.dd-date-header {
+  border-color: #334155;
+}
+
+.dd-search-input,
+.dd-form-group input,
+.dd-form-group textarea,
+.dd-form-group select,
+.dd-tabs .dd-tab {
+  background: #0f172a;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+.dd-search-input::placeholder,
+.dd-form-group input::placeholder,
+.dd-form-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+.dd-tab.active,
+.dd-add-btn,
+.dd-submit-btn,
+.dd-btn.confirm,
+.dd-btn.report,
+.dd-btn-sm.view,
+.dd-btn-view-slots,
+.dd-save-photo-btn,
+.dd-pagination-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.dd-add-btn:hover,
+.dd-submit-btn:hover,
+.dd-btn.confirm:hover,
+.dd-btn.report:hover,
+.dd-btn-sm.view:hover,
+.dd-btn-view-slots:hover,
+.dd-save-photo-btn:hover,
+.dd-pagination-btn:hover {
+  background: #1d4ed8;
+}
+
+.dd-btn.decline,
+.dd-btn.delete,
+.dd-btn-delete-all,
+.dd-review-delete-btn {
+  background: #991b1b;
+  color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.dd-btn.cancel,
+.dd-photo-upload-btn {
+  background: #334155;
+  color: #f8fafc;
+  border-color: #475569;
+}
+
+.dd-footer {
+  background: #0f172a;
+}
+
+/* Button style update: white background, black text, no hover effect */
+.dd-page button,
+.dd-page .dd-add-btn,
+.dd-page .dd-submit-btn,
+.dd-page .dd-btn,
+.dd-page .dd-btn-sm,
+.dd-page .dd-btn-view-slots,
+.dd-page .dd-btn-delete-all,
+.dd-page .dd-save-photo-btn,
+.dd-page .dd-photo-upload-btn,
+.dd-page .dd-pagination-btn,
+.dd-page .dd-review-delete-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.dd-page button:hover,
+.dd-page .dd-add-btn:hover,
+.dd-page .dd-submit-btn:hover,
+.dd-page .dd-btn:hover,
+.dd-page .dd-btn-sm:hover,
+.dd-page .dd-btn-view-slots:hover,
+.dd-page .dd-btn-delete-all:hover,
+.dd-page .dd-save-photo-btn:hover,
+.dd-page .dd-photo-upload-btn:hover,
+.dd-page .dd-pagination-btn:hover,
+.dd-page .dd-review-delete-btn:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Final gradient setup for Doctor dashboard */
+.dd-page {
+  background: linear-gradient(180deg, #081228 0%, #101d3a 100%) !important;
+  min-height: 100vh;
+}
+
+.dd-hospital-section,
+.dd-panel,
+.dd-date-group,
+.dd-slot-card,
+.dd-review-card,
+.dd-review-modal,
+.dd-report-modal {
+  background: #13213f !important;
+  border: 1px solid #2b3f68 !important;
+}
+
+.dd-panel-title,
+.dd-hospital-name,
+.dd-detail-row span,
+.dd-mini-val,
+.dd-table th,
+.dd-table td,
+.dd-date-label,
+.dd-slot-time-range,
+.dd-review-top strong {
+  color: #f8fafc !important;
+}
+
+.dd-hospital-details p,
+.dd-detail-row label,
+.dd-mini-label,
+.dd-empty,
+.dd-review-comment,
+.dd-review-date {
+  color: #c7d2fe !important;
+}
+
+.dd-table thead,
+.dd-table tbody tr:hover,
+.dd-date-header,
+.dd-hstat,
+.dd-mini-stat,
+.dd-slots-list-container {
+  background: #0e1a33 !important;
+}
+
+.dd-page button,
+.dd-page .dd-add-btn,
+.dd-page .dd-submit-btn,
+.dd-page .dd-btn,
+.dd-page .dd-btn-sm,
+.dd-page .dd-btn-view-slots,
+.dd-page .dd-btn-delete-all,
+.dd-page .dd-save-photo-btn,
+.dd-page .dd-photo-upload-btn,
+.dd-page .dd-pagination-btn,
+.dd-page .dd-review-delete-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+}
+
+/* Final black theme override for Doctor dashboard */
+.dd-page {
+  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
+}
+
+.dd-page .dash-sidebar {
+  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
+  border-color: #1a1a1a !important;
+}
+
+.dd-hospital-section,
+.dd-panel,
+.dd-date-group,
+.dd-slot-card,
+.dd-review-card,
+.dd-review-modal,
+.dd-report-modal,
+.dash-graph-card,
+.dash-profile-card,
+.dash-profile-row,
+.dash-profile-stat {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+}
+
+.dd-table thead,
+.dd-table tbody tr:hover,
+.dd-date-header,
+.dd-hstat,
+.dd-mini-stat,
+.dd-slots-list-container,
+.dash-line-chart,
+.dash-pie-chart::after {
+  background: #050505 !important;
+  border-color: #1f1f1f !important;
+}
+
+.dash-line-grid {
+  stroke: #202020 !important;
+}
+
+/* Final white theme override for Doctor dashboard */
+.dd-page {
+  background: #ffffff !important;
+}
+
+.dd-page .dash-sidebar {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.dd-hospital-section,
+.dd-panel,
+.dd-date-group,
+.dd-slot-card,
+.dd-review-card,
+.dd-review-modal,
+.dd-report-modal,
+.dash-graph-card,
+.dash-profile-card,
+.dash-profile-row,
+.dash-profile-stat {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.dd-table thead,
+.dd-table tbody tr:hover,
+.dd-date-header,
+.dd-hstat,
+.dd-mini-stat,
+.dd-slots-list-container,
+.dash-line-chart,
+.dash-pie-chart::after {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+}
+
+.dd-page .dd-panel-title,
+.dd-page .dd-hospital-name,
+.dd-page .dd-detail-row span,
+.dd-page .dd-mini-val,
+.dd-page .dd-table th,
+.dd-page .dd-table td,
+.dd-page .dd-date-label,
+.dd-page .dd-slot-time-range,
+.dd-page .dd-review-top strong,
+.dd-page .dash-profile-title,
+.dd-page .dash-profile-row span,
+.dd-page .dash-profile-stat strong {
+  color: #111827 !important;
+}
+
+.dd-page .dd-hospital-details p,
+.dd-page .dd-detail-row label,
+.dd-page .dd-mini-label,
+.dd-page .dd-empty,
+.dd-page .dd-review-comment,
+.dd-page .dd-review-date,
+.dd-page .dash-profile-subtitle,
+.dd-page .dash-profile-row label,
+.dd-page .dash-profile-stat span,
+.dd-page .dash-sidebar-title,
+.dd-page .dash-sidebar-footnote {
+  color: #6b7280 !important;
+}
+
+.dd-page button,
+.dd-page .dd-add-btn,
+.dd-page .dd-submit-btn,
+.dd-page .dd-btn,
+.dd-page .dd-btn-sm,
+.dd-page .dd-btn-view-slots,
+.dd-page .dd-btn-delete-all,
+.dd-page .dd-save-photo-btn,
+.dd-page .dd-photo-upload-btn,
+.dd-page .dd-pagination-btn,
+.dd-page .dd-review-delete-btn,
+.dd-page .dash-sidebar-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+.dd-page button:hover,
+.dd-page .dd-add-btn:hover,
+.dd-page .dd-submit-btn:hover,
+.dd-page .dd-btn:hover,
+.dd-page .dd-btn-sm:hover,
+.dd-page .dd-btn-view-slots:hover,
+.dd-page .dd-btn-delete-all:hover,
+.dd-page .dd-save-photo-btn:hover,
+.dd-page .dd-photo-upload-btn:hover,
+.dd-page .dd-pagination-btn:hover,
+.dd-page .dd-review-delete-btn:hover,
+.dd-page .dash-sidebar-btn:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Authoritative final Doctor palette override */
+.dd-page {
+  background: #f6f8fb !important;
+  color: #0f172a !important;
+}
+
+.dd-page .dash-sidebar {
+  background: #ffffff !important;
+  border: 1px solid #dbe3ee !important;
+}
+
+.dd-page .dash-sidebar-title,
+.dd-page .dash-sidebar-footnote {
+  color: #475569 !important;
+}
+
+.dd-page .dash-sidebar-btn {
+  background: #ffffff !important;
+  color: #2A7FFF !important;
+  border: 1px solid #2A7FFF !important;
+}
+
+.dd-page .dash-sidebar-btn.active,
+.dd-page .dash-sidebar-btn:hover,
+.dd-page .dash-sidebar-logout {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border-color: #1F5FCC !important;
+}
+
+.dd-page .dash-graph-card,
+.dd-page .dash-profile-card,
+.dd-page .dash-profile-row,
+.dd-page .dash-profile-stat,
+.dd-page .dd-panel,
+.dd-page .dd-hospital-section,
+.dd-page .dd-date-group,
+.dd-page .dd-review-card {
+  background: #ffffff !important;
+  border-color: #dbe3ee !important;
+}
+
+.dd-page .dash-graph-card h3,
+.dd-page .dash-graph-card p,
+.dd-page .dash-line-labels span,
+.dd-page .dash-pie-legend li,
+.dd-page .dash-pie-value {
+  color: #1e293b !important;
+}
+
+.dd-page .dash-line-chart,
+.dd-page .dash-pie-chart::after {
+  background: #f8fbff !important;
+  border-color: #dbe7ff !important;
+}
+
+.dd-page .dash-line-grid {
+  stroke: #d6e4ff !important;
+}
+
+.dd-page .dd-review-modal {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+  border: 1px solid #dbe3ee !important;
+}
+
+.dd-page .dd-review-hero {
+  background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 100%) !important;
+  border-bottom: 1px solid #dbe3ee !important;
+}
+
+.dd-page .dd-review-hero-copy h3,
+.dd-page .dd-review-modal .modal-header h2 {
+  color: #0f172a !important;
+}
+
+.dd-page .dd-review-hero-copy p,
+.dd-page .dd-review-date {
+  color: #64748b !important;
+}
+
+.dd-page .dd-review-message-card {
+  background: #f8fafc !important;
+  border: 1px solid #dbe3ee !important;
+}
+
+.dd-page .dd-review-message-card h4 {
+  color: #334155 !important;
+}
+
+.dd-page .dd-review-message-card p,
+.dd-page .dd-review-comment {
+  color: #1e293b !important;
+}
+
+.dd-page .dd-review-rating-panel {
+  background: linear-gradient(180deg, #0f2b57 0%, #153b73 100%) !important;
+  color: #ffffff !important;
+}
+
+.dd-page .dd-review-rating-panel p {
+  color: #dbeafe !important;
+}
+
+.dd-page .dd-review-modal-actions .dd-btn.cancel {
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.dd-page .dd-review-modal-actions .dd-btn.cancel:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+  border-color: #94a3b8 !important;
+}
+
+.dd-page .dd-form-group input,
+.dd-page .dd-form-group textarea,
+.dd-page .dd-form-group select,
+.dd-page .dd-search-input {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+  color-scheme: light;
+}
+
+.dd-page .dd-form-group input::placeholder,
+.dd-page .dd-form-group textarea::placeholder,
+.dd-page .dd-search-input::placeholder {
+  color: #6b7280 !important;
+}
+
+.dd-page .dd-form-group input:focus,
+.dd-page .dd-form-group textarea:focus,
+.dd-page .dd-form-group select:focus,
+.dd-page .dd-search-input:focus {
+  border-color: #2A7FFF !important;
+  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.15) !important;
+}
+
+.dd-page .dd-submit-btn,
+.dd-page .dd-btn.submit,
+.dd-page .dd-btn.confirm,
+.dd-page .dd-add-btn,
+.dd-page .dd-save-photo-btn {
+  background: #28A745 !important;
+  color: #ffffff !important;
+  border: 1px solid #218838 !important;
+}
+
+.dd-page .dd-btn.report,
+.dd-page .dd-btn-sm.view,
+.dd-page .dd-btn-view-slots,
+.dd-page .dd-slot-num,
+.dd-page .dd-slot-number-badge,
+.dd-page .dd-selected-tag {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border-color: #1F5FCC !important;
+}
+
+.dd-page .dd-btn.edit,
+.dd-page .dd-btn-sm.edit {
+  background: #FF9800 !important;
+  color: #ffffff !important;
+  border-color: #E68900 !important;
+}
+
+.dd-page .dd-btn.decline,
+.dd-page .dd-btn.delete,
+.dd-page .dd-btn-delete-all,
+.dd-page .dd-review-delete-btn,
+.dd-page .dd-btn-sm.del {
+  background: #DC3545 !important;
+  color: #ffffff !important;
+  border-color: #C82333 !important;
+}
+
+.dd-page .dd-btn.decline:hover,
+.dd-page .dd-btn.delete:hover,
+.dd-page .dd-btn-delete-all:hover,
+.dd-page .dd-review-delete-btn:hover,
+.dd-page .dd-btn-sm.del:hover {
+  background: #C82333 !important;
+  color: #ffffff !important;
+  border-color: #A71D2A !important;
+}
+
+.dd-page .dd-btn.report:hover,
+.dd-page .dd-btn-sm.view:hover,
+.dd-page .dd-btn-view-slots:hover,
+.dd-page .dd-save-photo-btn:hover,
+.dd-page .dd-add-btn:hover,
+.dd-page .dd-submit-btn:hover,
+.dd-page .dash-sidebar-btn:hover,
+.dd-page .dash-sidebar-btn.active:hover,
+.dd-page .dash-sidebar-logout:hover {
+  background: #1F5FCC !important;
+  color: #ffffff !important;
+  border-color: #174A99 !important;
+}
+
+.dd-page .dd-btn.confirm:hover,
+.dd-page .dd-btn.approve:hover {
+  background: #218838 !important;
+  border-color: #1E7E34 !important;
+}
+
+.dd-page .dd-btn.edit:hover,
+.dd-page .dd-btn-sm.edit:hover {
+  background: #E68900 !important;
+  border-color: #CC7A00 !important;
+}
+
+/* Final fixes: appointment tabs and pagination must not be black */
+.dd-page .dd-tab {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+.dd-page .dd-tab:hover {
+  background: #e2e8f0 !important;
+  color: #1e293b !important;
+  border-color: #94a3b8 !important;
+}
+
+.dd-page .dd-tab.active {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border-color: #1F5FCC !important;
+}
+
+.dd-page .dd-tab-count {
+  background: rgba(15, 23, 42, 0.12) !important;
+  color: #1e293b !important;
+}
+
+.dd-page .dd-tab.active .dd-tab-count {
+  background: rgba(255, 255, 255, 0.24) !important;
+  color: #ffffff !important;
+}
+
+.dd-page .dd-pagination-btn {
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid #1F5FCC !important;
+}
+
+.dd-page .dd-pagination-btn:hover:not(:disabled) {
+  background: #1F5FCC !important;
+  color: #ffffff !important;
+  border-color: #174A99 !important;
+}
+
+.dd-page .dd-pagination-btn:disabled {
+  background: #94a3b8 !important;
+  color: #ffffff !important;
+  border-color: #94a3b8 !important;
+}
+
+/* Final button color override: keep doctor dashboard buttons blue */
+.dd-page button,
+.dd-page .dash-sidebar-btn,
+.dd-page .dd-add-btn,
+.dd-page .dd-submit-btn,
+.dd-page .dd-btn,
+.dd-page .dd-btn-sm,
+.dd-page .dd-save-btn,
+.dd-page .dd-cancel-btn,
+.dd-page .dd-save-photo-btn,
+.dd-page .dd-photo-upload-btn,
+.dd-page .dd-edit-profile-btn,
+.dd-page .dd-pagination-btn,
+.dd-page .dd-review-delete-btn {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border: 1px solid #1F5FCC !important;
+}
+
+.dd-page button:hover,
+.dd-page .dash-sidebar-btn:hover,
+.dd-page .dd-add-btn:hover,
+.dd-page .dd-submit-btn:hover,
+.dd-page .dd-btn:hover,
+.dd-page .dd-btn-sm:hover,
+.dd-page .dd-save-btn:hover,
+.dd-page .dd-cancel-btn:hover,
+.dd-page .dd-save-photo-btn:hover,
+.dd-page .dd-photo-upload-btn:hover,
+.dd-page .dd-edit-profile-btn:hover,
+.dd-page .dd-pagination-btn:hover,
+.dd-page .dd-review-delete-btn:hover {
+  background: #1F5FCC !important;
+  color: #ffffff !important;
+  border-color: #174A99 !important;
+}
+

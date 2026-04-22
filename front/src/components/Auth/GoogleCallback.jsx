@@ -17,8 +17,11 @@ const GoogleCallback = () => {
   const [status, setStatus] = useState('processing');
   const [message, setMessage] = useState('Processing Google authentication...');
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const [requirePasswordSetup, setRequirePasswordSetup] = useState(false);
   const [userData, setUserData] = useState(null);
   const [authToken, setAuthToken] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [profileData, setProfileData] = useState({
     phone: '',
     date_of_birth: '',
@@ -31,30 +34,54 @@ const GoogleCallback = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    const modeFromQuery = searchParams.get('mode');
+    const authMode = modeFromQuery || localStorage.getItem('google_auth_mode');
     const token = searchParams.get('token');
     const userParam = searchParams.get('user');
     const error = searchParams.get('error');
     const isNew = searchParams.get('is_new');
 
     if (error) {
+      localStorage.removeItem('google_auth_mode');
       setStatus('error');
       setMessage(error);
-      setTimeout(() => navigate('/login'), 3000);
+      const errorTarget = authMode === 'register' ? '/register' : '/login';
+      setTimeout(() => navigate(errorTarget), 3000);
       return;
     }
 
     if (token && userParam) {
       try {
         const user = JSON.parse(decodeURIComponent(userParam));
+
+        if (authMode === 'register' && isNew !== 'true') {
+          localStorage.removeItem('google_auth_mode');
+          setStatus('error');
+          setMessage('This Google account is already registered. Please login with Google instead.');
+          setTimeout(() => navigate('/register?error=' + encodeURIComponent('This Google account is already registered. Please login with Google instead.')), 1500);
+          return;
+        }
+
+        if (authMode === 'login' && isNew === 'true') {
+          localStorage.removeItem('google_auth_mode');
+          setStatus('error');
+          setMessage('No account found for this Google email. Please register first.');
+          setTimeout(() => navigate('/login?error=' + encodeURIComponent('No account found for this Google email. Please register first.')), 1500);
+          return;
+        }
         
         // Store auth data
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
+        localStorage.removeItem('google_auth_mode');
         setUserData(user);
         setAuthToken(token);
         
         // Check if this is a new user - show profile form
-        if (isNew === 'true' || !user.phone) {
+        const needsProfile = isNew === 'true' || !user.phone;
+        setRequirePasswordSetup(isNew === 'true');
+
+        if (needsProfile) {
           setStatus('success');
           setShowProfileForm(true);
         } else {
@@ -82,11 +109,13 @@ const GoogleCallback = () => {
           setTimeout(() => navigate(dashboardRoute), 1500);
         }
       } catch (e) {
+        localStorage.removeItem('google_auth_mode');
         setStatus('error');
         setMessage('Failed to process authentication data');
         setTimeout(() => navigate('/login'), 3000);
       }
     } else {
+      localStorage.removeItem('google_auth_mode');
       setStatus('error');
       setMessage('Invalid authentication response');
       setTimeout(() => navigate('/login'), 3000);
@@ -102,7 +131,46 @@ const GoogleCallback = () => {
     e.preventDefault();
     setSaving(true);
 
+    if (requirePasswordSetup) {
+      if (newPassword.length < 6) {
+        setMessage('Password must be at least 6 characters.');
+        setSaving(false);
+        return;
+      }
+
+      if (newPassword !== confirmPassword) {
+        setMessage('Passwords do not match.');
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
+      if (requirePasswordSetup) {
+        const passwordResponse = await fetch(`${API_URL}/set-password`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({
+            password: newPassword,
+            password_confirmation: confirmPassword,
+          }),
+        });
+
+        if (!passwordResponse.ok) {
+          const passwordError = await passwordResponse.json();
+          setMessage(
+            passwordError?.message ||
+            passwordError?.errors?.password?.[0] ||
+            'Failed to set password. Please try again.'
+          );
+          setSaving(false);
+          return;
+        }
+      }
+
       const response = await fetch(`${API_URL}/profile`, {
         method: 'PUT',
         headers: {
@@ -175,6 +243,34 @@ const GoogleCallback = () => {
                   placeholder="Enter your phone number"
                 />
               </div>
+
+              {requirePasswordSetup && (
+                <>
+                  <div className="form-group">
+                    <label>Create Password</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="At least 6 characters"
+                      minLength={6}
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Confirm Password</label>
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      placeholder="Confirm your password"
+                      minLength={6}
+                      required
+                    />
+                  </div>
+                </>
+              )}
 
               <div className="form-group">
                 <label>Date of Birth</label>
@@ -250,22 +346,24 @@ const GoogleCallback = () => {
                 {saving ? 'Saving...' : 'Save & Continue'}
               </button>
               
-              <button 
-                type="button" 
-                onClick={skipProfile}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  marginTop: '10px',
-                  background: 'transparent',
-                  border: '1px solid #ddd',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  color: '#666'
-                }}
-              >
-                Skip for now
-              </button>
+              {!requirePasswordSetup && (
+                <button 
+                  type="button" 
+                  onClick={skipProfile}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    marginTop: '10px',
+                    background: 'transparent',
+                    border: '1px solid #ddd',
+                    borderRadius: '5px',
+                    cursor: 'pointer',
+                    color: '#666'
+                  }}
+                >
+                  Skip for now
+                </button>
+              )}
             </form>
           </>
         )}

@@ -60,8 +60,8 @@
   justify-content: center;
   font-size: 2.2rem;
   font-weight: 700;
-  color: #0d9488;
-  background: linear-gradient(135deg, #e0f2fe, #ecfeff);
+  color: #28A745;
+  background: linear-gradient(135deg, #e8f7f0, #f0fbf7);
 }
 
 .ad-hospital-name {
@@ -116,7 +116,7 @@
 }
 
 .ad-edit-hospital-btn {
-  background: #0ea5a4;
+  background: #2A7FFF;
   color: #fff;
   padding: 0.65rem 1rem;
 }
@@ -170,8 +170,8 @@
 
 .ad-cancel-btn,
 .cancel-btn {
-  background: #e2e8f0;
-  color: #334155;
+  background: #e8eef3;
+  color: #1a1a2e;
   padding: 0.55rem 0.9rem;
 }
 
@@ -180,25 +180,25 @@
 .open-doctor-form-btn,
 .ad-add-btn,
 .ad-add-doc-btn {
-  background: #0f766e;
+  background: #28A745;
   color: #fff;
   padding: 0.55rem 0.9rem;
 }
 
 .ad-form-error,
 .error-message {
-  background: #fee2e2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
+  background: #fdeef0;
+  border: 1px solid #f7a9b0;
+  color: #a4161a;
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
   margin-bottom: 0.8rem;
 }
 
 .success-message {
-  background: #dcfce7;
-  border: 1px solid #86efac;
-  color: #166534;
+  background: #e8f7f0;
+  border: 1px solid #a8d9c8;
+  color: #008c3a;
   border-radius: 8px;
   padding: 0.6rem 0.75rem;
   margin-bottom: 0.8rem;
@@ -253,13 +253,13 @@
   align-items: center;
   justify-content: center;
   font-size: 1.6rem;
-  background: #ecfeff;
+  background: #e8f2ff;
 }
 
 .ad-admin-role-badge {
   font-size: 0.8rem;
-  background: #cffafe;
-  color: #155e75;
+  background: #e8f2ff;
+  color: #0052a3;
   padding: 0.25rem 0.55rem;
   border-radius: 999px;
 }
@@ -310,6 +310,140 @@
 .ad-mini-label {
   font-size: 0.72rem;
   color: #64748b;
+}
+
+.ad-profile-section {
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.ad-profile-card {
+  width: 100%;
+  max-width: none;
+}
+
+.ad-profile-title {
+  font-size: 1.9rem;
+  margin-bottom: 0;
+}
+
+.ad-profile-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.1rem;
+}
+
+.ad-edit-profile-btn {
+  padding: 0.65rem 1rem;
+}
+
+.ad-profile-head {
+  margin-bottom: 1.2rem;
+  align-items: center;
+}
+
+.ad-profile-details-grid {
+  margin-bottom: 1rem;
+}
+
+.ad-profile-avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 2rem;
+  background: #ecfeff;
+  color: #cbd5e1;
+  overflow: hidden;
+}
+
+.ad-profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ad-profile-avatar-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.55rem;
+}
+
+.ad-profile-upload-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ad-profile-form {
+  margin-bottom: 1rem;
+}
+
+.ad-profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.ad-profile-rows {
+  margin-bottom: 1rem;
+}
+
+.ad-profile-rows .ad-detail-row {
+  padding: 0.9rem 0;
+}
+
+.ad-profile-rows .ad-detail-row:last-child {
+  border-bottom: none;
+}
+
+.ad-profile-rows .ad-detail-row label {
+  font-size: 1rem;
+}
+
+.ad-profile-rows .ad-detail-row span {
+  font-size: 1rem;
+}
+
+.ad-profile-stats-grid {
+  gap: 0.75rem;
+}
+
+.ad-profile-stats-grid .dash-profile-stat {
+  padding: 14px;
+}
+
+.ad-profile-stats-grid .dash-profile-stat strong {
+  font-size: 1.85rem;
+}
+
+.ad-profile-stats-grid .dash-profile-stat span {
+  font-size: 0.92rem;
+}
+
+@media (max-width: 768px) {
+  .ad-profile-header-row,
+  .ad-profile-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ad-profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-profile-card {
+    width: 100%;
+  }
 }
 
 .ad-panel-header-row,
@@ -369,13 +503,13 @@
 }
 
 .status-badge.active {
-  background: #d1fae5;
-  color: #065f46;
+  background: #e8f7f0;
+  color: #004b36;
 }
 
 .status-badge.inactive {
-  background: #fee2e2;
-  color: #991b1b;
+  background: #fdeef0;
+  color: #a4161a;
 }
 
 .ad-no-doctors {
@@ -394,7 +528,7 @@
 }
 
 .ad-doctor-table thead {
-  background: #f0fdfa;
+  background: #e8f7f0;
 }
 
 .ad-doctor-table th {
@@ -402,10 +536,10 @@
   padding: 0.65rem 0.75rem;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #64748b;
+  color: #545461;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  border-bottom: 2px solid #e2e8f0;
+  border-bottom: 2px solid #d0d8e0;
   white-space: nowrap;
 }
 
@@ -495,13 +629,13 @@
 }
 
 .status-badge.active {
-  background: #0d9488;
+  background: #28A745;
   color: #fff;
 }
 
 .status-badge.inactive {
-  background: #e2e8f0;
-  color: #64748b;
+  background: #e8eef3;
+  color: #545461;
 }
 
 .ad-review-card {
@@ -603,7 +737,7 @@
 }
 
 .ad-patient-search:focus {
-  border-color: #0d9488;
+  border-color: #2A7FFF;
 }
 
 .ad-patient-table-wrap {
@@ -616,7 +750,7 @@
 }
 
 .ad-footer {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 60px 40px 30px;
   margin-top: 1.5rem;
@@ -701,6 +835,237 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
+}
+
+/* ===== Dark Dashboard Refresh ===== */
+.ad-page {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: #e5e7eb;
+}
+
+.ad-hospital-section,
+.ad-panel,
+.combined-form,
+.dept-form-container,
+.ad-dept-block,
+.ad-review-card,
+.ad-doctor-view-card,
+.modal-content {
+  background: #1f2937;
+  border-color: #334155;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+}
+
+.ad-hospital-name,
+.ad-panel-title,
+.ad-dept-name,
+.ad-doc-name-cell strong,
+.ad-review-patient,
+.ad-mini-val,
+.ad-detail-row span,
+.ad-doctor-table td,
+.ad-doctor-table th,
+.ad-edit-title {
+  color: #f8fafc;
+}
+
+.ad-hospital-details p,
+.ad-dept-desc,
+.ad-doc-email,
+.ad-doc-id,
+.ad-mini-label,
+.ad-detail-row label,
+.ad-review-comment,
+.ad-review-dept,
+.ad-empty-box,
+.ad-no-doctors {
+  color: #cbd5e1;
+}
+
+.ad-empty-box {
+  background: #111827;
+  border-color: #334155;
+}
+
+.ad-doctor-table thead,
+.ad-doctor-table tbody tr:hover {
+  background: #0f172a;
+}
+
+.ad-doctor-table td,
+.ad-doctor-table th,
+.ad-detail-row {
+  border-color: #334155;
+}
+
+.ad-form-group input,
+.ad-form-group textarea,
+.dept-form input,
+.dept-form select,
+.dept-form textarea,
+.dept-select,
+.doctor-form input,
+.doctor-form textarea,
+.doctor-form select,
+.ad-patient-search {
+  background: #0f172a;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+.ad-form-group input::placeholder,
+.ad-form-group textarea::placeholder,
+.ad-patient-search::placeholder {
+  color: #94a3b8;
+}
+
+.ad-edit-hospital-btn,
+.ad-save-btn,
+.submit-btn,
+.open-doctor-form-btn,
+.ad-add-btn,
+.ad-add-doc-btn {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.ad-edit-hospital-btn:hover,
+.ad-save-btn:hover,
+.submit-btn:hover,
+.open-doctor-form-btn:hover,
+.ad-add-btn:hover,
+.ad-add-doc-btn:hover {
+  background: #1d4ed8;
+}
+
+.ad-cancel-btn,
+.cancel-btn {
+  background: #334155;
+  color: #f8fafc;
+}
+
+.ad-tbl-btn.view {
+  background: #1e3a8a;
+  color: #dbeafe;
+}
+
+.ad-tbl-btn.edit {
+  background: #6b21a8;
+  color: #f3e8ff;
+}
+
+.ad-tbl-btn.del,
+.ad-review-delete-btn {
+  background: #991b1b;
+  color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.ad-footer {
+  background: #0f172a;
+}
+
+/* Button style update: white background, black text, no hover effect */
+.ad-page button,
+.ad-page .ad-edit-hospital-btn,
+.ad-page .ad-save-btn,
+.ad-page .ad-cancel-btn,
+.ad-page .ad-add-btn,
+.ad-page .ad-add-doc-btn,
+.ad-page .ad-doc-btn,
+.ad-page .submit-btn,
+.ad-page .cancel-btn,
+.ad-page .open-doctor-form-btn,
+.ad-page .ad-tbl-btn,
+.ad-page .ad-review-delete-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.ad-page button:hover,
+.ad-page .ad-edit-hospital-btn:hover,
+.ad-page .ad-save-btn:hover,
+.ad-page .ad-cancel-btn:hover,
+.ad-page .ad-add-btn:hover,
+.ad-page .ad-add-doc-btn:hover,
+.ad-page .ad-doc-btn:hover,
+.ad-page .submit-btn:hover,
+.ad-page .cancel-btn:hover,
+.ad-page .open-doctor-form-btn:hover,
+.ad-page .ad-tbl-btn:hover,
+.ad-page .ad-review-delete-btn:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Final gradient setup for Admin dashboard */
+.ad-page {
+  background: linear-gradient(180deg, #081228 0%, #101d3a 100%) !important;
+  min-height: 100vh;
+}
+
+.ad-hospital-section,
+.ad-panel,
+.ad-dept-block,
+.ad-review-card,
+.combined-form,
+.dept-form-container,
+.modal-content {
+  background: #13213f !important;
+  border: 1px solid #2b3f68 !important;
+}
+
+.ad-panel-title,
+.ad-hospital-name,
+.ad-detail-row span,
+.ad-mini-val,
+.ad-dept-name,
+.ad-doctor-table th,
+.ad-doctor-table td,
+.ad-doc-name-cell strong {
+  color: #f8fafc !important;
+}
+
+.ad-hospital-details p,
+.ad-detail-row label,
+.ad-mini-label,
+.ad-dept-desc,
+.ad-doc-email,
+.ad-doc-id,
+.ad-review-comment,
+.ad-empty-box,
+.ad-no-doctors {
+  color: #c7d2fe !important;
+}
+
+.ad-doctor-table thead,
+.ad-doctor-table tbody tr:hover,
+.ad-empty-box {
+  background: #0e1a33 !important;
+}
+
+.ad-page button,
+.ad-page .ad-edit-hospital-btn,
+.ad-page .ad-save-btn,
+.ad-page .ad-cancel-btn,
+.ad-page .ad-add-btn,
+.ad-page .ad-add-doc-btn,
+.ad-page .ad-doc-btn,
+.ad-page .submit-btn,
+.ad-page .cancel-btn,
+.ad-page .open-doctor-form-btn,
+.ad-page .ad-tbl-btn,
+.ad-page .ad-review-delete-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
 }
 
 .form-group {
@@ -920,3 +1285,322 @@
     padding: 40px 20px 24px;
   }
 }
+
+/* Final Admin page background lock */
+.ad-page {
+  background: linear-gradient(180deg, #081228 0%, #101d3a 100%) !important;
+  min-height: 100vh !important;
+}
+
+.ad-page .dash-main-content {
+  background: transparent !important;
+}
+
+/* Final black theme override for Admin dashboard */
+.ad-page {
+  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
+}
+
+.ad-page .dash-sidebar {
+  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
+  border-color: #1a1a1a !important;
+}
+
+.ad-hospital-section,
+.ad-panel,
+.ad-dept-block,
+.ad-review-card,
+.combined-form,
+.dept-form-container,
+.modal-content,
+.dash-graph-card,
+.dash-profile-card,
+.dash-profile-row,
+.dash-profile-stat {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+}
+
+.ad-doctor-table thead,
+.ad-doctor-table tbody tr:hover,
+.ad-empty-box,
+.dash-line-chart,
+.dash-pie-chart::after,
+.ad-patient-search,
+.ad-form-group input,
+.ad-form-group textarea,
+.dept-form input,
+.dept-form select,
+.dept-form textarea,
+.dept-select,
+.doctor-form input,
+.doctor-form textarea,
+.doctor-form select {
+  background: #050505 !important;
+  border-color: #1f1f1f !important;
+}
+
+.dash-line-grid {
+  stroke: #202020 !important;
+}
+
+/* Final white theme override for Admin dashboard */
+.ad-page {
+  background: #ffffff !important;
+}
+
+.ad-page .dash-sidebar {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.ad-hospital-section,
+.ad-panel,
+.ad-dept-block,
+.ad-review-card,
+.combined-form,
+.dept-form-container,
+.modal-content,
+.dash-graph-card,
+.dash-profile-card,
+.dash-profile-row,
+.dash-profile-stat {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.ad-doctor-table thead,
+.ad-doctor-table tbody tr:hover,
+.ad-empty-box,
+.dash-line-chart,
+.dash-pie-chart::after {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+}
+
+.ad-patient-search,
+.ad-form-group input,
+.ad-form-group textarea,
+.dept-form input,
+.dept-form select,
+.dept-form textarea,
+.dept-select,
+.doctor-form input,
+.doctor-form textarea,
+.doctor-form select {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+  color: #1a1a2e !important;
+}
+
+.ad-page .ad-hospital-name,
+.ad-page .ad-panel-title,
+.ad-page .ad-dept-name,
+.ad-page .ad-doc-name-cell strong,
+.ad-page .ad-review-patient,
+.ad-page .ad-mini-val,
+.ad-page .ad-detail-row span,
+.ad-page .ad-doctor-table td,
+.ad-page .ad-doctor-table th,
+.ad-page .ad-edit-title,
+.ad-page .dash-profile-title,
+.ad-page .dash-profile-row span,
+.ad-page .dash-profile-stat strong {
+  color: #111827 !important;
+}
+
+.ad-page .ad-hospital-details p,
+.ad-page .ad-dept-desc,
+.ad-page .ad-doc-email,
+.ad-page .ad-doc-id,
+.ad-page .ad-mini-label,
+.ad-page .ad-detail-row label,
+.ad-page .ad-review-comment,
+.ad-page .ad-review-dept,
+.ad-page .ad-empty-box,
+.ad-page .ad-no-doctors,
+.ad-page .dash-profile-subtitle,
+.ad-page .dash-profile-row label,
+.ad-page .dash-profile-stat span,
+.ad-page .dash-sidebar-title,
+.ad-page .dash-sidebar-footnote {
+  color: #6b7280 !important;
+}
+
+.ad-page button,
+.ad-page .ad-edit-hospital-btn,
+.ad-page .ad-save-btn,
+.ad-page .ad-cancel-btn,
+.ad-page .ad-add-btn,
+.ad-page .ad-add-doc-btn,
+.ad-page .ad-doc-btn,
+.ad-page .submit-btn,
+.ad-page .cancel-btn,
+.ad-page .open-doctor-form-btn,
+.ad-page .ad-tbl-btn,
+.ad-page .ad-review-delete-btn,
+.ad-page .dash-sidebar-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+.ad-page button:hover,
+.ad-page .ad-edit-hospital-btn:hover,
+.ad-page .ad-save-btn:hover,
+.ad-page .ad-cancel-btn:hover,
+.ad-page .ad-add-btn:hover,
+.ad-page .ad-add-doc-btn:hover,
+.ad-page .ad-doc-btn:hover,
+.ad-page .submit-btn:hover,
+.ad-page .cancel-btn:hover,
+.ad-page .open-doctor-form-btn:hover,
+.ad-page .ad-tbl-btn:hover,
+.ad-page .ad-review-delete-btn:hover,
+.ad-page .dash-sidebar-btn:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Authoritative final Admin palette override */
+.ad-page {
+  background: #f6f8fb !important;
+  color: #0f172a !important;
+}
+
+.ad-page .dash-sidebar {
+  background: #ffffff !important;
+  border: 1px solid #dbe3ee !important;
+}
+
+.ad-page .dash-sidebar-title,
+.ad-page .dash-sidebar-footnote {
+  color: #475569 !important;
+}
+
+.ad-page .dash-sidebar-btn {
+  background: #ffffff !important;
+  color: #2A7FFF !important;
+  border: 1px solid #2A7FFF !important;
+}
+
+.ad-page .dash-sidebar-btn.active,
+.ad-page .dash-sidebar-btn:hover,
+.ad-page .dash-sidebar-logout {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border-color: #1F5FCC !important;
+}
+
+.ad-page .dash-graph-card,
+.ad-page .dash-profile-card,
+.ad-page .dash-profile-row,
+.ad-page .dash-profile-stat,
+.ad-page .ad-panel,
+.ad-page .ad-hospital-section,
+.ad-page .table-responsive {
+  background: #ffffff !important;
+  border-color: #dbe3ee !important;
+}
+
+.ad-page .dash-graph-card h3,
+.ad-page .dash-graph-card p,
+.ad-page .dash-line-labels span,
+.ad-page .dash-pie-legend li,
+.ad-page .dash-pie-value {
+  color: #1e293b !important;
+}
+
+.ad-page .dash-line-chart,
+.ad-page .dash-pie-chart::after {
+  background: #f8fbff !important;
+  border-color: #dbe7ff !important;
+}
+
+.ad-page .dash-line-grid {
+  stroke: #d6e4ff !important;
+}
+
+.ad-page .ad-save-btn,
+.ad-page .submit-btn,
+.ad-page .ad-add-btn,
+.ad-page .ad-add-doc-btn,
+.ad-page .open-doctor-form-btn {
+  background: #28A745 !important;
+  color: #ffffff !important;
+  border: 1px solid #218838 !important;
+}
+
+.ad-page .ad-edit-hospital-btn,
+.ad-page .btn-create,
+.ad-page .btn-add-hospital,
+.ad-page .action-btn.view-btn,
+.ad-page .ad-tbl-btn.view,
+.ad-page .ad-doc-btn {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border: 1px solid #1F5FCC !important;
+}
+
+.ad-page .action-btn.edit-btn,
+.ad-page .ad-tbl-btn.edit-btn,
+.ad-page .ad-tbl-btn.edit {
+  background: #FF9800 !important;
+  color: #ffffff !important;
+  border: 1px solid #E68900 !important;
+}
+
+.ad-page .action-btn.delete-btn,
+.ad-page .ad-review-delete-btn,
+.ad-page .ad-tbl-btn.delete-btn {
+  background: #DC3545 !important;
+  color: #ffffff !important;
+  border: 1px solid #C82333 !important;
+}
+
+.ad-page .ad-tbl-btn.del,
+.ad-page .action-btn.del,
+.ad-page .action-btn.delete,
+.ad-page .remove-image-btn {
+  background: #DC3545 !important;
+  color: #ffffff !important;
+  border: 1px solid #C82333 !important;
+}
+
+.ad-page .ad-tbl-btn.del:hover,
+.ad-page .action-btn.delete-btn:hover,
+.ad-page .ad-review-delete-btn:hover,
+.ad-page .action-btn.del:hover,
+.ad-page .action-btn.delete:hover,
+.ad-page .remove-image-btn:hover {
+  background: #C82333 !important;
+  color: #ffffff !important;
+  border-color: #A71D2A !important;
+}
+
+.ad-page .ad-tbl-btn.view:hover,
+.ad-page .ad-edit-hospital-btn:hover,
+.ad-page .btn-create:hover,
+.ad-page .btn-add-hospital:hover,
+.ad-page .ad-doc-btn:hover {
+  background: #1F5FCC !important;
+  border-color: #174A99 !important;
+}
+
+.ad-page .ad-save-btn:hover,
+.ad-page .submit-btn:hover,
+.ad-page .ad-add-btn:hover,
+.ad-page .ad-add-doc-btn:hover,
+.ad-page .open-doctor-form-btn:hover {
+  background: #218838 !important;
+  border-color: #1E7E34 !important;
+}
+
+.ad-page .ad-tbl-btn.edit:hover,
+.ad-page .action-btn.edit-btn:hover {
+  background: #E68900 !important;
+  border-color: #CC7A00 !important;
+}
+
+

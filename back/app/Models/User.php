@@ -80,6 +80,28 @@ class User extends Authenticatable
         return $this->role === 'patient';
     }
 
+    public function requiresHospitalAccess()
+    {
+        return in_array($this->role, ['doctor', 'admin'], true);
+    }
+
+    public function hasAccessibleHospital()
+    {
+        if (!$this->requiresHospitalAccess()) {
+            return true;
+        }
+
+        if (!$this->hospital_id) {
+            return false;
+        }
+
+        if ($this->relationLoaded('hospital')) {
+            return $this->hospital !== null;
+        }
+
+        return Hospital::query()->whereKey($this->hospital_id)->exists();
+    }
+
     // ========== Relationships ==========
 
     /**

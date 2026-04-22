@@ -4,17 +4,23 @@ import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import PageHero from '../components/PageHero/PageHero';
 import Footer from '../components/Common/Footer';
+import Navigation from '../components/Common/Navigation';
 import '../styles/PatientDashboard.css';
 
 const PatientDashboard = () => {
   const navigate = useNavigate();
-  const { user, token, logout } = useContext(AuthContext);
+  const { user, token } = useContext(AuthContext);
   const [dashboardData, setDashboardData] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [myReviews, setMyReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  // Search filters
+  const [searchDoctors, setSearchDoctors] = useState('');
+  const [searchHospitals, setSearchHospitals] = useState('');
   
   // Doctor reviews for cards
   const [doctorReviews, setDoctorReviews] = useState({});
@@ -85,6 +91,15 @@ const PatientDashboard = () => {
         setReports(reportsRes);
       }
 
+      try {
+        const reviewsRes = await api.getMyReviews(token);
+        if (reviewsRes.status === 'success') {
+          setMyReviews(Array.isArray(reviewsRes.data?.data) ? reviewsRes.data.data : reviewsRes.data || []);
+        }
+      } catch (reviewErr) {
+        console.error('Failed to fetch my reviews:', reviewErr);
+      }
+
       // Fetch reviews for doctors - moved to doctor view page
       // await fetchDoctorReviews(doctorsRes.status === 'success' ? doctorsRes.data : doctorsRes);
     } catch (err) {
@@ -121,16 +136,6 @@ const PatientDashboard = () => {
     } finally {
       setLoadingReviews(false);
     }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await api.logout(token);
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-    logout();
-    navigate('/login');
   };
 
   const handleHospitalClick = (hospitalId) => {
@@ -239,9 +244,11 @@ const PatientDashboard = () => {
     setReviewLoading(true);
     setReviewMessage({ type: '', text: '' });
     try {
+      const appointmentId = selectedAppointment?.id || selectedAppointment?.appointment_id || null;
+
       const res = await api.submitReview({
         doctor_id: doctorUserId,
-        appointment_id: selectedAppointment.id,
+        appointment_id: appointmentId,
         rating: parseInt(reviewForm.rating),
         comment: reviewForm.comment,
       }, token);
@@ -268,6 +275,7 @@ const PatientDashboard = () => {
 
   return (
     <div className="patient-dashboard-page">
+      <Navigation />
       <PageHero 
         title={`Welcome, ${user.name}`} 
         subtitle="Manage your medical records, view doctors, and book appointments."
@@ -277,7 +285,7 @@ const PatientDashboard = () => {
         {error && <div className="error-message">{error}</div>}
 
         {/* Patient Info Card */}
-        <section className="patient-info">
+        <section id="pd-overview" className="patient-info">
           <div className="info-card">
             <h2>Your Information</h2>
             <div className="info-grid">
@@ -302,14 +310,38 @@ const PatientDashboard = () => {
         </section>
 
         {/* DOCTORS SECTION - Below hero */}
-        <section className="pd-doctors-section">
+        <section id="pd-doctors" className="pd-doctors-section">
           <div className="pd-section-header">
-            <h2>Our Doctors</h2>
-            <p>Browse our qualified healthcare professionals</p>
+            <div>
+              <h2>Our Doctors</h2>
+              <p>Browse our qualified healthcare professionals</p>
+            </div>
+          </div>
+          <div className="pd-search-box">
+            <input
+              type="text"
+              placeholder="Search doctors by name, specialization, or department..."
+              value={searchDoctors}
+              onChange={(e) => setSearchDoctors(e.target.value)}
+              className="pd-search-input"
+            />
           </div>
           {doctors.length > 0 ? (
             <div className="pd-doctors-grid">
-              {doctors.map((doc) => (
+              {doctors.filter((doc) => {
+                const searchLower = searchDoctors.toLowerCase();
+                const name = doc.user?.name?.toLowerCase() || '';
+                const specialization = doc.specialization?.toLowerCase() || '';
+                const dept = doc.department?.name?.toLowerCase() || '';
+                return name.includes(searchLower) || specialization.includes(searchLower) || dept.includes(searchLower);
+              }).length > 0 ? (
+                doctors.filter((doc) => {
+                  const searchLower = searchDoctors.toLowerCase();
+                  const name = doc.user?.name?.toLowerCase() || '';
+                  const specialization = doc.specialization?.toLowerCase() || '';
+                  const dept = doc.department?.name?.toLowerCase() || '';
+                  return name.includes(searchLower) || specialization.includes(searchLower) || dept.includes(searchLower);
+                }).map((doc) => (
                 <div key={doc.id} className="pd-doctor-card">
                   <div className="pd-doctor-photo">
                     {doc.image && doc.image !== '' ? (
@@ -350,7 +382,10 @@ const PatientDashboard = () => {
                     View Doctor
                   </button>
                 </div>
-              ))}
+              ))
+              ) : (
+                <div className="no-data">No doctors match your search</div>
+              )}
             </div>
           ) : (
             <div className="no-data">No doctors available</div>
@@ -358,14 +393,38 @@ const PatientDashboard = () => {
         </section>
 
         {/* HOSPITALS SECTION */}
-        <section className="pd-hospitals-section">
+        <section id="pd-hospitals" className="pd-hospitals-section">
           <div className="pd-section-header">
-            <h2>Our Hospitals</h2>
-            <p>Browse hospitals and book appointments</p>
+            <div>
+              <h2>Our Hospitals</h2>
+              <p>Browse hospitals and book appointments</p>
+            </div>
+          </div>
+          <div className="pd-search-box">
+            <input
+              type="text"
+              placeholder="Search hospitals by name, address, or email..."
+              value={searchHospitals}
+              onChange={(e) => setSearchHospitals(e.target.value)}
+              className="pd-search-input"
+            />
           </div>
           {hospitals.length > 0 ? (
             <div className="pd-hospitals-grid">
-              {hospitals.map((hospital) => (
+              {hospitals.filter((hospital) => {
+                const searchLower = searchHospitals.toLowerCase();
+                const name = hospital.name?.toLowerCase() || '';
+                const address = hospital.address?.toLowerCase() || '';
+                const email = hospital.email?.toLowerCase() || '';
+                return name.includes(searchLower) || address.includes(searchLower) || email.includes(searchLower);
+              }).length > 0 ? (
+                hospitals.filter((hospital) => {
+                  const searchLower = searchHospitals.toLowerCase();
+                  const name = hospital.name?.toLowerCase() || '';
+                  const address = hospital.address?.toLowerCase() || '';
+                  const email = hospital.email?.toLowerCase() || '';
+                  return name.includes(searchLower) || address.includes(searchLower) || email.includes(searchLower);
+                }).map((hospital) => (
                 <div key={hospital.id} className="pd-hospital-card">
                   {hospital.image && (
                     <div className="pd-hospital-image">
@@ -397,7 +456,10 @@ const PatientDashboard = () => {
                     </button>
                   </div>
                 </div>
-              ))}
+              ))
+              ) : (
+                <div className="no-data">No hospitals match your search</div>
+              )}
             </div>
           ) : (
             <div className="no-data">No hospitals available</div>
@@ -406,7 +468,7 @@ const PatientDashboard = () => {
 
         {/* APPOINTMENTS SECTION - For reviews */}
         {appointments.length > 0 && (
-          <section className="pd-appointments-section">
+          <section id="pd-appointments" className="pd-appointments-section">
             <div className="pd-section-header">
               <h2>Your Appointments</h2>
               <p>Review completed appointments</p>
@@ -437,8 +499,37 @@ const PatientDashboard = () => {
           </section>
         )}
 
+        {/* MY REVIEWS SECTION */}
+        <section className="pd-appointments-section">
+          <div className="pd-section-header">
+            <h2>My Reviews</h2>
+            <p>Reviews you have submitted</p>
+          </div>
+          {myReviews.length === 0 ? (
+            <div className="no-data">You have not submitted any reviews yet.</div>
+          ) : (
+            <div className="pd-appointments-list">
+              {myReviews.map((review) => (
+                <div key={review.id} className="pd-appointment-card">
+                  <div className="pd-appt-info">
+                    <h4>Dr. {review.doctor?.name || 'Doctor'}</h4>
+                    <p><strong>Rating:</strong> {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                    {review.comment && <p><strong>Comment:</strong> {review.comment}</p>}
+                    <p>
+                      <strong>Status:</strong>{' '}
+                      <span className={`pd-status pd-status-${review.status || 'pending'}`}>
+                        {(review.status || 'pending').toUpperCase()}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
         {/* REPORTS SECTION - View doctor's reports with download */}
-        <section className="pd-reports-section">
+        <section id="pd-reports" className="pd-reports-section">
           <div className="pd-section-header">
             <h2>Doctor Reports</h2>
             <p>View and download reports uploaded by your doctors</p>

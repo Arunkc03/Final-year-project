@@ -3,7 +3,7 @@
 .hvm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(2, 6, 23, 0.78);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -13,9 +13,10 @@
 }
 
 .hvm-modal {
-  background: #fff;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
   border-radius: 18px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 30px 70px rgba(2, 6, 23, 0.65);
   width: 100%;
   max-width: 680px;
   max-height: 90vh;
@@ -32,8 +33,8 @@
 .hvm-header {
   position: sticky;
   top: 0;
-  background: #fff;
-  border-bottom: 1px solid #e5e7eb;
+  background: #ffffff;
+  border-bottom: 1px solid #e5edf7;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,26 +46,20 @@
 .hvm-header h2 {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   margin: 0;
 }
 
 .hvm-close-btn {
   width: 36px;
   height: 36px;
-  border: none;
-  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s;
-  color: #6b7280;
-}
-
-.hvm-close-btn:hover {
-  background: #e5e7eb;
   color: #111827;
 }
 
@@ -89,7 +84,8 @@
   height: 200px;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.5);
+  border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
 .hvm-image-wrap img {
@@ -123,7 +119,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #9ca3af;
+  color: #64748b;
 }
 
 .hvm-field-label svg {
@@ -137,7 +133,7 @@
 .hvm-field-value {
   font-size: 1rem;
   font-weight: 500;
-  color: #111827;
+  color: #0f172a;
 }
 
 .hvm-field-value.large {
@@ -147,10 +143,11 @@
 
 /* ── Admin Section (purple gradient) ── */
 .hvm-admin-section {
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: #f8fbff;
+  border: 1px solid #dbe7ff;
   border-radius: 14px;
   padding: 1.5rem;
-  color: #fff;
+  color: #0f172a;
 }
 
 .hvm-admin-section-title {
@@ -179,8 +176,8 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.2);
-  border: 2px solid rgba(255,255,255,0.3);
+  background: #eff6ff;
+  border: 2px solid #cfe0ff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -190,7 +187,7 @@
 .hvm-admin-avatar svg {
   width: 28px;
   height: 28px;
-  stroke: #fff;
+  stroke: #2A7FFF;
   fill: none;
 }
 
@@ -205,7 +202,7 @@
   align-items: center;
   gap: 0.4rem;
   font-size: 0.9rem;
-  color: rgba(255,255,255,0.88);
+  color: #475569;
   margin-bottom: 0.25rem;
 }
 
@@ -218,7 +215,7 @@
 }
 
 .hvm-no-admin {
-  color: rgba(255,255,255,0.85);
+  color: #64748b;
   font-weight: 500;
 }
 
@@ -229,22 +226,23 @@
   gap: 0.6rem;
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   margin-bottom: 0.75rem;
 }
 
 .hvm-dept-title svg {
   width: 20px;
   height: 20px;
-  stroke: #16a34a;
+  stroke: #64748b;
   fill: none;
 }
 
 .hvm-dept-card {
-  background: #16a34a;
+  background: #f8fbff;
+  border: 1px solid #dbe7ff;
   border-radius: 14px;
   padding: 1.25rem 1.5rem;
-  color: #fff;
+  color: #0f172a;
   margin-bottom: 0.75rem;
 }
 
@@ -265,8 +263,8 @@
 }
 
 .hvm-dept-badge {
-  background: rgba(255,255,255,0.95);
-  color: #16a34a;
+  background: #ffffff;
+  color: #111827;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.3rem 0.8rem;
@@ -279,12 +277,13 @@
   flex-wrap: wrap;
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
 }
 
 .hvm-dept-meta-item {
-  background: rgba(255,255,255,0.9);
-  color: #16a34a;
+  background: rgba(30, 41, 59, 0.9);
+  color: #e2e8f0;
+  border: 1px solid rgba(148, 163, 184, 0.35);
   font-size: 0.8rem;
   font-weight: 600;
   padding: 0.3rem 0.7rem;
@@ -292,14 +291,15 @@
 }
 
 .hvm-doctor-label {
-  color: rgba(255,255,255,0.8);
+  color: #475569;
   font-size: 0.82rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
 .hvm-doctor-card {
-  background: #fff;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
   border-radius: 10px;
   padding: 0.85rem 1rem;
   display: flex;
@@ -318,11 +318,19 @@
   gap: 0.75rem;
 }
 
+.hvm-doctor-item {
+  margin-bottom: 0.7rem;
+}
+
+.hvm-doctor-item:last-child {
+  margin-bottom: 0;
+}
+
 .hvm-doctor-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4ade80, #16a34a);
+  background: linear-gradient(135deg, #2A7FFF, #1F5FCC);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,28 +347,33 @@
 .hvm-doctor-name {
   font-weight: 700;
   font-size: 0.9rem;
-  color: #111827;
+  color: #0f172a;
 }
 
 .hvm-doctor-qual {
   font-size: 0.8rem;
-  color: #6b7280;
+  color: #64748b;
+}
+
+.hvm-doctor-meta {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 0.15rem;
 }
 
 .hvm-doctor-fee {
   font-size: 0.82rem;
   font-weight: 700;
-  color: #16a34a;
+  color: #166534;
 }
 
 .hvm-doctor-delete-btn {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -369,10 +382,99 @@
   flex-shrink: 0;
 }
 
-.hvm-doctor-delete-btn:hover:not(:disabled) {
-  background: #fecaca;
-  border-color: #f87171;
-  box-shadow: 0 2px 8px rgba(153, 27, 27, 0.15);
+.hvm-doctor-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hvm-doctor-action-btn {
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  min-height: 38px;
+  font-weight: 600;
+}
+
+.hvm-doctor-action-btn:disabled,
+.hvm-doctor-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.hvm-doctor-message {
+  margin-bottom: 0.85rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.hvm-doctor-message.success {
+  background: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.hvm-doctor-message.error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.hvm-doctor-edit-form {
+  margin-top: 0.65rem;
+  padding: 0.95rem;
+  border: 1px solid #dbe7ff;
+  border-radius: 10px;
+  background: #f8fbff;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.hvm-doctor-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.hvm-doctor-form-group label {
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hvm-doctor-form-group input,
+.hvm-doctor-form-group select,
+.hvm-doctor-form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.65rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #c7d7ef;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.hvm-doctor-form-group textarea {
+  resize: vertical;
+}
+
+.hvm-doctor-form-group-full {
+  grid-column: 1 / -1;
+}
+
+.hvm-doctor-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
 }
 
 .hvm-doctor-delete-btn:disabled {
@@ -386,38 +488,32 @@
 }
 
 .hvm-no-doctors {
-  color: rgba(255,255,255,0.8);
+  color: #64748b;
   font-size: 0.88rem;
 }
 
 /* ── Registration Date ── */
 .hvm-date-section {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5edf7;
   padding-top: 1rem;
 }
 
 /* ── Footer ── */
 .hvm-footer {
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5edf7;
   padding-top: 1rem;
 }
 
 .hvm-btn-close {
   width: 100%;
   padding: 0.75rem 1.5rem;
-  background: linear-gradient(135deg, #4b5563, #374151);
-  color: #fff;
-  border: none;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
   border-radius: 10px;
   font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
-}
-
-.hvm-btn-close:hover {
-  box-shadow: 0 4px 14px rgba(0,0,0,0.2);
-  transform: translateY(-1px);
 }
 
 /* ── Responsive ── */
@@ -431,4 +527,25 @@
   .hvm-body {
     padding: 1.25rem;
   }
+
+  .hvm-doctor-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .hvm-doctor-card-actions,
+  .hvm-doctor-form-actions,
+  .hvm-doctor-edit-form {
+    width: 100%;
+  }
+
+  .hvm-doctor-edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .hvm-doctor-form-group-full {
+    grid-column: auto;
+  }
 }
+

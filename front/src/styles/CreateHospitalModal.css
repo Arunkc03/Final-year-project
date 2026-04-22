@@ -3,7 +3,7 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: rgba(2, 6, 23, 0.78);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -13,9 +13,10 @@
 }
 
 .create-hospital-modal {
-  background: #fff;
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
   border-radius: 16px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
   max-width: 780px;
   width: 100%;
   max-height: 90vh;
@@ -32,8 +33,9 @@
 .modal-header {
   position: sticky;
   top: 0;
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  background: #ffffff;
   padding: 1.4rem 1.75rem;
+  border-bottom: 1px solid #e5edf7;
   border-radius: 16px 16px 0 0;
   display: flex;
   align-items: center;
@@ -50,7 +52,8 @@
 .modal-header-icon {
   width: 42px;
   height: 42px;
-  background: rgba(255, 255, 255, 0.2);
+  background: #eff6ff;
+  border: 1px solid #cfe0ff;
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -61,45 +64,40 @@
 .modal-header-icon svg {
   width: 22px;
   height: 22px;
-  color: #fff;
+  color: #2A7FFF;
 }
 
 .modal-header-title {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
-  color: #fff;
+  color: #0f172a;
   line-height: 1.3;
 }
 
 .modal-header-subtitle {
   margin: 0.2rem 0 0;
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.82);
+  color: #64748b;
 }
 
 .modal-close-btn {
   width: 36px;
   height: 36px;
-  border: none;
-  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid #d1d5db;
+  background: #ffffff;
   border-radius: 8px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
   flex-shrink: 0;
-}
-
-.modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
 }
 
 .modal-close-btn svg {
   width: 18px;
   height: 18px;
-  color: #fff;
+  color: #111827;
 }
 
 /* Form Body */
@@ -114,7 +112,7 @@
 .modal-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  color: #b91c1c;
+  color: #991b1b;
   padding: 0.75rem 1rem;
   border-radius: 10px;
   font-size: 0.88rem;
@@ -127,7 +125,7 @@
   align-items: center;
   gap: 0.55rem;
   padding-bottom: 0.65rem;
-  border-bottom: 1.5px solid #f3f4f6;
+  border-bottom: 1px solid #e5edf7;
   margin-bottom: 1rem;
 }
 
@@ -139,11 +137,11 @@
 .modal-section-title span {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #1e293b;
+  color: #0f172a;
 }
 
-.modal-section-title.blue svg  { color: #2563eb; }
-.modal-section-title.indigo svg { color: #4f46e5; }
+.modal-section-title.blue svg  { color: #2A7FFF; }
+.modal-section-title.indigo svg { color: #2A7FFF; }
 
 /* Image Upload */
 .image-upload-label {
@@ -153,29 +151,23 @@
   justify-content: center;
   width: 100%;
   height: 140px;
-  border: 2px dashed #d1d5db;
+  border: 1px dashed #c7d7ef;
   border-radius: 12px;
   cursor: pointer;
   text-align: center;
-  transition: border-color 0.2s, background 0.2s;
-  background: #fafafa;
-}
-
-.image-upload-label:hover {
-  border-color: #2563eb;
-  background: #eff6ff;
+  background: #f8fbff;
 }
 
 .image-upload-label svg {
   width: 32px;
   height: 32px;
-  color: #9ca3af;
+  color: #2A7FFF;
   margin-bottom: 0.5rem;
 }
 
 .image-upload-label span {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: #475569;
   font-weight: 500;
 }
 
@@ -198,9 +190,9 @@
   position: absolute;
   top: 8px;
   right: 8px;
-  background: #ef4444;
-  color: #fff;
-  border: none;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #d1d5db;
   border-radius: 50%;
   width: 28px;
   height: 28px;
@@ -208,11 +200,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
-}
-
-.image-remove-btn:hover {
-  background: #dc2626;
 }
 
 .image-remove-btn svg {
@@ -236,7 +223,7 @@
   display: block;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #374151;
+  color: #334155;
   margin-bottom: 0.4rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -248,29 +235,49 @@
 }
 
 .modal-field input,
-.modal-field textarea {
+.modal-field textarea,
+.modal-field select {
   width: 100%;
   padding: 0.65rem 0.9rem;
-  border: 1.5px solid #e5e7eb;
+  border: 1px solid #c7d7ef;
   border-radius: 10px;
   font-size: 0.9rem;
-  color: #1e293b;
-  background: #fff;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  color: #0f172a;
+  background: #ffffff;
   font-family: inherit;
   box-sizing: border-box;
 }
 
 .modal-field input::placeholder,
-.modal-field textarea::placeholder {
-  color: #9ca3af;
+.modal-field textarea::placeholder,
+.modal-field select::placeholder {
+  color: #94a3b8;
 }
 
 .modal-field input:focus,
-.modal-field textarea:focus {
+.modal-field textarea:focus,
+.modal-field select:focus {
   outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 2px rgba(42, 127, 255, 0.15);
+}
+
+.modal-select-wrap {
+  position: relative;
+}
+
+.modal-select-wrap svg {
+  position: absolute;
+  top: 50%;
+  left: 0.9rem;
+  transform: translateY(-50%);
+  color: #64748b;
+  pointer-events: none;
+}
+
+.modal-select-wrap select {
+  padding-left: 2.5rem;
+  appearance: none;
 }
 
 .modal-field textarea {
@@ -279,9 +286,111 @@
 }
 
 /* Admin section inputs get indigo focus */
-.modal-section.admin .modal-field input:focus {
-  border-color: #4f46e5;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+.modal-section.admin .modal-field input:focus,
+.modal-section.admin .modal-field select:focus {
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 2px rgba(42, 127, 255, 0.15);
+}
+
+.modal-checkbox-label {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  font-size: 0.9rem !important;
+  color: #0f172a !important;
+}
+
+.modal-checkbox-label input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+
+.staff-loading,
+.staff-note {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.staff-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.staff-list-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+.staff-list-item strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.staff-list-item p {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.staff-list-item span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1f5fcc;
+  background: #eaf2ff;
+  border: 1px solid #d4e4ff;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  white-space: nowrap;
+}
+
+.staff-doctor-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
+.staff-edit-btn {
+  border: 1px solid #1f5fcc;
+  background: #2a7fff;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.staff-edit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.doctor-inline-form {
+  margin-top: 0.65rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  padding: 0.9rem;
+  background: #ffffff;
+}
+
+.doctor-inline-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.8rem;
 }
 
 /* Footer Buttons */
@@ -289,48 +398,69 @@
   display: flex;
   gap: 0.75rem;
   padding-top: 1.25rem;
-  border-top: 1.5px solid #f3f4f6;
+  border-top: 1px solid #e5edf7;
 }
 
 .btn-modal-cancel {
   flex: 1;
   padding: 0.75rem 1.25rem;
-  border: 1.5px solid #e5e7eb;
-  background: #fff;
-  color: #374151;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
   border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.btn-modal-cancel:hover {
-  background: #f9fafb;
-  border-color: #d1d5db;
 }
 
 .btn-modal-submit {
   flex: 1;
   padding: 0.75rem 1.25rem;
-  border: none;
-  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
-  color: #fff;
+  border: 1px solid #1F5FCC;
+  background: #2A7FFF;
+  color: #ffffff;
   border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  transition: box-shadow 0.2s, opacity 0.2s;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.btn-modal-submit:hover:not(:disabled) {
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+  box-shadow: none;
 }
 
 .btn-modal-submit:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Keep modal controls readable inside super admin global theme overrides */
+.superadmin-dashboard .create-hospital-modal .modal-close-btn,
+.superadmin-dashboard .create-hospital-modal .image-remove-btn {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.superadmin-dashboard .create-hospital-modal .modal-close-btn svg,
+.superadmin-dashboard .create-hospital-modal .image-remove-btn svg {
+  color: #111827 !important;
+}
+
+.superadmin-dashboard .create-hospital-modal .btn-modal-cancel {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.superadmin-dashboard .create-hospital-modal .btn-modal-submit,
+.superadmin-dashboard .create-hospital-modal .staff-edit-btn {
+  background: #2a7fff !important;
+  color: #ffffff !important;
+  border: 1px solid #1f5fcc !important;
+}
+
+.superadmin-dashboard .create-hospital-modal .btn-modal-submit:hover,
+.superadmin-dashboard .create-hospital-modal .staff-edit-btn:hover {
+  background: #1f5fcc !important;
+  border-color: #174ea6 !important;
 }
 
 /* Responsive */
@@ -356,3 +486,4 @@
     flex-direction: column;
   }
 }
+

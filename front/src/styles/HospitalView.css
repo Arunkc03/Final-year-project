@@ -213,7 +213,7 @@
 }
 
 .hv-doctor-item:hover {
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
   box-shadow: 0 2px 8px rgba(14, 123, 158, 0.08);
 }
 
@@ -238,7 +238,7 @@
 .hv-doctor-avatar span {
   font-size: 1rem;
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .hv-doctor-info {
@@ -266,8 +266,8 @@
 
 .hv-btn-view {
   background: white;
-  color: #0E7B9E;
-  border: 1px solid #0E7B9E;
+  color: #2A7FFF;
+  border: 1px solid #2A7FFF;
   padding: 0.3rem 0.75rem;
   border-radius: 6px;
   font-size: 0.78rem;
@@ -278,7 +278,7 @@
 }
 
 .hv-btn-view:hover {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
 }
 
@@ -385,7 +385,7 @@
 .hv-form-group select:focus,
 .hv-form-group textarea:focus {
   outline: none;
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
   box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
 }
 
@@ -414,7 +414,7 @@
 }
 
 .hv-btn.primary {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
 }
 
@@ -439,8 +439,8 @@
 
 .hv-btn.secondary:hover {
   background: #f8fafc;
-  color: #0E7B9E;
-  border-color: #0E7B9E;
+  color: #2A7FFF;
+  border-color: #2A7FFF;
 }
 
 .hv-btn.link {
@@ -451,7 +451,7 @@
 }
 
 .hv-btn.link:hover {
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .hv-btn.khalti {
@@ -616,3 +616,4 @@
     grid-template-columns: 1fr;
   }
 }
+

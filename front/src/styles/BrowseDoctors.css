@@ -47,8 +47,8 @@
 
 .search-box input:focus {
   outline: none;
-  border-color: #e74c3c;
-  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.1);
 }
 
 .doctors-grid {
@@ -74,7 +74,7 @@
   width: 100%;
   height: 240px;
   overflow: hidden;
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,7 +108,7 @@
 }
 
 .doctor-id {
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-size: 12px;
   font-weight: 700;
   margin: 0 0 10px;
@@ -117,7 +117,7 @@
 }
 
 .doctor-specialization {
-  background: #e74c3c;
+  background: #FF9800;
   color: white;
   padding: 6px 14px;
   border-radius: 20px;
@@ -143,14 +143,14 @@
 }
 
 .doctor-fee {
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-weight: 700;
   font-size: 15px;
   margin: 8px 0 15px;
 }
 
 .doctor-card .btn-primary {
-  background: #e74c3c;
+  background: #FF9800;
   color: white;
   border: none;
   padding: 12px 20px;
@@ -167,7 +167,7 @@
 }
 
 .doctor-card .btn-primary:hover {
-  background: #d63620;
+  background: #cc7700;
   transform: translateX(4px);
 }
 
@@ -179,7 +179,7 @@
 }
 
 .login-prompt {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 30px;
   border-radius: 8px;
@@ -213,12 +213,12 @@
 }
 
 .error-message {
-  background: #fee;
-  color: #c33;
+  background: #fdeef0;
+  color: #a4161a;
   padding: 15px;
   border-radius: 4px;
   margin-bottom: 20px;
-  border-left: 4px solid #e74c3c;
+  border-left: 4px solid #DC3545;
 }
 
 /* Responsive Design */
@@ -352,3 +352,4 @@
     font-size: 12px;
   }
 }
+

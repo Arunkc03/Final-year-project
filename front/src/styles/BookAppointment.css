@@ -3,7 +3,7 @@
   min-height: 100vh;
   background: #ffffff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+  color: #1a1a2e;
 }
 
 .ba-loading {
@@ -12,7 +12,7 @@
   align-items: center;
   min-height: 60vh;
   font-size: 1.1rem;
-  color: #666;
+  color: #545461;
 }
 
 /* ── DOCTOR HEADER SECTION ── */
@@ -36,7 +36,7 @@
   height: 80px;
   border-radius: 50%;
   overflow: hidden;
-  background: #ecfeff;
+  background: #e8f2ff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -52,19 +52,19 @@
 .ba-avatar-letter {
   font-size: 2rem;
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .ba-doctor-name {
   margin: 0 0 0.25rem;
   font-size: 1.35rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #1a1a2e;
 }
 
 .ba-dept-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #0E7B9E, #1a9bb8);
+  background: linear-gradient(135deg, #2A7FFF, #1F5FCC);
   color: white;
   padding: 0.2rem 0.65rem;
   border-radius: 20px;
@@ -81,26 +81,26 @@
 }
 
 .ba-doctor-meta span {
-  color: #64748b;
+  color: #545461;
   font-size: 0.85rem;
 }
 
 .ba-doctor-meta span:not(:last-child)::after {
   content: '·';
   margin-left: 1rem;
-  color: #cbd5e1;
+  color: #d0d8e0;
 }
 
 .ba-fee {
   margin-top: 0.5rem;
   font-size: 1.1rem;
   font-weight: 700;
-  color: #16a34a;
+  color: #28A745;
 }
 
 .ba-fee small {
   font-weight: 400;
-  color: #64748b;
+  color: #545461;
   font-size: 0.8rem;
   margin-left: 0.25rem;
 }
@@ -112,21 +112,21 @@
 }
 
 .ba-error {
-  background: #fff0f0;
-  color: #c00;
+  background: #fdeef0;
+  color: #a4161a;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  border-left: 4px solid #c00;
+  border-left: 4px solid #DC3545;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
 
 .ba-success {
-  background: #f0fdf4;
-  color: #166534;
+  background: #e8f7f0;
+  color: #008c3a;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  border-left: 4px solid #16a34a;
+  border-left: 4px solid #28A745;
   margin-bottom: 1rem;
   font-size: 0.9rem;
 }
@@ -134,9 +134,9 @@
 /* ── PANELS ── */
 .ba-panel {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d0d8e0;
   border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 24px rgba(42, 127, 255, 0.06);
   padding: 1.25rem;
   margin-bottom: 1.25rem;
 }
@@ -144,7 +144,7 @@
 .ba-panel-title {
   margin: 0 0 1rem;
   font-size: 1.05rem;
-  color: #0f172a;
+  color: #1a1a2e;
   font-weight: 700;
 }
 
@@ -157,68 +157,68 @@
 
 .ba-slot {
   padding: 0.85rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d0d8e0;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
-  background: #f8fafc;
+  background: #f8fafb;
 }
 
 .ba-slot:hover {
-  border-color: #0E7B9E;
-  background: #f0fdfa;
+  border-color: #2A7FFF;
+  background: #e8f2ff;
 }
 
 .ba-slot-active {
-  border-color: #0E7B9E;
-  background: #ecfeff;
-  box-shadow: 0 0 0 2px rgba(14, 123, 158, 0.15);
+  border-color: #2A7FFF;
+  background: #e8f2ff;
+  box-shadow: 0 0 0 2px rgba(42, 127, 255, 0.15);
 }
 
 .ba-slot-date {
   font-weight: 600;
-  color: #0f172a;
+  color: #1a1a2e;
   font-size: 0.88rem;
   margin-bottom: 0.3rem;
 }
 
 .ba-slot-time {
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-weight: 500;
   font-size: 0.85rem;
 }
 
 .ba-slot-avail {
   font-size: 0.78rem;
-  color: #64748b;
+  color: #545461;
   margin-top: 0.3rem;
 }
 
 .ba-slot-booked {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: #f8fafb;
+  border-color: #d0d8e0;
   opacity: 0.75;
   cursor: not-allowed;
 }
 
 .ba-slot-booked .ba-slot-time,
 .ba-slot-booked .ba-slot-avail {
-  color: #b91c1c;
+  color: #DC3545;
   font-weight: 600;
 }
 
 .ba-slot-booked:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+  border-color: #d0d8e0;
+  background: #f8fafb;
 }
 
 .ba-no-schedules {
-  background: #fffbeb;
-  color: #92400e;
+  background: #fff5e6;
+  color: #cc7700;
   padding: 0.85rem 1rem;
   border-radius: 8px;
   font-size: 0.88rem;
-  border: 1px solid #fde68a;
+  border: 1px solid #ffc66d;
 }
 
 /* ── FORM ── */
@@ -242,14 +242,14 @@
 .ba-form-group label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #374151;
+  color: #1a1a2e;
   margin-bottom: 0.35rem;
 }
 
 .ba-form-group input,
 .ba-form-group textarea {
   padding: 0.6rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #d0d8e0;
   border-radius: 8px;
   font-size: 0.9rem;
   font-family: inherit;
@@ -260,8 +260,8 @@
 .ba-form-group input:focus,
 .ba-form-group textarea:focus {
   outline: none;
-  border-color: #0E7B9E;
-  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.1);
 }
 
 .ba-form-group textarea {
@@ -288,18 +288,18 @@
 }
 
 .ba-btn.primary {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
 }
 
 .ba-btn.primary:hover {
-  background: #0a6580;
+  background: #1F5FCC;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(14, 123, 158, 0.3);
+  box-shadow: 0 4px 12px rgba(42, 127, 255, 0.3);
 }
 
 .ba-btn.primary:disabled {
-  background: #94a3b8;
+  background: #b3cbe5;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -307,14 +307,14 @@
 
 .ba-btn.secondary {
   background: white;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
+  color: #545461;
+  border: 1px solid #d0d8e0;
 }
 
 .ba-btn.secondary:hover {
-  background: #f8fafc;
-  color: #0E7B9E;
-  border-color: #0E7B9E;
+  background: #f8fafb;
+  color: #2A7FFF;
+  border-color: #2A7FFF;
 }
 
 .ba-btn.khalti {
@@ -367,26 +367,26 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #d0d8e0;
 }
 
 .ba-modal-header h2 {
   margin: 0;
   font-size: 1.1rem;
-  color: #0f172a;
+  color: #1a1a2e;
 }
 
 .ba-modal-close {
   background: none;
   border: none;
   font-size: 1.2rem;
-  color: #94a3b8;
+  color: #8a8f9e;
   cursor: pointer;
   padding: 0.25rem;
 }
 
 .ba-modal-close:hover {
-  color: #c00;
+  color: #DC3545;
 }
 
 .ba-modal-body {
@@ -394,7 +394,7 @@
 }
 
 .ba-summary {
-  background: #f8fafc;
+  background: #f8fafb;
   border-radius: 10px;
   padding: 1rem;
   margin-bottom: 1rem;
@@ -408,27 +408,27 @@
 }
 
 .ba-summary-row span {
-  color: #64748b;
+  color: #545461;
 }
 
 .ba-summary-row strong {
-  color: #0f172a;
+  color: #1a1a2e;
 }
 
 .ba-summary-total {
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #d0d8e0;
   margin-top: 0.4rem;
   padding-top: 0.6rem;
 }
 
 .ba-summary-total strong {
-  color: #16a34a;
+  color: #28A745;
   font-size: 1rem;
 }
 
 .ba-notice {
   font-size: 0.82rem;
-  color: #64748b;
+  color: #545461;
   margin: 0 0 1rem;
   text-align: center;
 }
@@ -449,7 +449,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #16a34a;
+  background: #28A745;
   color: white;
   font-size: 1.8rem;
   display: flex;
@@ -460,13 +460,13 @@
 
 .ba-success-modal h2 {
   margin: 0 0 0.5rem;
-  color: #0f172a;
+  color: #1a1a2e;
   font-size: 1.1rem;
 }
 
 .ba-success-modal p {
   margin: 0;
-  color: #64748b;
+  color: #545461;
   font-size: 0.9rem;
 }
 
@@ -498,3 +498,4 @@
     grid-template-columns: 1fr;
   }
 }
+

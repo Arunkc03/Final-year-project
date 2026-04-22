@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Hospital;
 use App\Models\User;
+use App\Models\Doctor;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class HospitalController extends Controller
@@ -66,6 +68,7 @@ class HospitalController extends Controller
             'country' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:20',
             'description' => 'nullable|string',
+            'image' => 'nullable|file|mimes:jpeg,png,jpg,gif,webp,avif|max:2048',
             // admin user details
             'admin_name' => 'required|string|max:255',
             'admin_email' => 'required|email|unique:users,email',
@@ -79,6 +82,11 @@ class HospitalController extends Controller
         // Create hospital and admin user in a transaction
         try {
             $result = DB::transaction(function () use ($request) {
+                $imagePath = null;
+                if ($request->hasFile('image')) {
+                    $imagePath = $request->file('image')->store('hospitals', 'public');
+                }
+
                 // Generate unique slug
                 $baseSlug = Str::slug($request->name);
                 $slug = $baseSlug;
@@ -91,7 +99,9 @@ class HospitalController extends Controller
                 $hospital = Hospital::create([
                     'name' => $request->name,
                     'slug' => $slug,
+                    'admin_email' => $request->admin_email,
                     'description' => $request->description ?? null,
+                    'image' => $imagePath,
                     'email' => $request->email ?? null,
                     'phone' => $request->phone ?? null,
                     'address' => $request->address ?? null,
@@ -111,20 +121,9 @@ class HospitalController extends Controller
                     'identifier' => 'ADM'.Str::upper(Str::random(6)),
                 ]);
 
-                // set hospital admin relationship
-                $hospital->admin_id = null; // default
-                $hospital->save();
-
                 // return both models
                 return compact('hospital', 'admin');
             });
-
-            // make sure admin_id is linked on hospital
-            if (isset($result['admin']->id) && isset($result['hospital']->id)) {
-                $h = $result['hospital'];
-                $h->admin_id = $result['admin']->id;
-                $h->save();
-            }
 
             return response()->json([
                 'status' => 'success',
@@ -274,6 +273,108 @@ class HospitalController extends Controller
         return response()->json(['status'=>'success','hospital'=>$hospital]);
     }
 
+    /**
+     * Update doctor under a specific hospital context.
+     * PUT /api/hospitals/{hospitalId}/doctors/{doctorId}
+     */
+    public function updateDoctor(Request $request, $hospitalId, $doctorId)
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $hospital = Hospital::findOrFail($hospitalId);
+        $doctor = Doctor::with('user')->findOrFail($doctorId);
+
+        if ($doctor->hospital_id != $hospital->id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Doctor does not belong to this hospital',
+            ], 422);
+        }
+
+        $isSuperAdmin = $user->isSuperAdmin();
+        $isHospitalAdmin = $user->isAdmin() && (int) $user->hospital_id === (int) $hospital->id;
+
+        if (!($isSuperAdmin || $isHospitalAdmin)) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:users,email,' . $doctor->user_id,
+            'phone' => 'nullable|string|max:20',
+            'department_id' => 'nullable|exists:departments,id',
+            'license_number' => 'nullable|string|max:255',
+            'specialization' => 'nullable|string|max:255',
+            'qualification' => 'nullable|string|max:255',
+            'experience_years' => 'nullable|integer|min:0',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'bio' => 'nullable|string',
+            'daily_patient_limit' => 'nullable|integer|min:1|max:100',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        if ($request->filled('department_id')) {
+            $department = $hospital->departments()->where('id', $request->department_id)->first();
+            if (!$department) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Selected department does not belong to this hospital',
+                ], 422);
+            }
+        }
+
+        try {
+            $userData = $request->only(['name', 'email', 'phone']);
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+            if (!empty($userData)) {
+                $doctor->user->update($userData);
+            }
+
+            $doctorData = $request->only([
+                'department_id',
+                'license_number',
+                'specialization',
+                'qualification',
+                'experience_years',
+                'consultation_fee',
+                'bio',
+                'daily_patient_limit',
+            ]);
+
+            if ($request->hasFile('image')) {
+                if ($doctor->image && Storage::disk('public')->exists($doctor->image)) {
+                    Storage::disk('public')->delete($doctor->image);
+                }
+                $doctorData['image'] = $request->file('image')->store('doctors', 'public');
+            }
+
+            if (!empty($doctorData)) {
+                $doctor->update($doctorData);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Doctor updated successfully',
+                'doctor' => $doctor->fresh()->load('user', 'hospital', 'department'),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update doctor: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function destroy($id)
     {
         $user = auth()->user();
@@ -286,17 +387,17 @@ class HospitalController extends Controller
         try {
             DB::beginTransaction();
 
-            // Delete related doctors and their user accounts
-            $doctors = $hospital->doctors;
-            foreach ($doctors as $doctor) {
-                // Delete the doctor's user account (this will cascade delete the doctor)
-                if ($doctor->user) {
-                    $doctor->user->delete();
-                }
-            }
+            // Delete hospital staff accounts and revoke their active tokens first.
+            /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $staffUsers */
+            $staffUsers = User::query()
+                ->where('hospital_id', $hospital->id)
+                ->whereIn('role', ['doctor', 'admin'])
+                ->get();
 
-            // Delete admin user associated with this hospital
-            User::where('hospital_id', $hospital->id)->where('role', 'admin')->delete();
+            foreach ($staffUsers as $staffUser) {
+                $staffUser->tokens()->delete();
+                $staffUser->delete();
+            }
 
             // Delete related departments
             $hospital->departments()->delete();

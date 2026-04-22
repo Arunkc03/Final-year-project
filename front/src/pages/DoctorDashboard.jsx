@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import '../styles/DoctorDashboard.css';
+import '../styles/DashboardWidgets.css';
 
 const DoctorDashboard = () => {
   const navigate = useNavigate();
@@ -64,6 +65,8 @@ const DoctorDashboard = () => {
   // Reviews
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [deletingReviewId, setDeletingReviewId] = useState(null);
+  const [selectedReview, setSelectedReview] = useState(null);
 
   // Appointment filter tab
   const [activeTab, setActiveTab] = useState('all');
@@ -72,6 +75,21 @@ const DoctorDashboard = () => {
 
   // Patient search
   const [patientSearch, setPatientSearch] = useState('');
+  const [activeSection, setActiveSection] = useState('hospital');
+  const [profileEditMode, setProfileEditMode] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+  const [profileFormData, setProfileFormData] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    date_of_birth: user?.date_of_birth || '',
+    gender: user?.gender || '',
+    address: user?.address || '',
+    city: user?.city || '',
+    state: user?.state || '',
+    postal_code: user?.postal_code || '',
+    avatar: null,
+  });
 
   useEffect(() => {
     if (!token || user?.role !== 'doctor') {
@@ -80,6 +98,20 @@ const DoctorDashboard = () => {
     }
     fetchAll();
   }, [token, user, navigate]);
+
+  useEffect(() => {
+    setProfileFormData({
+      name: user?.name || '',
+      phone: user?.phone || '',
+      date_of_birth: user?.date_of_birth || '',
+      gender: user?.gender || '',
+      address: user?.address || '',
+      city: user?.city || '',
+      state: user?.state || '',
+      postal_code: user?.postal_code || '',
+      avatar: null,
+    });
+  }, [user]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -128,6 +160,27 @@ const DoctorDashboard = () => {
     } catch (err) { console.error('Reviews fetch error:', err); }
     finally { setReviewsLoading(false); }
   };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm('Delete this review? This cannot be undone.')) return;
+
+    setDeletingReviewId(reviewId);
+    try {
+      const res = await api.deleteReview(reviewId, token);
+      if (res.status === 'success') {
+        setReviews(prev => prev.filter(r => r.id !== reviewId));
+      } else {
+        alert(res.message || 'Failed to delete review');
+      }
+    } catch (err) {
+      alert('Error deleting review');
+    } finally {
+      setDeletingReviewId(null);
+    }
+  };
+
+  const openReviewModal = (review) => setSelectedReview(review);
+  const closeReviewModal = () => setSelectedReview(null);
 
   // Appointment actions
   const handleAcceptAppointment = async (id) => {
@@ -178,7 +231,7 @@ const DoctorDashboard = () => {
     setActionLoading(id);
     setActionMessage({ type: '', text: '' });
     try {
-      const res = await api.cancelAppointment(id, 'Deleted by doctor from dashboard', token);
+      const res = await api.deleteDoctorAppointment(id, token);
       if (res.status === 'success') {
         setActionMessage({ type: 'success', text: 'Appointment deleted successfully' });
         setAppointments(prev => prev.filter(a => a.id !== id));
@@ -233,6 +286,14 @@ const DoctorDashboard = () => {
       const res = await api.uploadReport(fd, token);
       if (res.status === 'success') {
         setReportMessage({ type: 'success', text: 'Report submitted successfully!' });
+        const submittedAppointmentId = appointmentId;
+        if (submittedAppointmentId) {
+          setAppointments(prev => prev.map(a =>
+            a.id === submittedAppointmentId
+              ? { ...a, report: res.report || { appointment_id: submittedAppointmentId } }
+              : a
+          ));
+        }
         // Reset form
         setReportForm({ title: '', description: '', diagnosis: '', treatment: '', notes: '' });
         setTimeout(() => { closeReportModal(); fetchAll(); }, 1200);
@@ -409,10 +470,96 @@ const DoctorDashboard = () => {
     }
   };
 
+  const handleProfileInputChange = (e) => {
+    const { name, value, files } = e.target;
+
+    if (name === 'avatar' && files?.[0]) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImagePreview(reader.result);
+        setProfileFormData(prev => ({ ...prev, avatar: file }));
+      };
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    setProfileFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfileCancel = () => {
+    setProfileEditMode(false);
+    setProfileMessage({ type: '', text: '' });
+    setProfileFormData({
+      name: user?.name || '',
+      phone: user?.phone || '',
+      date_of_birth: user?.date_of_birth || '',
+      gender: user?.gender || '',
+      address: user?.address || '',
+      city: user?.city || '',
+      state: user?.state || '',
+      postal_code: user?.postal_code || '',
+      avatar: null,
+    });
+    setProfileImagePreview(user?.avatar ? `${api.getStorageUrl()}/${user.avatar}` : null);
+  };
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileMessage({ type: '', text: '' });
+
+    try {
+      const fd = new FormData();
+      const fields = ['name', 'phone', 'date_of_birth', 'gender', 'address', 'city', 'state', 'postal_code'];
+
+      fields.forEach((field) => {
+        fd.append(field, profileFormData[field] ?? '');
+      });
+
+      if (profileFormData.avatar) {
+        fd.append('avatar', profileFormData.avatar);
+      }
+
+      const res = await api.updateProfile(fd, token);
+
+      if (res.status === 'success') {
+        const nextUser = res.user
+          ? { ...user, ...res.user }
+          : {
+              ...user,
+              name: profileFormData.name,
+              phone: profileFormData.phone,
+              date_of_birth: profileFormData.date_of_birth,
+              gender: profileFormData.gender,
+              address: profileFormData.address,
+              city: profileFormData.city,
+              state: profileFormData.state,
+              postal_code: profileFormData.postal_code,
+            };
+
+        updateUser(nextUser);
+        setProfileEditMode(false);
+        setProfileMessage({ type: 'success', text: res.message || 'Profile updated successfully' });
+        setProfileFormData(prev => ({ ...prev, avatar: null }));
+      } else {
+        setProfileMessage({ type: 'error', text: res.message || 'Failed to update profile' });
+      }
+    } catch (err) {
+      setProfileMessage({ type: 'error', text: err.message || 'Failed to update profile' });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
   const handleLogout = async () => {
     try { await api.logout(token); } catch {}
     logout();
     navigate('/login');
+  };
+
+  const handleSectionClick = (section) => {
+    setActiveSection(section);
   };
 
   // Filter appointments by tab
@@ -458,14 +605,244 @@ const DoctorDashboard = () => {
       )
     : uniquePatients;
 
+  const doctorOverviewBars = [
+    { label: 'Appointments', value: appointments.length || 0 },
+    { label: 'Patients', value: uniquePatients.length || 0 },
+    { label: 'Schedules', value: schedules.length || 0 },
+    { label: 'Reviews', value: reviews.length || 0 },
+  ];
+
+  const doctorStatusBars = [
+    { label: 'Pending', value: appointments.filter(a => a.status === 'pending').length || 0 },
+    { label: 'Confirmed', value: appointments.filter(a => a.status === 'confirmed').length || 0 },
+    { label: 'Completed', value: appointments.filter(a => a.status === 'completed').length || 0 },
+    { label: 'Cancelled', value: appointments.filter(a => a.status === 'cancelled').length || 0 },
+  ];
+
+  const doctorOverviewMax = Math.max(1, ...doctorOverviewBars.map(item => item.value));
+  const doctorOverviewPoints = doctorOverviewBars.map((item, idx) => {
+    const x = doctorOverviewBars.length === 1 ? 50 : (idx * 100) / (doctorOverviewBars.length - 1);
+    const y = 95 - (item.value / doctorOverviewMax) * 80;
+    return { x, y };
+  });
+  const doctorOverviewPath = doctorOverviewPoints.map(point => `${point.x},${point.y}`).join(' ');
+
+  const doctorPieColors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444'];
+  const doctorStatusTotal = Math.max(1, doctorStatusBars.reduce((sum, item) => sum + item.value, 0));
+  let doctorAccumulated = 0;
+  const doctorPieGradient = `conic-gradient(${doctorStatusBars
+    .map((item, idx) => {
+      const start = (doctorAccumulated / doctorStatusTotal) * 360;
+      doctorAccumulated += item.value;
+      const end = (doctorAccumulated / doctorStatusTotal) * 360;
+      return `${doctorPieColors[idx % doctorPieColors.length]} ${start}deg ${end}deg`;
+    })
+    .join(', ')})`;
+
   if (loading) return <div className="dd-loading">Loading dashboard...</div>;
   if (!user) return null;
 
   return (
     <div className="dd-page">
+      <div className="dash-shell">
+        <aside className="dash-sidebar">
+          <h3 className="dash-sidebar-title">Doctor Navigation</h3>
+          <div className="dash-sidebar-nav">
+            <button className={`dash-sidebar-btn ${activeSection === 'profile' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('profile')}>My Profile</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'hospital' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('hospital')}>Hospital</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'appointments' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('appointments')}>Appointments</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'schedule' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('schedule')}>Schedule</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'reviews' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('reviews')}>Reviews</button>
+          </div>
+          <div className="dash-sidebar-footer">
+            <button className="dash-sidebar-btn dash-sidebar-logout" type="button" onClick={handleLogout}>Logout</button>
+            <p className="dash-sidebar-footnote">Doctor Panel</p>
+          </div>
+        </aside>
+
+        <div className="dash-main-content">
+      <section className="dash-analytics">
+        <div className="dash-graph-card">
+          <h3>Practice Graph</h3>
+          <p>Doctor workload overview</p>
+          <div className="dash-line-wrap">
+            <svg className="dash-line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Practice line graph">
+              <line className="dash-line-grid" x1="0" y1="20" x2="100" y2="20" />
+              <line className="dash-line-grid" x1="0" y1="40" x2="100" y2="40" />
+              <line className="dash-line-grid" x1="0" y1="60" x2="100" y2="60" />
+              <line className="dash-line-grid" x1="0" y1="80" x2="100" y2="80" />
+              <polyline className="dash-line-path" points={doctorOverviewPath} />
+              {doctorOverviewPoints.map((point, idx) => (
+                <circle key={doctorOverviewBars[idx].label} className="dash-line-point" cx={point.x} cy={point.y} r="1.8" />
+              ))}
+            </svg>
+            <div className="dash-line-labels">
+              {doctorOverviewBars.map((item) => (
+                <span key={item.label}>{item.label}: {item.value}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="dash-graph-card">
+          <h3>Status Pie Chart</h3>
+          <p>Appointment status split</p>
+          <div className="dash-pie-wrap">
+            <div className="dash-pie-chart" style={{ background: doctorPieGradient }} aria-label="Status pie chart" />
+            <ul className="dash-pie-legend">
+              {doctorStatusBars.map((item, idx) => (
+                <li key={item.label}>
+                  <span className="dash-pie-legend-name">
+                    <span className="dash-pie-dot" style={{ background: doctorPieColors[idx % doctorPieColors.length] }} />
+                    {item.label}
+                  </span>
+                  <span className="dash-pie-value">{item.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="dash-profile-section" style={{ display: activeSection === 'profile' ? 'block' : 'none' }}>
+        <div className="dash-profile-card">
+          <div className="dd-profile-header-row">
+            <h2 className="dd-panel-title dd-profile-main-title">My Profile</h2>
+            {!profileEditMode ? (
+              <button type="button" className="dd-edit-profile-btn" onClick={() => setProfileEditMode(true)}>
+                Edit Profile
+              </button>
+            ) : null}
+          </div>
+
+          {profileMessage.text && (
+            <div className={`dd-msg ${profileMessage.type}`}>{profileMessage.text}</div>
+          )}
+
+          {actionMessage.text && (
+            <div className={`dd-msg ${actionMessage.type}`}>{actionMessage.text}</div>
+          )}
+
+          {!profileEditMode ? (
+            <>
+              <div className="dash-profile-top">
+                <div className="dash-profile-avatar">
+                  {profileImagePreview ? (
+                    <img src={profileImagePreview} alt={user?.name || 'Doctor'} />
+                  ) : (
+                    <span>{user?.name?.charAt(0)?.toUpperCase() || 'D'}</span>
+                  )}
+                </div>
+                <div>
+                  <h2 className="dash-profile-title">Dr. {user?.name || 'Doctor'}</h2>
+                  <p className="dash-profile-subtitle">Doctor account overview</p>
+                </div>
+              </div>
+
+              <div className="dash-profile-details">
+                <div className="dash-profile-row"><label>Name</label><span>Dr. {user?.name || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Qualification</label><span>{dashboardData?.qualification || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Experience</label><span>{dashboardData?.experience_years ? `${dashboardData.experience_years} years` : 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Consultation Fee</label><span>{dashboardData?.consultation_fee ? `Rs ${dashboardData.consultation_fee}` : 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Hospital</label><span>{hospitalInfo?.name || 'N/A'}</span></div>
+              </div>
+
+              <div className="dd-photo-actions dd-profile-photo-actions">
+                <label className="dd-photo-upload-btn" htmlFor="profile-photo-input">
+                  Change Photo
+                </label>
+                <input id="profile-photo-input" ref={profilePhotoInputRef} type="file" accept="image/*" onChange={handleProfileImageChange} style={{ display: 'none' }} />
+                {profileImage && profileImage !== user?.avatar && (
+                  <button type="button" onClick={handleUploadProfileImage} disabled={uploadingProfile} className="dd-save-photo-btn">
+                    {uploadingProfile ? 'Saving...' : 'Save Photo'}
+                  </button>
+                )}
+              </div>
+            </>
+          ) : (
+            <form className="dd-profile-form" onSubmit={handleProfileSave}>
+              <div className="dash-profile-top">
+                <div className="dash-profile-avatar">
+                  {profileImagePreview ? (
+                    <img src={profileImagePreview} alt={profileFormData.name || 'Doctor'} />
+                  ) : (
+                    <span>{profileFormData.name?.charAt(0)?.toUpperCase() || 'D'}</span>
+                  )}
+                </div>
+                <div>
+                  <h2 className="dash-profile-title">Dr. {profileFormData.name || 'Doctor'}</h2>
+                  <p className="dash-profile-subtitle">Update your account information</p>
+                  <label className="dd-photo-upload-btn dd-inline-upload">
+                    Change Avatar
+                    <input type="file" accept="image/*" name="avatar" onChange={handleProfileInputChange} style={{ display: 'none' }} />
+                  </label>
+                </div>
+              </div>
+
+              <div className="dd-profile-form-grid">
+                <div className="dd-form-group">
+                  <label>Name</label>
+                  <input name="name" value={profileFormData.name} onChange={handleProfileInputChange} placeholder="Full name" />
+                </div>
+                <div className="dd-form-group">
+                  <label>Phone</label>
+                  <input name="phone" value={profileFormData.phone} onChange={handleProfileInputChange} placeholder="Phone number" />
+                </div>
+                <div className="dd-form-group">
+                  <label>Date of Birth</label>
+                  <input type="date" name="date_of_birth" value={profileFormData.date_of_birth} onChange={handleProfileInputChange} />
+                </div>
+                <div className="dd-form-group">
+                  <label>Gender</label>
+                  <select name="gender" value={profileFormData.gender} onChange={handleProfileInputChange}>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="dd-form-group dd-form-group--full">
+                  <label>Address</label>
+                  <input name="address" value={profileFormData.address} onChange={handleProfileInputChange} placeholder="Address" />
+                </div>
+                <div className="dd-form-group">
+                  <label>City</label>
+                  <input name="city" value={profileFormData.city} onChange={handleProfileInputChange} placeholder="City" />
+                </div>
+                <div className="dd-form-group">
+                  <label>State</label>
+                  <input name="state" value={profileFormData.state} onChange={handleProfileInputChange} placeholder="State" />
+                </div>
+                <div className="dd-form-group">
+                  <label>Postal Code</label>
+                  <input name="postal_code" value={profileFormData.postal_code} onChange={handleProfileInputChange} placeholder="Postal code" />
+                </div>
+                <div className="dd-form-group">
+                  <label>Email</label>
+                  <input value={user?.email || ''} disabled readOnly />
+                </div>
+              </div>
+
+              <div className="dd-form-actions">
+                <button type="button" className="dd-cancel-btn" onClick={handleProfileCancel}>Cancel</button>
+                <button type="submit" className="dd-save-btn" disabled={profileSaving}>{profileSaving ? 'Saving...' : 'Save Changes'}</button>
+              </div>
+            </form>
+          )}
+
+          <div className="dash-profile-stats">
+            <div className="dash-profile-stat"><strong>{appointments.length || 0}</strong><span>Appointments</span></div>
+            <div className="dash-profile-stat"><strong>{uniquePatients.length || 0}</strong><span>Patients</span></div>
+            <div className="dash-profile-stat"><strong>{schedules.length || 0}</strong><span>Schedules</span></div>
+            <div className="dash-profile-stat"><strong>{reviews.length || 0}</strong><span>Reviews</span></div>
+          </div>
+        </div>
+      </section>
 
       {/* SECTION 1: Hospital Information */}
-      <section className="dd-hospital-section">
+      <section id="dd-hospital" className="dd-hospital-section" style={{ display: activeSection === 'hospital' ? 'block' : 'none' }}>
         {hospitalInfo ? (
           <div className="dd-hospital-view">
             <div className="dd-hospital-img-wrap">
@@ -494,10 +871,10 @@ const DoctorDashboard = () => {
       </section>
 
       {/* ── TOP ROW: My Info (left) + Appointments (right) ── */}
-      <div className="dd-top-row">
+      <div className="dd-top-row" style={{ display: activeSection === 'appointments' ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
 
         {/* PANEL 1: My Information */}
-        <div className="dd-panel dd-info-panel">
+        <div className="dd-panel dd-info-panel" style={{ display: 'none' }}>
           <h2 className="dd-panel-title">My Information</h2>
           <div className="dd-avatar-wrap">
             <div className="dd-avatar">
@@ -549,7 +926,7 @@ const DoctorDashboard = () => {
         </div>
 
         {/* PANEL 2: Appointments */}
-        <div className="dd-panel dd-appt-panel">
+        <div id="dd-appointments" className="dd-panel dd-appt-panel">
           <h2 className="dd-panel-title">Appointments</h2>
           <div className="dd-tabs">
             {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(tab => (
@@ -581,6 +958,12 @@ const DoctorDashboard = () => {
                     {filteredAppointments
                       .slice((appointmentCurrentPage - 1) * appointmentsPerPage, appointmentCurrentPage * appointmentsPerPage)
                       .map(apt => (
+                        (() => {
+                          const hasSubmittedReport = Boolean(
+                            apt.report || apt.report_id || apt.has_report || apt.report_submitted_at
+                          );
+
+                          return (
                         <tr key={apt.id}>
                           <td><strong>{apt.user?.name || 'Unknown'}</strong></td>
                           <td>{new Date(apt.date).toLocaleDateString()}{apt.time ? ` ${apt.time}` : ''}</td>
@@ -597,18 +980,30 @@ const DoctorDashboard = () => {
                               {apt.status === 'confirmed' && (
                                 <>
                                   <button className="dd-btn confirm" onClick={() => handleCompleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Mark Completed</button>
-                                  <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
+                                  {hasSubmittedReport ? (
+                                    <span className="dd-report-submitted" title="Report already submitted">
+                                      Report Submitted
+                                    </span>
+                                  ) : (
+                                    <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
+                                  )}
                                 </>
                               )}
                               {apt.status === 'completed' && (
-                                <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
+                                hasSubmittedReport ? (
+                                  <span className="dd-report-submitted" title="Report already submitted">
+                                    Report Submitted
+                                  </span>
+                                ) : (
+                                  <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
+                                )
                               )}
-                              {apt.status !== 'cancelled' && (
-                                <button className="dd-btn delete" onClick={() => handleDeleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Delete</button>
-                              )}
+                              <button className="dd-btn delete" onClick={() => handleDeleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Delete</button>
                             </div>
                           </td>
                         </tr>
+                          );
+                        })()
                       ))}
                   </tbody>
                 </table>
@@ -621,7 +1016,7 @@ const DoctorDashboard = () => {
                     onClick={() => setAppointmentCurrentPage(p => Math.max(1, p - 1))}
                     disabled={appointmentCurrentPage === 1}
                   >
-                    ← Previous
+                    Previous
                   </button>
                   <span className="dd-pagination-info">
                     Page {appointmentCurrentPage} of {Math.ceil(filteredAppointments.length / appointmentsPerPage)}
@@ -631,7 +1026,7 @@ const DoctorDashboard = () => {
                     onClick={() => setAppointmentCurrentPage(p => Math.min(Math.ceil(filteredAppointments.length / appointmentsPerPage), p + 1))}
                     disabled={appointmentCurrentPage === Math.ceil(filteredAppointments.length / appointmentsPerPage)}
                   >
-                    Next →
+                    Next
                   </button>
                 </div>
               )}
@@ -644,10 +1039,10 @@ const DoctorDashboard = () => {
       {error && <div className="dd-error">{error}</div>}
 
       {/* ── MIDDLE ROW: Patients + Schedule ── */}
-      <div className="dd-middle-row">
+      <div className="dd-middle-row" style={{ display: activeSection === 'schedule' ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
 
         {/* My Patients */}
-        <div className="dd-panel dd-patients-panel">
+        <div className="dd-panel dd-patients-panel" style={{ display: 'none' }}>
           <div className="dd-panel-header-row">
             <h2 className="dd-panel-title">My Patients ({uniquePatients.length})</h2>
             <input
@@ -689,7 +1084,7 @@ const DoctorDashboard = () => {
         </div>
 
         {/* Schedule Management */}
-        <div className="dd-panel dd-schedule-panel">
+        <div id="dd-schedule" className="dd-panel dd-schedule-panel">
           <div className="dd-panel-header-row">
             <h2 className="dd-panel-title">My Schedule</h2>
             <button className="dd-add-btn" onClick={() => setShowScheduleForm(!showScheduleForm)}>
@@ -771,6 +1166,14 @@ const DoctorDashboard = () => {
                       totalSlots += s.available_slots;
                     });
                     
+                    const normalizeTimeKey = (timeValue) => String(timeValue || '').slice(0, 5);
+                    const dateKey = String(date || '').split('T')[0];
+                    const bookedTimes = new Set(
+                      appointments
+                        .filter(a => String(a.date || '').split('T')[0] === dateKey && a.status !== 'cancelled')
+                        .map(a => normalizeTimeKey(a.time))
+                    );
+
                     // Flatten all slots from all schedules on this date
                     const allSlots = [];
                     dateSchedules.forEach(s => {
@@ -783,10 +1186,12 @@ const DoctorDashboard = () => {
                         const slotStartMins = slotStartMin % 60;
                         const slotEndHour = Math.floor(slotEnd / 60);
                         const slotEndMins = slotEnd % 60;
+                        const slotStart = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMins).padStart(2, '0')}`;
                         allSlots.push({
                           scheduleId: s.id,
-                          start: `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMins).padStart(2, '0')}`,
-                          end: `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMins).padStart(2, '0')}`
+                          start: slotStart,
+                          end: `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMins).padStart(2, '0')}`,
+                          isBooked: bookedTimes.has(slotStart)
                         });
                       }
                     });
@@ -826,9 +1231,10 @@ const DoctorDashboard = () => {
                           <div className="dd-slots-list-container">
                             <div className="dd-slots-scroll-wrapper">
                               {allSlots.map((slot, idx) => (
-                                <div key={idx} className="dd-slot-card">
+                                <div key={idx} className={`dd-slot-card ${slot.isBooked ? 'booked' : ''}`}>
                                   <span className="dd-slot-num">{idx + 1}</span>
                                   <span className="dd-slot-time-range">{slot.start} - {slot.end}</span>
+                                  {slot.isBooked && <span className="dd-slot-booked-badge">Booked</span>}
                                 </div>
                               ))}
                             </div>
@@ -845,9 +1251,9 @@ const DoctorDashboard = () => {
       </div>
 
       {/* ── BOTTOM ROW: Reviews ── */}
-      <div className="dd-bottom-row">
+      <div className="dd-bottom-row" style={{ display: activeSection === 'reviews' ? 'block' : 'none' }}>
         {/* Patient Reviews */}
-        <div className="dd-panel dd-reviews-panel">
+        <div id="dd-reviews" className="dd-panel dd-reviews-panel">
           <h2 className="dd-panel-title">Patient Reviews</h2>
           {reviewsLoading ? (
             <p className="dd-empty">Loading reviews...</p>
@@ -862,14 +1268,83 @@ const DoctorDashboard = () => {
                     <span key={i} className={i < r.rating ? 'star filled' : 'star empty'}>&#9733;</span>
                   ))}
                 </div>
-                <span className={`dd-review-status ${r.status}`}>{r.status}</span>
+                {r.status !== 'pending' && (
+                  <span className={`dd-review-status ${r.status}`}>{r.status}</span>
+                )}
               </div>
-              {r.comment && <p className="dd-review-comment">{r.comment}</p>}
-              <span className="dd-review-date">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ''}</span>
+              {r.comment && <p className="dd-review-comment">{r.comment.length > 140 ? `${r.comment.slice(0, 140)}...` : r.comment}</p>}
+              <div className="dd-review-footer">
+                <span className="dd-review-date">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ''}</span>
+                <div className="dd-review-actions">
+                  <button
+                    type="button"
+                    className="dd-btn-sm view"
+                    onClick={() => openReviewModal(r)}
+                  >
+                    View
+                  </button>
+                  <button
+                    type="button"
+                    className="dd-review-delete-btn"
+                    onClick={() => handleDeleteReview(r.id)}
+                    disabled={deletingReviewId === r.id}
+                  >
+                    {deletingReviewId === r.id ? 'Deleting...' : 'Delete'}
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </div>
+
+      {selectedReview && (
+        <div className="modal-overlay" onClick={closeReviewModal}>
+          <div className="modal-content dd-review-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header dd-review-modal-header">
+              <div>
+                <p className="dd-review-kicker">Patient Feedback</p>
+                <h2>Review Details</h2>
+              </div>
+              <button className="close-modal-btn" onClick={closeReviewModal}>&times;</button>
+            </div>
+
+            <div className="dd-review-hero">
+              <div className="dd-review-avatar">
+                {(selectedReview.patient?.name || selectedReview.user?.name || 'P').charAt(0).toUpperCase()}
+              </div>
+              <div className="dd-review-hero-copy">
+                <h3>{selectedReview.patient?.name || selectedReview.user?.name || 'Patient'}</h3>
+                <p>{selectedReview.created_at ? new Date(selectedReview.created_at).toLocaleString() : 'Recent review'}</p>
+              </div>
+              {selectedReview.status !== 'pending' && (
+                <span className={`dd-review-status ${selectedReview.status}`}>{selectedReview.status}</span>
+              )}
+            </div>
+
+            <div className="dd-review-modal-body">
+              <div className="dd-review-rating-panel">
+                <span className="dd-review-rating-number">{selectedReview.rating}.0</span>
+                <div className="dd-review-stars lg">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} className={i < selectedReview.rating ? 'star filled' : 'star empty'}>&#9733;</span>
+                  ))}
+                </div>
+                <p>{selectedReview.rating === 5 ? 'Excellent experience' : selectedReview.rating >= 4 ? 'Very positive feedback' : selectedReview.rating >= 3 ? 'Average experience' : 'Needs improvement'}</p>
+              </div>
+
+              <div className="dd-review-message-card">
+                <h4>Patient Comment</h4>
+                <p>{selectedReview.comment || 'No written comment provided for this review.'}</p>
+              </div>
+            </div>
+
+            <div className="dd-review-modal-actions">
+              <button type="button" className="dd-btn cancel" onClick={closeReviewModal}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Report Modal */}
       {showReportModal && selectedPatient && (
@@ -915,34 +1390,8 @@ const DoctorDashboard = () => {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="dd-footer">
-        <div className="dd-footer-content">
-          <div className="dd-footer-brand">
-            <h3>Hospital Management System</h3>
-            <p>Providing efficient healthcare administration across all hospitals in the network.</p>
-          </div>
-          <div className="dd-footer-links">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><a href="/dashboard/doctor">Dashboard</a></li>
-              <li><a href="/browse-hospitals">Hospitals</a></li>
-              <li><a href="/browse-doctors">Doctors</a></li>
-            </ul>
-          </div>
-          <div className="dd-footer-links">
-            <h4>Management</h4>
-            <ul>
-              <li><a href="/dashboard/doctor">Appointments</a></li>
-              <li><a href="/dashboard/doctor">Schedules</a></li>
-              <li><a href="/dashboard/doctor">Reports</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="dd-footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Hospital Management System. All rights reserved.</p>
-        </div>
-      </footer>
+      </div>
+      </div>
     </div>
   );
 };

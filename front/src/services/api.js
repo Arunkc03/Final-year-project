@@ -26,7 +26,24 @@ const api = {
       });
       
       if (!res.ok) {
-        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        let errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+
+        try {
+          const errorData = await res.json();
+          if (errorData?.message) {
+            errorMessage = errorData.message;
+          } else if (res.status === 401) {
+            errorMessage = 'Invalid email or password.';
+          }
+        } catch {
+          if (res.status === 401) {
+            errorMessage = 'Invalid email or password.';
+          }
+        }
+
+        const error = new Error(errorMessage);
+        error.status = res.status;
+        throw error;
       }
       
       return res.json();
@@ -34,6 +51,41 @@ const api = {
       console.error('Login API error:', error, 'API_BASE_URL:', API_BASE_URL);
       throw error;
     }
+  },
+
+  forgotPassword: async (email) => {
+    const res = await fetch(`${API_BASE_URL}/forgot-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data?.message || data?.errors?.email?.[0] || 'Failed to send reset link');
+    }
+
+    return data;
+  },
+
+  resetPassword: async (payload) => {
+    const res = await fetch(`${API_BASE_URL}/reset-password`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(
+        data?.message ||
+        data?.errors?.password?.[0] ||
+        data?.errors?.token?.[0] ||
+        'Failed to reset password'
+      );
+    }
+
+    return data;
   },
 
   logout: async (token) => {
@@ -82,6 +134,18 @@ const api = {
     return res.json();
   },
 
+  updateAdmin: async (id, data, token) => {
+    const res = await fetch(`${API_BASE_URL}/admins/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+    return res.json();
+  },
+
   deleteAdmin: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/admins/${id}`, {
       method: 'DELETE',
@@ -120,6 +184,34 @@ const api = {
       : `${API_BASE_URL}/public/doctors`;
     const res = await fetch(url);
     return res.json ? await res.json() : res;
+  },
+
+  getDoctorsAdmin: async (token) => {
+    const headers = { 'Authorization': `Bearer ${token}` };
+    const candidateEndpoints = ['/system/doctors', '/doctors'];
+    let lastPayload = null;
+
+    for (const endpoint of candidateEndpoints) {
+      try {
+        const res = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
+        const payload = await res.json();
+        lastPayload = payload;
+
+        if (res.ok && payload?.status === 'success') {
+          return payload;
+        }
+      } catch (error) {
+        lastPayload = {
+          status: 'error',
+          message: error?.message || 'Failed to fetch doctors',
+        };
+      }
+    }
+
+    return lastPayload || {
+      status: 'error',
+      message: 'Failed to fetch doctors',
+    };
   },
 
   getDoctorsByDepartment: async (departmentId, token) => {
@@ -228,6 +320,18 @@ const api = {
     return res.json();
   },
 
+  updateHospitalDoctor: async (hospitalId, doctorId, data, token) => {
+    const isFormData = data instanceof FormData;
+    const headers = { 'Authorization': `Bearer ${token}` };
+    if (!isFormData) headers['Content-Type'] = 'application/json';
+    const res = await fetch(`${API_BASE_URL}/hospitals/${hospitalId}/doctors/${doctorId}`, {
+      method: 'PUT',
+      headers,
+      body: isFormData ? data : JSON.stringify(data),
+    });
+    return res.json();
+  },
+
   // Report endpoints
   getReports: async (token) => {
     const res = await fetch(`${API_BASE_URL}/reports`, {
@@ -329,11 +433,32 @@ const api = {
     }
   },
 
+  deleteDepartment: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/departments/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+    });
+    return res.json();
+  },
+
   // Appointment endpoints
   getAppointments: async (token) => {
     const res = await fetch(`${API_BASE_URL}/appointments`, {
       headers: { 'Authorization': `Bearer ${token}` },
     });
+
+    // Some role-specific backends restrict /appointments for doctors.
+    // Fallback to doctor endpoint to avoid 403 in doctor contexts.
+    if (res.status === 403) {
+      const doctorRes = await fetch(`${API_BASE_URL}/doctor/appointments`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return doctorRes.json();
+    }
+
     return res.json();
   },
 
@@ -390,6 +515,16 @@ const api = {
       body: JSON.stringify({
         reason: notes || 'Deleted by doctor from dashboard',
       }),
+    });
+    return res.json();
+  },
+
+  deleteDoctorAppointment: async (id, token) => {
+    const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
     });
     return res.json();
   },
@@ -598,8 +733,8 @@ const api = {
   // Profile endpoints
   updateProfile: async (formData, token) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/profile`, {
-        method: 'PUT',
+      const res = await fetch(`${API_BASE_URL}/profile/update`, {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
         },

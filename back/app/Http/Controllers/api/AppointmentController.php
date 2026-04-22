@@ -334,7 +334,7 @@ class AppointmentController extends Controller
 
         // Get doctor's appointments - show all appointments regardless of payment status
         $appointments = Appointment::where('doctor_id', $doctor->id)
-            ->with(['user', 'hospital', 'department', 'doctor'])
+            ->with(['user', 'hospital', 'department', 'doctor', 'report'])
             ->orderBy('date', 'asc')
             ->paginate(20);
 
@@ -567,7 +567,13 @@ class AppointmentController extends Controller
         $user = $request->user();
         $appointment = Appointment::findOrFail($id);
 
-        if ($appointment->user_id !== $user->id && !$user->isAdmin() && !$user->isSuperAdmin()) {
+        $isDoctorOwner = false;
+        if ($user->isDoctor()) {
+            $doctor = \App\Models\Doctor::where('user_id', $user->id)->first();
+            $isDoctorOwner = $doctor && $appointment->doctor_id === $doctor->id;
+        }
+
+        if ($appointment->user_id !== $user->id && !$user->isAdmin() && !$user->isSuperAdmin() && !$isDoctorOwner) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

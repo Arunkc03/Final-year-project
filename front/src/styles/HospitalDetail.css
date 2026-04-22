@@ -8,7 +8,7 @@
 
 /* Header Section */
 .hospital-detail .header-section {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 40px 40px;
   margin-bottom: 30px;
@@ -110,7 +110,7 @@
   color: #1a1a1a;
   font-size: 24px;
   font-weight: 700;
-  border-bottom: 2px solid #0E7B9E;
+  border-bottom: 2px solid #2A7FFF;
   padding-bottom: 15px;
 }
 
@@ -131,7 +131,7 @@
 
 .info-item label {
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
   margin-bottom: 8px;
   font-size: 12px;
   text-transform: uppercase;
@@ -205,8 +205,8 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #0E7B9E;
-  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.1);
 }
 
 .form-group textarea {
@@ -261,7 +261,7 @@
 .btn-link {
   background: none;
   border: none;
-  color: #0E7B9E;
+  color: #2A7FFF;
   padding: 0;
   font-weight: 600;
   text-decoration: underline;
@@ -292,7 +292,7 @@
   color: #1a1a1a;
   font-size: 24px;
   font-weight: 700;
-  border-bottom: 2px solid #0E7B9E;
+  border-bottom: 2px solid #2A7FFF;
   padding-bottom: 15px;
 }
 
@@ -499,7 +499,7 @@
 }
 
 .file-input:hover {
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
   background: #f0f9ff;
 }
 
@@ -507,3 +507,4 @@
   color: #6b7280;
   font-size: 0.85rem;
 }
+

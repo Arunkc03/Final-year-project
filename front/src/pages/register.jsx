@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
@@ -20,6 +20,13 @@ const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const queryError = searchParams.get('error');
+    if (queryError) {
+      setError(queryError);
+    }
+  }, [searchParams]);
 
   const handleChange = (e) => {
     setFormData({
@@ -78,7 +85,12 @@ const Register = () => {
           setTimeout(() => navigate('/login'), 2000);
         }
       } else {
-        setError(response.errors?.email?.[0] || response.message || 'Registration failed');
+        const emailError = response.errors?.email?.[0] || '';
+        if (emailError.toLowerCase().includes('taken') || emailError.toLowerCase().includes('exists')) {
+          setError('Email already exists');
+        } else {
+          setError(emailError || response.message || 'Registration failed');
+        }
       }
     } catch (err) {
       setError('Error connecting to server');
@@ -101,7 +113,7 @@ const Register = () => {
 
           {/* Tabs */}
           <div className="auth-split-tabs">
-            <button className="auth-split-tab">Sign In</button>
+            <button type="button" className="auth-split-tab" onClick={() => navigate('/login')}>Sign In</button>
             <button className="auth-split-tab active">Sign Up</button>
           </div>
 
@@ -172,7 +184,10 @@ const Register = () => {
           <button
             type="button"
             className="google-btn"
-            onClick={() => window.location.href = `${API_URL}/auth/google`}
+            onClick={() => {
+              localStorage.setItem('google_auth_mode', 'register');
+              window.location.href = `${API_URL}/auth/google?mode=register`;
+            }}
           >
             <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

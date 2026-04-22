@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
+import Navigation from '../components/Common/Navigation';
 import '../styles/Home.css';
 import hospitalImage from '../assets/images/hospital.jpg';
 
@@ -19,6 +20,14 @@ const Home = () => {
     return `${api.getStorageUrl()}/${String(path).replace(/^\/+/, '')}`;
   };
 
+
+
+  useEffect(() => {
+    // Logged-in users should land on their dashboard instead of the public home view.
+    if (token && user && dashboardRoute && dashboardRoute !== '/') {
+      navigate(dashboardRoute, { replace: true });
+    }
+  }, [token, user, dashboardRoute, navigate]);
 
 
   useEffect(() => {
@@ -59,6 +68,7 @@ const Home = () => {
   if (token && user && user.role === 'patient') {
     return (
       <div className="home-container">
+        <Navigation />
         <header className="home-header">
           <h1>🏥 Hospital Management System</h1>
           <p>Welcome, {user.name}!</p>
@@ -125,6 +135,7 @@ const Home = () => {
   // not logged in or other roles (render public home)
   return (
     <div className="home-container">
+      <Navigation />
       <header className="home-header">
         <h1>🏥 Hospital Management System</h1>
         <p>Efficient Healthcare Administration Platform</p>
@@ -156,9 +167,6 @@ const Home = () => {
             <div className="hero-buttons">
               <button onClick={() => navigate('/register')} className="hero-btn hero-btn-primary">
                 Get Started
-              </button>
-              <button onClick={() => navigate('/browse-hospitals')} className="hero-btn hero-btn-secondary">
-                Explore Hospitals
               </button>
             </div>
           </div>

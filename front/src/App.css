@@ -1,0 +1,864 @@
+/**
+ * Global App Styles with Theme Support & Component Library
+ * All colors use CSS variables for light/dark mode compatibility
+ * 
+ * ========== BUTTON USAGE GUIDE ==========
+ * 
+ * PRIMARY BUTTONS (Blue #2A7FFF):
+ *   <button class="btn-primary">Default Button</button>
+ *   <button class="btn-primary btn-sm">Small Button</button>
+ *   <button class="btn-primary btn-lg">Large Button</button>
+ *   <button class="btn-primary" disabled>Disabled Button</button>
+ * 
+ * SECONDARY BUTTONS (Blue outline):
+ *   <button class="btn-secondary">Cancel</button>
+ *   <button class="btn-secondary btn-sm">Small Secondary</button>
+ * 
+ * SUCCESS BUTTONS (Green #28A745):
+ *   <button class="btn-success">Save Changes</button>
+ *   <button class="btn-success btn-lg">Submit</button>
+ * 
+ * WARNING BUTTONS (Orange #FF9800):
+ *   <button class="btn-warning">Confirm</button>
+ *   <button class="btn-warning btn-sm">Alert Action</button>
+ * 
+ * DANGER BUTTONS (Red #DC3545):
+ *   <button class="btn-danger">Delete</button>
+ *   <button class="btn-danger btn-lg">Remove</button>
+ * 
+ * DISABLED STATE (All button types):
+ *   <button class="btn-primary" disabled>Disabled</button>
+ * 
+ * ========== CARD USAGE GUIDE ==========
+ * 
+ * BASIC CARD:
+ *   <div class="card">
+ *     <div class="card-header">
+ *       <h2 class="card-title">Card Title</h2>
+ *     </div>
+ *     <div class="card-body">
+ *       <p class="card-text">Card content goes here</p>
+ *     </div>
+ *     <div class="card-footer">
+ *       <button class="btn-primary">Action</button>
+ *     </div>
+ *   </div>
+ * 
+ * CARD VARIANTS:
+ *   <div class="card card-success">Success Card</div>
+ *   <div class="card card-warning">Warning Card</div>
+ *   <div class="card card-danger">Error Card</div>
+ *   <div class="card card-info">Info Card</div>
+ * 
+ * CARD GRID:
+ *   <div class="card-grid">
+ *     <div class="card">Card 1</div>
+ *     <div class="card">Card 2</div>
+ *     <div class="card">Card 3</div>
+ *   </div>
+ * 
+ * COMPACT CARD:
+ *   <div class="card card-compact">Compact card content</div>
+ * 
+ * ========== HOSPITAL SYSTEM EXAMPLES ==========
+ * 
+ * DOCTOR APPOINTMENT CARD:
+ *   <div class="card">
+ *     <div class="card-header">
+ *       <h3 class="card-title">Dr. Sarah Johnson</h3>
+ *     </div>
+ *     <div class="card-body">
+ *       <p><strong>Specialization:</strong> Cardiology</p>
+ *       <p><strong>Appointment:</strong> Mar 15, 2:30 PM</p>
+ *       <p class="card-meta">Available Slots: 3</p>
+ *     </div>
+ *     <div class="card-footer">
+ *       <button class="btn-primary">Book Appointment</button>
+ *       <button class="btn-secondary">View Profile</button>
+ *     </div>
+ *   </div>
+ * 
+ * APPOINTMENT STATUS CARD (Success):
+ *   <div class="card card-success">
+ *     <div class="card-header">
+ *       <h3 class="card-title">✓ Appointment Confirmed</h3>
+ *     </div>
+ *     <div class="card-body">
+ *       <p>Your appointment with Dr. Johnson has been confirmed.</p>
+ *       <p><strong>Date:</strong> March 15, 2024 | <strong>Time:</strong> 2:30 PM</p>
+ *     </div>
+ *   </div>
+ * 
+ * PAYMENT ALERT (Warning):
+ *   <div class="card card-warning">
+ *     <div class="card-header">
+ *       <h3 class="card-title">⚠ Limited Slots Available</h3>
+ *     </div>
+ *     <div class="card-body">
+ *       <p>Only 2 appointment slots remaining for this week!</p>
+ *     </div>
+ *     <div class="card-footer">
+ *       <button class="btn-warning btn-lg btn-block">Book Now</button>
+ *     </div>
+ *   </div>
+ * 
+ * CANCELLATION CONFIRMATION (Danger):
+ *   <div class="card card-danger">
+ *     <div class="card-header">
+ *       <h3 class="card-title">✕ Appointment Cancellation</h3>
+ *     </div>
+ *     <div class="card-body">
+ *       <p>Your appointment with Dr. Sarah has been cancelled.</p>
+ *     </div>
+ *     <div class="card-footer">
+ *       <button class="btn-primary">Book New Appointment</button>
+ *     </div>
+ *   </div>
+ * 
+ * DOCTOR PROFILE ACTIONS:
+ *   <div class="card-footer">
+ *     <button class="btn-primary">Book Appointment</button>
+ *     <button class="btn-secondary">View Profile</button>
+ *     <button class="btn-warning btn-sm">Report Issue</button>
+ *     <button class="btn-danger btn-sm">Remove</button>
+ *   </div>
+ * 
+ * HOSPITAL ADMIN ACTIONS:
+ *   <div class="card-footer">
+ *     <button class="btn-success">Save Changes</button>
+ *     <button class="btn-warning">Review</button>
+ *     <button class="btn-secondary">Cancel</button>
+ *     <button class="btn-danger">Delete</button>
+ *   </div>
+ * 
+ * DOCTOR GRID (Multiple Cards):
+ *   <div class="card-grid">
+ *     <!-- Repeat card structure for each doctor -->
+ *     <div class="card">
+ *       <div class="card-header">
+ *         <h4 class="card-title">Dr. Name</h4>
+ *       </div>
+ *       <!-- ... -->
+ *     </div>
+ *   </div>
+ * 
+ * ========== COLOR PALETTE ==========
+ * Primary (Blue):    #2A7FFF
+ * Secondary (Green):  #28A745
+ * Accent (Orange):   #FF9800
+ * Danger (Red):      #DC3545
+ * Border:           #d0d8e0
+ * Text Primary:     #1a1a2e
+ * Text Secondary:   #545461
+ * Background:       #ffffff
+ */
+
+/* Root Theme Application */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg-white);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Ensure all text respects theme */
+#root {
+  background: var(--color-bg-white);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Global Transitions for Theme Switching */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Links in theme */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+a:hover {
+  color: var(--color-primary-light);
+}
+
+a:visited {
+  color: var(--color-primary-dark);
+}
+
+/* Form Elements */
+input,
+textarea,
+select {
+  background: var(--color-bg-light);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
+  background: var(--color-bg-white);
+}
+
+input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+/* ========== COMPREHENSIVE BUTTON STYLES ========== */
+
+/* Base Button Styles */
+button,
+.btn {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  outline: none;
+}
+
+/* PRIMARY BUTTON (Blue) - Default State */
+button,
+.btn-primary {
+  background-color: #2A7FFF;
+  color: #ffffff;
+  border: 2px solid #2A7FFF;
+}
+
+/* PRIMARY BUTTON - Hover State */
+button:hover,
+.btn-primary:hover {
+  background-color: #1F5FCC;
+  border-color: #1F5FCC;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(42, 127, 255, 0.25);
+}
+
+/* PRIMARY BUTTON - Active/Pressed State */
+button:active,
+.btn-primary:active {
+  background-color: #174A99;
+  border-color: #174A99;
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(42, 127, 255, 0.15);
+}
+
+/* PRIMARY BUTTON - Focus State (Accessibility) */
+button:focus,
+.btn-primary:focus {
+  outline: 2px solid #2A7FFF;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(42, 127, 255, 0.15);
+}
+
+/* SECONDARY BUTTON - Default State */
+.btn-secondary {
+  background-color: #ffffff;
+  color: #2A7FFF;
+  border: 2px solid #2A7FFF;
+}
+
+/* SECONDARY BUTTON - Hover State */
+.btn-secondary:hover {
+  background-color: #e8f2ff;
+  color: #1F5FCC;
+  border-color: #1F5FCC;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(42, 127, 255, 0.15);
+}
+
+/* SECONDARY BUTTON - Active State */
+.btn-secondary:active {
+  background-color: #d4e6ff;
+  color: #174A99;
+  border-color: #174A99;
+  transform: translateY(0);
+}
+
+/* SUCCESS BUTTON (Green) - Default State */
+.btn-success {
+  background-color: #28A745;
+  color: #ffffff;
+  border: 2px solid #28A745;
+}
+
+/* SUCCESS BUTTON - Hover State */
+.btn-success:hover {
+  background-color: #218838;
+  border-color: #218838;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(40, 167, 69, 0.25);
+}
+
+/* SUCCESS BUTTON - Active State */
+.btn-success:active {
+  background-color: #1E7E34;
+  border-color: #1E7E34;
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+}
+
+/* SUCCESS BUTTON - Focus State */
+.btn-success:focus {
+  outline: 2px solid #28A745;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.15);
+}
+
+/* WARNING BUTTON (Orange) - Default State */
+.btn-warning {
+  background-color: #FF9800;
+  color: #ffffff;
+  border: 2px solid #FF9800;
+}
+
+/* WARNING BUTTON - Hover State */
+.btn-warning:hover {
+  background-color: #E68900;
+  border-color: #E68900;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 152, 0, 0.25);
+}
+
+/* WARNING BUTTON - Active State */
+.btn-warning:active {
+  background-color: #CC7A00;
+  border-color: #CC7A00;
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.15);
+}
+
+/* WARNING BUTTON - Focus State */
+.btn-warning:focus {
+  outline: 2px solid #FF9800;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.15);
+}
+
+/* DANGER/DELETE BUTTON (Red) - Default State */
+.btn-danger,
+button.btn-danger {
+  background-color: #DC3545;
+  color: #ffffff;
+  border: 2px solid #DC3545;
+}
+
+/* DANGER BUTTON - Hover State */
+.btn-danger:hover,
+button.btn-danger:hover {
+  background-color: #C82333;
+  border-color: #C82333;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 53, 69, 0.25);
+}
+
+/* DANGER BUTTON - Active State */
+.btn-danger:active,
+button.btn-danger:active {
+  background-color: #A71D2A;
+  border-color: #A71D2A;
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.15);
+}
+
+/* DANGER BUTTON - Focus State */
+.btn-danger:focus,
+button.btn-danger:focus {
+  outline: 2px solid #DC3545;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.15);
+}
+
+/* DISABLED STATE - All Button Types */
+button:disabled,
+.btn:disabled,
+button.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-success:disabled,
+.btn-warning:disabled,
+.btn-danger:disabled {
+  background-color: #b3cbe5;
+  border-color: #b3cbe5;
+  color: #8a8f9e;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+/* DISABLED STATE - Hover (should not change) */
+button:disabled:hover,
+.btn:disabled:hover {
+  background-color: #b3cbe5;
+  border-color: #b3cbe5;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Small Button Variant */
+.btn-sm,
+button.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Large Button Variant */
+.btn-lg,
+button.btn-lg {
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Full Width Button */
+.btn-block,
+button.btn-block {
+  width: 100%;
+  display: flex;
+}
+
+/* ========== COMPREHENSIVE CARD STYLES ========== */
+
+/* Base Card Styles */
+.card,
+.modal,
+.panel {
+  background-color: #ffffff;
+  border: 1px solid #d0d8e0;
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Card Hover Effect */
+.card:hover {
+  box-shadow: 0 12px 32px rgba(42, 127, 255, 0.08);
+  border-color: #2A7FFF;
+  transform: translateY(-4px);
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #d0d8e0;
+}
+
+.card-header h2,
+.card-header h3,
+.card-header h4 {
+  margin: 0;
+  color: #1a1a2e;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* Card Body - Main Content */
+.card-body {
+  padding: 0;
+}
+
+.card-body p {
+  margin: 0 0 12px 0;
+  color: #545461;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.card-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Card Footer */
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  margin-top: 16px;
+  border-top: 1px solid #d0d8e0;
+}
+
+/* Card Text Colors */
+.card-title {
+  color: #1a1a2e;
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+
+.card-subtitle {
+  color: #545461;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.card-text {
+  color: #545461;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.card-meta {
+  color: #8a8f9e;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 12px;
+}
+
+/* Card Variants - Status Based */
+
+/* Success Card */
+.card.card-success {
+  border-color: #28A745;
+  border-left: 4px solid #28A745;
+}
+
+.card.card-success:hover {
+  border-color: #218838;
+  box-shadow: 0 12px 32px rgba(40, 167, 69, 0.08);
+}
+
+.card.card-success .card-header {
+  border-bottom-color: #e8f7f0;
+}
+
+/* Warning Card */
+.card.card-warning {
+  border-color: #FF9800;
+  border-left: 4px solid #FF9800;
+}
+
+.card.card-warning:hover {
+  border-color: #E68900;
+  box-shadow: 0 12px 32px rgba(255, 152, 0, 0.08);
+}
+
+.card.card-warning .card-header {
+  border-bottom-color: #fff5e6;
+}
+
+/* Error/Danger Card */
+.card.card-danger {
+  border-color: #DC3545;
+  border-left: 4px solid #DC3545;
+}
+
+.card.card-danger:hover {
+  border-color: #C82333;
+  box-shadow: 0 12px 32px rgba(220, 53, 69, 0.08);
+}
+
+.card.card-danger .card-header {
+  border-bottom-color: #fdeef0;
+}
+
+/* Info Card */
+.card.card-info {
+  border-color: #2A7FFF;
+  border-left: 4px solid #2A7FFF;
+}
+
+.card.card-info:hover {
+  border-color: #1F5FCC;
+  box-shadow: 0 12px 32px rgba(42, 127, 255, 0.08);
+}
+
+.card.card-info .card-header {
+  border-bottom-color: #e8f2ff;
+}
+
+/* Filled Card Backgrounds */
+
+.card.card-success {
+  background-color: #f0fbf7;
+}
+
+.card.card-warning {
+  background-color: #fff5e6;
+}
+
+.card.card-danger {
+  background-color: #fdeef0;
+}
+
+.card.card-info {
+  background-color: #e8f2ff;
+}
+
+/* Card with Image/Icon */
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 10px 10px 0 0;
+  margin: -20px -20px 16px -20px;
+}
+
+/* Card Grid Layout */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin: 20px 0;
+}
+
+/* Compact Card */
+.card.card-compact {
+  padding: 12px 16px;
+}
+
+.card.card-compact .card-header {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.card.card-compact .card-title {
+  font-size: 0.95rem;
+}
+
+/* ========== DROPDOWN/MODAL ADJUSTMENTS ========== */
+
+/* Dropdown and Modal Container */
+.dropdown {
+  background: #ffffff;
+  color: #1a1a2e;
+  border: 1px solid #d0d8e0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  color: #1a1a2e;
+  border: 1px solid #d0d8e0;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  color: var(--card-foreground);
+}
+
+thead {
+  background: var(--color-bg-light);
+  border-bottom: 2px solid var(--color-border);
+}
+
+th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+tbody tr:hover {
+  background: var(--color-bg-lighter);
+}
+
+/* Status Badges */
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: var(--color-success-light);
+  color: var(--color-success-text);
+}
+
+.badge-error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+}
+
+.badge-warning {
+  background: var(--color-warning);
+  color: var(--color-warning-text);
+}
+
+.badge-info {
+  background: var(--color-info);
+  color: var(--color-info-text);
+}
+
+/* Alert Messages */
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  border-left: 4px solid;
+  margin-bottom: 16px;
+}
+
+.alert-success {
+  background: var(--color-success-light);
+  color: var(--color-success-text);
+  border-color: var(--color-success);
+}
+
+.alert-error {
+  background: var(--color-error-bg);
+  color: var(--color-error-text);
+  border-color: var(--color-error);
+}
+
+.alert-warning {
+  background: var(--color-warning);
+  color: var(--color-warning-text);
+  border-color: var(--color-warning);
+}
+
+.alert-info {
+  background: var(--color-info);
+  color: var(--color-info-text);
+  border-color: var(--color-info);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
+}
+
+/* Focus Visible for Accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Responsive Text */
+@media (max-width: 1024px) {
+  body {
+    font-size: 14px;
+  }
+
+  button {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 13px;
+  }
+
+  button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  input,
+  textarea,
+  select {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  table {
+    font-size: 12px;
+  }
+
+  th,
+  td {
+    padding: 8px;
+  }
+}
+
+/* Dark Mode Specific Adjustments */
+.dark {
+  /* Ensure dark backgrounds don't have excessive contrast */
+  --logo-visibility: brightness(1.2);
+}
+
+.dark a:visited {
+  color: var(--color-primary-light);
+}
+
+/* Accessibility: Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    color: black;
+  }
+
+  button,
+  .nav-menu,
+  .nav-theme-toggle {
+    display: none;
+  }
+}

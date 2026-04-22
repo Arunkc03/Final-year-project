@@ -8,11 +8,130 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
 
 class UserController extends Controller
 {
+    private function forgotPasswordMessage(string $status): string
+    {
+        return match ($status) {
+            Password::RESET_LINK_SENT => 'If this email is registered, a password reset link has been sent.',
+            Password::RESET_THROTTLED => 'Please wait before requesting another reset link.',
+            default => 'If this email is registered, a password reset link has been sent.',
+        };
+    }
+
+    private function resetPasswordMessage(string $status): string
+    {
+        return match ($status) {
+            Password::PASSWORD_RESET => 'Password has been reset successfully.',
+            Password::INVALID_TOKEN => 'This reset link is invalid or expired. Please request a new one.',
+            Password::INVALID_USER => 'No account found for this email address.',
+            Password::RESET_THROTTLED => 'Too many attempts. Please wait and try again.',
+            default => 'Unable to reset password. Please request a new reset link and try again.',
+        };
+    }
+
+    // Set password for authenticated account (used by Google sign-up onboarding)
+    public function setPassword(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'Unauthenticated'], 401);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password set successfully',
+        ]);
+    }
+
+    // Send password reset link
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'status' => 'success',
+                'message' => $this->forgotPasswordMessage($status),
+            ]);
+        }
+
+        // Return success for unknown email to avoid account enumeration and reduce mismatch confusion.
+        if ($status === Password::INVALID_USER) {
+            return response()->json([
+                'status' => 'success',
+                'message' => $this->forgotPasswordMessage($status),
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $this->forgotPasswordMessage($status),
+        ], 422);
+    }
+
+    // Reset password using token sent by email
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error', 'errors' => $validator->errors()], 422);
+        }
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'status' => 'success',
+                'message' => $this->resetPasswordMessage($status),
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $this->resetPasswordMessage($status),
+        ], 422);
+    }
+
     // Patient Self-Registration (public)
     public function registerPatient(Request $request)
     {
@@ -108,6 +227,17 @@ class UserController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['status'=>'error','message'=>'Invalid credentials'], 401);
+        }
+
+        $user->loadMissing('hospital');
+
+        if (!$user->hasAccessibleHospital()) {
+            $user->tokens()->delete();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Your hospital account is no longer available.',
+            ], 403);
         }
 
         // Generate Sanctum token

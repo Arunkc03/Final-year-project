@@ -26,7 +26,7 @@
 .nav-logo {
   font-size: 24px;
   font-weight: bold;
-  color: #0E7B9E;
+  color: #000000;
   text-decoration: none;
   display: flex;
   align-items: center;
@@ -71,7 +71,7 @@
 }
 
 .nav-link:hover {
-  color: #e74c3c;
+  color: #666666;
 }
 
 /* Theme Toggle Button */
@@ -113,9 +113,9 @@
 
 .nav-btn-primary {
   padding: 10px 24px;
-  background: #e74c3c;
+  background: #000000;
   color: white !important;
-  border: 2px solid #e74c3c;
+  border: 2px solid #000000;
   border-radius: 4px;
   font-weight: 600;
   font-size: 14px;
@@ -124,10 +124,10 @@
 }
 
 .nav-btn-primary:hover {
-  background: #d63620;
-  border-color: #d63620;
+  background: #333333;
+  border-color: #333333;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .nav-user-name {

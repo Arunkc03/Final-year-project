@@ -26,6 +26,8 @@ use App\Http\Controllers\api\AIController;
 // Authentication
 Route::post('/register', [UserController::class, 'registerPatient'])->name('register');
 Route::post('/login', [UserController::class, 'login'])->name('login');
+Route::post('/forgot-password', [UserController::class, 'forgotPassword'])->name('password.email');
+Route::post('/reset-password', [UserController::class, 'resetPassword'])->name('password.reset');
 
 // Google OAuth routes
 Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])->name('auth.google');
@@ -83,11 +85,20 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('profile.update.post');
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
     Route::post('/change-password', [UserController::class, 'changePassword'])->name('password.change');
+    Route::post('/set-password', [UserController::class, 'setPassword'])->name('password.set');
 
     // ========== REPORTS (All authenticated users) ==========
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.all');
     Route::get('/reports/{id}', [ReportController::class, 'show'])->name('reports.show.all');
     Route::delete('/reports/{id}', [ReportController::class, 'destroy'])->name('reports.destroy');
+
+    // ========== REVIEWS (All authenticated users; authorization in controller) ==========
+    Route::prefix('/reviews')->name('reviews.')->group(function () {
+        Route::get('/', [ReviewController::class, 'index'])->name('index');
+        Route::post('/', [ReviewController::class, 'store'])->name('store');
+        Route::put('/{id}', [ReviewController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
+    });
 
     // ========== NOTIFICATIONS ==========
     Route::prefix('/notifications')->name('notifications.')->group(function () {
@@ -144,22 +155,11 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/lookup/{paymentId}', [KhaltiPaymentController::class, 'lookupPayment'])->name('lookup');
         });
 
-        // Reviews
-        Route::prefix('/reviews')->name('reviews.')->group(function () {
-            Route::get('/', [ReviewController::class, 'index'])->name('index');
-            Route::post('/', [ReviewController::class, 'store'])->name('store');
-            Route::put('/{id}', [ReviewController::class, 'update'])->name('update');
-            Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
-        });
-
         // Appointment history
         Route::get('/appointments-history', [AppointmentController::class, 'history'])->name('appointment-history');
 
         // ========== AI RECOMMENDATIONS ==========
-        Route::prefix('/ai')->name('ai.')->group(function () {
-            Route::get('/doctor-recommendations', [AIController::class, 'getDoctorRecommendations'])->name('doctor-recommendations');
-            Route::post('/specialty-recommendation', [AIController::class, 'getSpecialtyRecommendation'])->name('specialty-recommendation');
-            Route::get('/similar-patients', [AIController::class, 'getSimilarPatients'])->name('similar-patients');
+        
         });
     });
 
@@ -183,6 +183,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/doctor/appointments/{id}/accept', [AppointmentController::class, 'acceptAppointment'])->name('doctor.appointments.accept');
         Route::post('/doctor/appointments/{id}/reject', [AppointmentController::class, 'rejectAppointment'])->name('doctor.appointments.reject');
         Route::post('/doctor/appointments/{id}/cancel', [AppointmentController::class, 'doctorCancelAppointment'])->name('doctor.appointments.cancel');
+        Route::delete('/doctor/appointments/{id}', [AppointmentController::class, 'destroy'])->name('doctor.appointments.destroy');
         Route::post('/doctor/appointments/{id}/complete', [AppointmentController::class, 'completeAppointment'])->name('doctor.appointments.complete');
         
         // Appointments
@@ -191,9 +192,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/appointments/{id}', [AppointmentController::class, 'update'])->name('appointments.update');
         Route::post('/appointments/{id}/accept', [AppointmentController::class, 'acceptAppointment'])->name('appointments.accept');
         Route::post('/appointments/{id}/reject', [AppointmentController::class, 'rejectAppointment'])->name('appointments.reject');
-
-        // Doctor Reviews
-        Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews');
 
         // Doctor Reports - POST for creating and reviewing reports
         Route::post('/reports', [ReportController::class, 'store'])->name('reports.store');
@@ -209,6 +207,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{id}', [HospitalController::class, 'show'])->name('show');
             Route::post('/', [HospitalController::class, 'store'])->middleware('role:super_admin')->name('store');
             Route::put('/{id}', [HospitalController::class, 'update'])->name('update');
+            Route::put('/{hospitalId}/doctors/{doctorId}', [HospitalController::class, 'updateDoctor'])->name('doctors.update');
             Route::delete('/{id}', [HospitalController::class, 'destroy'])->middleware('role:super_admin')->name('destroy');
             Route::get('/{id}/statistics', [HospitalController::class, 'statistics'])->name('statistics');
         });
@@ -219,7 +218,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/{id}', [DepartmentController::class, 'show'])->name('show');
             Route::post('/', [DepartmentController::class, 'store'])->name('store');
             Route::put('/{id}', [DepartmentController::class, 'update'])->name('update');
-            Route::delete('/{id}', [DepartmentController::class, 'destroy'])->middleware('role:super_admin')->name('destroy');
+            Route::delete('/{id}', [DepartmentController::class, 'destroy'])->name('destroy');
             Route::get('/{id}/statistics', [DepartmentController::class, 'statistics'])->name('statistics');
         });
 
@@ -255,10 +254,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Reviews Management
         Route::prefix('/reviews')->name('reviews.')->group(function () {
-            Route::get('/', [ReviewController::class, 'index'])->name('index');
             Route::put('/{id}/approve', [ReviewController::class, 'approve'])->name('approve');
             Route::put('/{id}/reject', [ReviewController::class, 'reject'])->name('reject');
-            Route::delete('/{id}', [ReviewController::class, 'destroy'])->name('destroy');
         });
 
         // Payments
@@ -292,11 +289,12 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/settings', [AdminController::class, 'settings'])->name('settings');
             Route::get('/users', [UserController::class, 'systemUsers'])->name('users');
             Route::get('/hospitals', [HospitalController::class, 'systemHospitals'])->name('hospitals');
+            Route::get('/doctors', [DoctorController::class, 'adminIndex'])->name('doctors');
             Route::get('/departments', [DepartmentController::class, 'systemDepartments'])->name('departments');
         });
     });
 
-});
+
 
 /**
  * ========== FALLBACK ==========

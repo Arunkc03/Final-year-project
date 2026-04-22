@@ -18,13 +18,13 @@ class DoctorController extends Controller
     {
         $user = auth()->user();
 
-        if (!$user || !$user->isAdmin()) {
+        if (!$user || !($user->isAdmin() || $user->isSuperAdmin())) {
             return response()->json(['message'=>'Unauthorized'], 403);
         }
 
         $query = Doctor::with('user', 'hospital', 'department');
         
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() && !$user->isSuperAdmin()) {
             $query->where('hospital_id', $user->hospital_id);
         }
 

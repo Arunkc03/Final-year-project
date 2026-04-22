@@ -6,7 +6,7 @@
 }
 
 .page-header {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 50px 40px;
   display: flex;
@@ -68,7 +68,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   border: none;
   padding: 14px 28px;
@@ -126,8 +126,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #0E7B9E;
-  box-shadow: 0 0 5px rgba(14, 123, 158, 0.3);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 5px rgba(42, 127, 255, 0.3);
 }
 
 .form-group textarea {
@@ -142,13 +142,13 @@
 
 .form-group textarea:focus {
   outline: none;
-  border-color: #0E7B9E;
-  box-shadow: 0 0 5px rgba(14, 123, 158, 0.3);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 5px rgba(42, 127, 255, 0.3);
 }
 
 .form-divider {
   font-weight: 600;
-  color: #0E7B9E;
+  color: #2A7FFF;
   margin: 20px 0 15px;
   padding-top: 20px;
   border-top: 1px solid #eee;
@@ -163,7 +163,7 @@
 
 .edit-info-box {
   background: #f0f7ff;
-  border-left: 4px solid #0E7B9E;
+  border-left: 4px solid #2A7FFF;
   padding: 15px;
   border-radius: 4px;
   margin-bottom: 20px;
@@ -171,7 +171,7 @@
 
 .edit-info-box h4 {
   margin: 0 0 10px;
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
@@ -193,14 +193,14 @@
 }
 
 .image-upload-group:hover {
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
   background: #f0f7ff;
 }
 
 .image-upload-placeholder {
   cursor: pointer;
   display: block;
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-weight: 500;
   padding: 20px;
   border-radius: 4px;
@@ -294,7 +294,7 @@
 }
 
 .hospital-id {
-  color: #0E7B9E;
+  color: #2A7FFF;
   font-weight: 600;
   font-size: 12px;
   margin-bottom: 10px;
@@ -313,7 +313,7 @@
 .status-active {
   display: inline-block;
   background: #e8f5e9;
-  color: #0E7B9E;
+  color: #2A7FFF;
   padding: 3px 8px;
   border-radius: 3px;
   font-size: 12px;
@@ -347,7 +347,7 @@
 
 .btn-view {
   background: #e8f5e9;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .btn-view:hover {
@@ -393,5 +393,6 @@
   align-items: center;
   min-height: 100vh;
   font-size: 18px;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
+

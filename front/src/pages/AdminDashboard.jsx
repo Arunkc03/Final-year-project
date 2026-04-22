@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
 import '../styles/AdminDashboard.css';
+import '../styles/DashboardWidgets.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { user, token } = useContext(AuthContext);
+  const { user, token, logout, updateUser } = useContext(AuthContext);
   const [dashboardData, setDashboardData] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,7 +16,6 @@ const AdminDashboard = () => {
   const [deptFormData, setDeptFormData] = useState({
     name: '',
     description: '',
-    head_doctor: '',
     total_beds: '',
     status: 'active'
   });
@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const [viewingDoctor, setViewingDoctor] = useState(null);
   const [showDoctorView, setShowDoctorView] = useState(false);
   const [deletingDoctorId, setDeletingDoctorId] = useState(null);
+  const [deletingDepartmentId, setDeletingDepartmentId] = useState(null);
   const [editingDoctorId, setEditingDoctorId] = useState(null);
 
   // Hospital info / edit states
@@ -69,6 +70,22 @@ const AdminDashboard = () => {
   const [patientsLoading, setPatientsLoading] = useState(false);
   const [patientSearch, setPatientSearch] = useState('');
   const [deletingPatientId, setDeletingPatientId] = useState(null);
+  const [activeSection, setActiveSection] = useState('hospital');
+  const [profileEditMode, setProfileEditMode] = useState(false);
+  const [profileFormData, setProfileFormData] = useState({
+    name: '',
+    phone: '',
+    date_of_birth: '',
+    gender: '',
+    address: '',
+    city: '',
+    state: '',
+    postal_code: '',
+  });
+  const [profileAvatarFile, setProfileAvatarFile] = useState(null);
+  const [profileAvatarPreview, setProfileAvatarPreview] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
 
   useEffect(() => {
     if (!token || user?.role !== 'admin') {
@@ -86,6 +103,21 @@ const AdminDashboard = () => {
       fetchAllReviews();
     }
   }, [dashboardData]);
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileFormData({
+      name: user.name || '',
+      phone: user.phone || '',
+      date_of_birth: user.date_of_birth || '',
+      gender: user.gender || '',
+      address: user.address || '',
+      city: user.city || '',
+      state: user.state || '',
+      postal_code: user.postal_code || '',
+    });
+    setProfileAvatarPreview(user.avatar ? `${api.getStorageUrl()}/${user.avatar}` : '');
+  }, [user]);
 
   const fetchDepartments = async (hospitalId) => {
     try {
@@ -268,7 +300,6 @@ const AdminDashboard = () => {
         setDeptFormData({
           name: '',
           description: '',
-          head_doctor: '',
           total_beds: '',
           status: 'active'
         });
@@ -459,14 +490,320 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteDepartment = async (departmentId) => {
+    if (!window.confirm('Delete this department? It cannot be undone.')) {
+      return;
+    }
+
+    setDeletingDepartmentId(departmentId);
+    try {
+      const response = await api.deleteDepartment(departmentId, token);
+      if (response.status === 'success') {
+        fetchDepartments(dashboardData.hospital_id);
+        alert('Department deleted successfully');
+      } else {
+        alert(response.message || 'Failed to delete department');
+      }
+    } catch (err) {
+      alert('Error deleting department: ' + (err.message || err));
+    } finally {
+      setDeletingDepartmentId(null);
+    }
+  };
+
+  const handleSectionClick = (section) => {
+    setActiveSection(section);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.logout(token);
+    } catch {}
+    logout();
+    navigate('/login');
+  };
+
+  const handleProfileInputChange = (e) => {
+    const { name, value, type, files } = e.target;
+
+    if (type === 'file') {
+      const file = files?.[0];
+      if (!file) return;
+      setProfileAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setProfileAvatarPreview(reader.result);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    setProfileFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfileCancel = () => {
+    setProfileEditMode(false);
+    setProfileAvatarFile(null);
+    setProfileMessage({ type: '', text: '' });
+    setProfileFormData({
+      name: user?.name || '',
+      phone: user?.phone || '',
+      date_of_birth: user?.date_of_birth || '',
+      gender: user?.gender || '',
+      address: user?.address || '',
+      city: user?.city || '',
+      state: user?.state || '',
+      postal_code: user?.postal_code || '',
+    });
+    setProfileAvatarPreview(user?.avatar ? `${api.getStorageUrl()}/${user.avatar}` : '');
+  };
+
+  const handleProfileSave = async (e) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileMessage({ type: '', text: '' });
+
+    try {
+      const formData = new FormData();
+      Object.entries(profileFormData).forEach(([key, value]) => {
+        formData.append(key, value || '');
+      });
+      if (profileAvatarFile) {
+        formData.append('avatar', profileAvatarFile);
+      }
+
+      const response = await api.updateProfile(formData, token);
+      if (response.status === 'success') {
+        updateUser(response.user);
+        setProfileAvatarFile(null);
+        setProfileEditMode(false);
+        setProfileMessage({ type: 'success', text: response.message || 'Profile updated successfully' });
+      } else {
+        setProfileMessage({ type: 'error', text: response.message || 'Failed to update profile' });
+      }
+    } catch (err) {
+      setProfileMessage({ type: 'error', text: err.message || 'Error updating profile' });
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
+  const adminOverviewBars = [
+    { label: 'Doctors', value: dashboardData?.total_doctors || 0 },
+    { label: 'Patients', value: dashboardData?.total_patients || 0 },
+    { label: 'Appointments', value: dashboardData?.total_appointments || 0 },
+    { label: 'Reviews', value: allReviews.length || 0 },
+  ];
+
+  const adminOpsBars = [
+    { label: 'Departments', value: departments.length || 0 },
+    { label: 'Pending', value: dashboardData?.pending_appointments || 0 },
+    { label: 'Reports', value: dashboardData?.total_reports || 0 },
+    { label: 'Active Depts', value: departments.filter(d => d.status === 'active').length || 0 },
+  ];
+
+  const overviewMax = Math.max(1, ...adminOverviewBars.map(item => item.value));
+  const overviewPoints = adminOverviewBars
+    .map((item, idx) => {
+      const x = adminOverviewBars.length === 1 ? 50 : (idx * 100) / (adminOverviewBars.length - 1);
+      const y = 95 - (item.value / overviewMax) * 80;
+      return { x, y };
+    });
+  const overviewPath = overviewPoints.map(point => `${point.x},${point.y}`).join(' ');
+
+  const pieColors = ['#3b82f6', '#22c55e', '#f59e0b', '#a855f7'];
+  const opsTotal = Math.max(1, adminOpsBars.reduce((sum, item) => sum + item.value, 0));
+  let accumulated = 0;
+  const pieGradient = `conic-gradient(${adminOpsBars
+    .map((item, idx) => {
+      const start = (accumulated / opsTotal) * 360;
+      accumulated += item.value;
+      const end = (accumulated / opsTotal) * 360;
+      return `${pieColors[idx % pieColors.length]} ${start}deg ${end}deg`;
+    })
+    .join(', ')})`;
+
   if (loading) return <div className="ad-loading">Loading dashboard...</div>;
   if (!user) return null;
 
   return (
     <div className="ad-page">
+      <div className="dash-shell">
+        <aside className="dash-sidebar">
+          <h3 className="dash-sidebar-title">Admin Navigation</h3>
+          <div className="dash-sidebar-nav">
+            <button className={`dash-sidebar-btn ${activeSection === 'profile' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('profile')}>My Profile</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'hospital' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('hospital')}>Hospital</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'departments' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('departments')}>Departments</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'reviews' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('reviews')}>Reviews</button>
+            <button className={`dash-sidebar-btn ${activeSection === 'patients' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('patients')}>Patients</button>
+          </div>
+          <div className="dash-sidebar-footer">
+            <button className="dash-sidebar-btn dash-sidebar-logout" type="button" onClick={handleLogout}>Logout</button>
+            <p className="dash-sidebar-footnote">Admin Panel</p>
+          </div>
+        </aside>
+
+        <div className="dash-main-content">
+      <section className="dash-analytics">
+        <div className="dash-graph-card">
+          <h3>Overview Graph</h3>
+          <p>Core hospital metrics</p>
+          <div className="dash-line-wrap">
+            <svg className="dash-line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Overview line graph">
+              <line className="dash-line-grid" x1="0" y1="20" x2="100" y2="20" />
+              <line className="dash-line-grid" x1="0" y1="40" x2="100" y2="40" />
+              <line className="dash-line-grid" x1="0" y1="60" x2="100" y2="60" />
+              <line className="dash-line-grid" x1="0" y1="80" x2="100" y2="80" />
+              <polyline className="dash-line-path" points={overviewPath} />
+              {overviewPoints.map((point, idx) => (
+                <circle key={adminOverviewBars[idx].label} className="dash-line-point" cx={point.x} cy={point.y} r="1.8" />
+              ))}
+            </svg>
+            <div className="dash-line-labels">
+              {adminOverviewBars.map((item) => (
+                <span key={item.label}>{item.label}: {item.value}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="dash-graph-card">
+          <h3>Operations Pie Chart</h3>
+          <p>Department and workflow health</p>
+          <div className="dash-pie-wrap">
+            <div className="dash-pie-chart" style={{ background: pieGradient }} aria-label="Operations pie chart" />
+            <ul className="dash-pie-legend">
+              {adminOpsBars.map((item, idx) => (
+                <li key={item.label}>
+                  <span className="dash-pie-legend-name">
+                    <span className="dash-pie-dot" style={{ background: pieColors[idx % pieColors.length] }} />
+                    {item.label}
+                  </span>
+                  <span className="dash-pie-value">{item.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section className="ad-profile-section" style={{ display: activeSection === 'profile' ? 'block' : 'none' }}>
+        <div className="ad-panel ad-profile-card">
+          <div className="ad-profile-header-row">
+            <h2 className="ad-panel-title ad-profile-title">My Information</h2>
+            {!profileEditMode ? (
+              <button type="button" className="ad-edit-profile-btn" onClick={() => setProfileEditMode(true)}>Edit Profile</button>
+            ) : null}
+          </div>
+
+          {profileMessage.text ? (
+            <div className={profileMessage.type === 'error' ? 'ad-form-error' : 'success-message'}>{profileMessage.text}</div>
+          ) : null}
+
+          {!profileEditMode ? (
+            <>
+              <div className="dash-profile-top ad-profile-head">
+                <div className="dash-profile-avatar ad-profile-avatar">
+                  {profileAvatarPreview ? (
+                    <img src={profileAvatarPreview} alt={user?.name || 'Admin'} className="ad-profile-avatar-img" />
+                  ) : (
+                    user?.name?.charAt(0)?.toUpperCase() || 'A'
+                  )}
+                </div>
+                <div>
+                  <h2 className="dash-profile-title">{user?.name || 'Admin'}</h2>
+                  <p className="dash-profile-subtitle">Administrator account overview</p>
+                </div>
+              </div>
+
+              <div className="dash-profile-details ad-profile-details-grid">
+                <div className="dash-profile-row"><label>Name</label><span>{user?.name || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
+                <div className="dash-profile-row"><label>Role</label><span>Admin</span></div>
+                <div className="dash-profile-row"><label>Hospital</label><span>{hospitalInfo?.name || 'N/A'}</span></div>
+              </div>
+            </>
+          ) : (
+            <form className="ad-profile-form" onSubmit={handleProfileSave}>
+              <div className="ad-admin-avatar-wrap ad-profile-head">
+                <div className="ad-admin-avatar ad-profile-avatar">
+                  {profileAvatarPreview ? (
+                    <img src={profileAvatarPreview} alt={profileFormData.name || 'Admin'} className="ad-profile-avatar-img" />
+                  ) : (
+                    profileFormData.name?.charAt(0)?.toUpperCase() || 'A'
+                  )}
+                </div>
+                <div className="ad-profile-avatar-actions">
+                  <span className="ad-admin-role-badge">Admin</span>
+                  <label className="ad-profile-upload-label">
+                    Change Photo
+                    <input type="file" accept="image/*" onChange={handleProfileInputChange} name="avatar" style={{ display: 'none' }} />
+                  </label>
+                </div>
+              </div>
+
+              <div className="ad-profile-form-grid">
+                <div className="ad-form-group">
+                  <label>Name</label>
+                  <input name="name" value={profileFormData.name} onChange={handleProfileInputChange} placeholder="Full name" />
+                </div>
+                <div className="ad-form-group">
+                  <label>Phone</label>
+                  <input name="phone" value={profileFormData.phone} onChange={handleProfileInputChange} placeholder="Phone number" />
+                </div>
+                <div className="ad-form-group">
+                  <label>Date of Birth</label>
+                  <input type="date" name="date_of_birth" value={profileFormData.date_of_birth} onChange={handleProfileInputChange} />
+                </div>
+                <div className="ad-form-group">
+                  <label>Gender</label>
+                  <select name="gender" value={profileFormData.gender} onChange={handleProfileInputChange}>
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div className="ad-form-group ad-form-group--full">
+                  <label>Address</label>
+                  <input name="address" value={profileFormData.address} onChange={handleProfileInputChange} placeholder="Address" />
+                </div>
+                <div className="ad-form-group">
+                  <label>City</label>
+                  <input name="city" value={profileFormData.city} onChange={handleProfileInputChange} placeholder="City" />
+                </div>
+                <div className="ad-form-group">
+                  <label>State</label>
+                  <input name="state" value={profileFormData.state} onChange={handleProfileInputChange} placeholder="State" />
+                </div>
+                <div className="ad-form-group">
+                  <label>Postal Code</label>
+                  <input name="postal_code" value={profileFormData.postal_code} onChange={handleProfileInputChange} placeholder="Postal code" />
+                </div>
+                <div className="ad-form-group">
+                  <label>Email</label>
+                  <input value={user?.email || ''} disabled readOnly />
+                </div>
+              </div>
+
+              <div className="ad-form-actions">
+                <button type="button" className="ad-cancel-btn" onClick={handleProfileCancel}>Cancel</button>
+                <button type="submit" className="ad-save-btn" disabled={profileSaving}>{profileSaving ? 'Saving...' : 'Save Profile'}</button>
+              </div>
+            </form>
+          )}
+
+          <div className="dash-profile-stats ad-profile-stats-grid">
+            <div className="dash-profile-stat"><strong>{dashboardData?.total_doctors || 0}</strong><span>Doctors</span></div>
+            <div className="dash-profile-stat"><strong>{dashboardData?.total_patients || 0}</strong><span>Patients</span></div>
+            <div className="dash-profile-stat"><strong>{dashboardData?.pending_appointments || 0}</strong><span>Pending Appts</span></div>
+            <div className="dash-profile-stat"><strong>{dashboardData?.total_reports || 0}</strong><span>Reports</span></div>
+          </div>
+        </div>
+      </section>
 
       {/* ── HOSPITAL INFO SECTION ── */}
-      <section className="ad-hospital-section">
+      <section id="ad-hospital" className="ad-hospital-section" style={{ display: activeSection === 'hospital' ? 'block' : 'none' }}>
         {!hospitalEditMode ? (
           <div className="ad-hospital-view">
             <div className="ad-hospital-img-wrap">
@@ -533,7 +870,7 @@ const AdminDashboard = () => {
             <div className="ad-form-actions">
               <button type="button" className="ad-cancel-btn" onClick={() => { setHospitalEditMode(false); setHospitalFormError(''); }}>Cancel</button>
               <button type="submit" className="ad-save-btn" disabled={hospitalFormLoading}>
-                {hospitalFormLoading ? 'Saving...' : '💾 Save Changes'}
+                {hospitalFormLoading ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
           </form>
@@ -541,59 +878,14 @@ const AdminDashboard = () => {
       </section>
 
       {/* ── THREE PANELS ── */}
-      <div className="ad-panels">
-
-        {/* ── PANEL 1 — Admin Info ── */}
-        <div className="ad-panel ad-admin-panel">
-          <h2 className="ad-panel-title">👤 My Information</h2>
-          <div className="ad-admin-avatar-wrap">
-            <div className="ad-admin-avatar">👤</div>
-            <span className="ad-admin-role-badge">Admin</span>
-          </div>
-          <div className="ad-admin-details">
-            <div className="ad-detail-row">
-              <label>Name</label>
-              <span>{user?.name || 'N/A'}</span>
-            </div>
-            <div className="ad-detail-row">
-              <label>Email</label>
-              <span>{user?.email || 'N/A'}</span>
-            </div>
-            <div className="ad-detail-row">
-              <label>Phone</label>
-              <span>{user?.phone || 'N/A'}</span>
-            </div>
-            <div className="ad-detail-row">
-              <label>Staff ID</label>
-              <span>{user?.identifier || 'N/A'}</span>
-            </div>
-          </div>
-          <div className="ad-mini-stats">
-            <div className="ad-mini-stat">
-              <span className="ad-mini-val">{dashboardData?.total_doctors || 0}</span>
-              <span className="ad-mini-label">Doctors</span>
-            </div>
-            <div className="ad-mini-stat">
-              <span className="ad-mini-val">{dashboardData?.total_patients || 0}</span>
-              <span className="ad-mini-label">Patients</span>
-            </div>
-            <div className="ad-mini-stat">
-              <span className="ad-mini-val">{dashboardData?.pending_appointments || 0}</span>
-              <span className="ad-mini-label">Pending Appts</span>
-            </div>
-            <div className="ad-mini-stat">
-              <span className="ad-mini-val">{dashboardData?.total_reports || 0}</span>
-              <span className="ad-mini-label">Reports</span>
-            </div>
-          </div>
-        </div>
+      <div className="ad-panels" style={{ display: activeSection === 'departments' ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
 
         {/* ── PANEL 2 — Departments & Doctors ── */}
-        <div className="ad-panel ad-depts-panel">
+        <div id="ad-departments" className="ad-panel ad-depts-panel">
           <div className="ad-panel-header-row">
-            <h2 className="ad-panel-title">🏥 Departments & Doctors</h2>
+            <h2 className="ad-panel-title">Departments and Doctors</h2>
             <button className="ad-add-btn" onClick={() => setShowDeptForm(!showDeptForm)}>
-              {showDeptForm ? '✕ Cancel' : '+ Add Dept / Doctor'}
+              {showDeptForm ? 'Cancel' : 'Add Dept / Doctor'}
             </button>
           </div>
 
@@ -604,16 +896,12 @@ const AdminDashboard = () => {
               {deptFormError && <div className="error-message">{deptFormError}</div>}
               {deptFormSuccess && <div className="success-message">{deptFormSuccess}</div>}
               <div className="form-section">
-                <h4>📋 Department Information</h4>
+                <h4>Department Information</h4>
                 <form onSubmit={handleCreateDepartment} className="dept-form">
                   <div className="form-row">
                     <div className="form-group">
                       <label>Department Name *</label>
                       <input type="text" name="name" value={deptFormData.name} onChange={handleDeptFormChange} placeholder="e.g., Cardiology" required />
-                    </div>
-                    <div className="form-group">
-                      <label>Head Doctor</label>
-                      <input type="text" name="head_doctor" value={deptFormData.head_doctor} onChange={handleDeptFormChange} placeholder="e.g., Dr. Smith" />
                     </div>
                   </div>
                   <div className="form-row">
@@ -641,7 +929,7 @@ const AdminDashboard = () => {
                 </form>
               </div>
               <div className="form-section doctor-section">
-                <h4>👨‍⚕️ Add Doctor to Existing Department</h4>
+                <h4>Add Doctor to Existing Department</h4>
                 <p className="section-hint">Select a department and add a doctor directly</p>
                 <div className="quick-add-doctor">
                   <select className="dept-select" value={doctorFormData.department_id} onChange={(e) => setDoctorFormData(prev => ({ ...prev, department_id: e.target.value }))}>
@@ -675,6 +963,14 @@ const AdminDashboard = () => {
                 <div className="ad-dept-right">
                   <span className={`status-badge ${dept.status === 'active' ? 'active' : 'inactive'}`}>{dept.status || 'active'}</span>
                   <button className="ad-add-doc-btn" onClick={() => openDoctorForm(dept)}>+ Doctor</button>
+                  <button
+                    className="ad-tbl-btn del"
+                    type="button"
+                    onClick={() => handleDeleteDepartment(dept.id)}
+                    disabled={deletingDepartmentId === dept.id}
+                  >
+                    {deletingDepartmentId === dept.id ? '...' : 'Delete Dept'}
+                  </button>
                 </div>
               </div>
 
@@ -735,11 +1031,11 @@ const AdminDashboard = () => {
       </div>{/* end .ad-panels (2-col top row) */}
 
       {/* ── BOTTOM ROW — Reviews + Patients ── */}
-      <div className="ad-bottom-row">
+      <div className="ad-bottom-row" style={{ display: (activeSection === 'reviews' || activeSection === 'patients') ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
 
         {/* ── Reviews ── */}
-        <div className="ad-panel ad-reviews-panel">
-          <h2 className="ad-panel-title">⭐ Doctor Reviews</h2>
+        <div id="ad-reviews" className="ad-panel ad-reviews-panel" style={{ display: activeSection === 'reviews' ? 'block' : 'none' }}>
+          <h2 className="ad-panel-title">Doctor Reviews</h2>
           {reviewsLoading ? (
             <p className="ad-reviews-loading">Loading reviews...</p>
           ) : allReviews.length === 0 ? (
@@ -769,7 +1065,7 @@ const AdminDashboard = () => {
                   disabled={deletingReviewId === review.id}
                   title="Delete review"
                 >
-                  {deletingReviewId === review.id ? '...' : '🗑 Delete'}
+                  {deletingReviewId === review.id ? '...' : 'Delete'}
                 </button>
               </div>
             </div>
@@ -777,8 +1073,8 @@ const AdminDashboard = () => {
         </div>
 
         {/* ── Patients ── */}
-        <div className="ad-panel ad-patients-panel">
-          <h2 className="ad-panel-title">🧑‍🤝‍🧑 Hospital Patients</h2>
+        <div id="ad-patients" className="ad-panel ad-patients-panel" style={{ display: activeSection === 'patients' ? 'block' : 'none' }}>
+          <h2 className="ad-panel-title">Hospital Patients</h2>
           <input
             type="text"
             className="ad-patient-search"
@@ -897,11 +1193,11 @@ const AdminDashboard = () => {
                   {doctorFormData.imagePreview ? (
                     <div className="image-preview">
                       <img src={doctorFormData.imagePreview} alt="Doctor preview" />
-                      <button type="button" className="remove-image-btn" onClick={() => setDoctorFormData(prev => ({ ...prev, image: null, imagePreview: '' }))}>✕ Remove</button>
+                      <button type="button" className="remove-image-btn" onClick={() => setDoctorFormData(prev => ({ ...prev, image: null, imagePreview: '' }))}>Remove</button>
                     </div>
                   ) : (
                     <label className="image-upload-label">
-                      <div className="upload-placeholder">📸 Click to select image or drag & drop</div>
+                      <div className="upload-placeholder">Click to select image or drag and drop</div>
                       <input type="file" name='image' accept="image/*" onChange={handleDoctorFormChange} style={{ display: 'none' }} />
                     </label>
                   )}
@@ -928,7 +1224,7 @@ const AdminDashboard = () => {
             </div>
             <div className="doctor-view-content">
               <div className="doctor-view-avatar">
-                <span className="avatar-large">👨‍⚕️</span>
+                <span className="avatar-large">DR</span>
               </div>
               <div className="doctor-view-details">
                 <div className="detail-row"><label>Name</label><span>{viewingDoctor.user?.name || viewingDoctor.name || 'N/A'}</span></div>
@@ -955,33 +1251,8 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      <footer className="ad-footer">
-        <div className="ad-footer-content">
-          <div className="ad-footer-brand">
-            <h3>Hospital Management System</h3>
-            <p>Providing efficient healthcare administration across all hospitals in the network.</p>
-          </div>
-          <div className="ad-footer-links">
-            <h4>Quick Links</h4>
-            <ul>
-              <li><a href="/dashboard/admin">Dashboard</a></li>
-              <li><a href="/browse-hospitals">Hospitals</a></li>
-              <li><a href="/browse-doctors">Doctors</a></li>
-            </ul>
-          </div>
-          <div className="ad-footer-links">
-            <h4>Management</h4>
-            <ul>
-              <li><a href="/dashboard/admin">Departments</a></li>
-              <li><a href="/dashboard/admin">Doctors</a></li>
-              <li><a href="/dashboard/admin">Patients</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="ad-footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Hospital Management System. All rights reserved.</p>
-        </div>
-      </footer>
+      </div>
+      </div>
 
     </div>
   );

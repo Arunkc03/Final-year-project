@@ -166,7 +166,7 @@ class DepartmentController extends Controller
     /**
      * Delete department
      * DELETE /api/departments/{id}
-     * Accessible: Super Admin
+     * Accessible: Admin, Super Admin
      */
     public function destroy($id)
     {
@@ -177,6 +177,22 @@ class DepartmentController extends Controller
                 'status' => 'error',
                 'message' => 'Department not found',
             ], 404);
+        }
+
+        // Check authorization: admin can delete only departments in their own hospital.
+        if (auth()->user()->role === 'admin' && auth()->user()->hospital_id !== $department->hospital_id) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        // Prevent deleting department with assigned doctors to avoid orphaned assignments.
+        if ($department->doctors()->count() > 0) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot delete department with assigned doctors. Move or delete doctors first.',
+            ], 422);
         }
 
         // Log action

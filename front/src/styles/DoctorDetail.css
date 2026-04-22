@@ -8,7 +8,7 @@
 
 /* Header Section */
 .doctor-detail header {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 40px;
   margin-bottom: 30px;
@@ -72,22 +72,22 @@
 /* Messages */
 .success-message {
   padding: 15px 20px;
-  background-color: #e8f5e9;
-  border: 1px solid #a5d6a7;
+  background-color: #e8f7f0;
+  border: 1px solid #a8d9c8;
   border-radius: 4px;
-  color: #1b5e20;
+  color: #008c3a;
   margin-bottom: 20px;
-  border-left: 4px solid #66bb6a;
+  border-left: 4px solid #28A745;
 }
 
 .error-message {
   padding: 15px 20px;
-  background-color: #fee;
-  border: 1px solid #f88;
+  background-color: #fdeef0;
+  border: 1px solid #f7a9b0;
   border-radius: 4px;
-  color: #c33;
+  color: #a4161a;
   margin-bottom: 20px;
-  border-left: 4px solid #e74c3c;
+  border-left: 4px solid #DC3545;
 }
 
 /* Section Styling */
@@ -109,7 +109,7 @@
   color: #1a1a1a;
   font-size: 24px;
   font-weight: 700;
-  border-bottom: 2px solid #0E7B9E;
+  border-bottom: 2px solid #2A7FFF;
   padding-bottom: 15px;
 }
 
@@ -126,7 +126,7 @@
 
 .info-item label {
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
   margin-bottom: 8px;
   font-size: 12px;
   text-transform: uppercase;
@@ -150,7 +150,7 @@
 .qualification-item {
   padding: 15px;
   background: #f9fafb;
-  border-left: 4px solid #0E7B9E;
+  border-left: 4px solid #2A7FFF;
   border-radius: 4px;
 }
 
@@ -170,11 +170,11 @@
 /* Booking Section */
 .booking-section {
   background: linear-gradient(135deg, #f5f7fa 0%, #eef1f8 100%);
-  border: 2px solid #e0e7ff;
+  border: 2px solid #e8f2ff;
 }
 
 .booking-section h2 {
-  border-bottom: 2px solid #e74c3c;
+  border-bottom: 2px solid #FF9800;
   color: #1a1a1a;
 }
 
@@ -212,8 +212,8 @@
 .form-group textarea:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #0E7B9E;
-  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.1);
 }
 
 .form-group textarea {
@@ -284,7 +284,7 @@
 .stat-card {
   text-align: center;
   padding: 20px;
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   border-radius: 8px;
 }
@@ -458,3 +458,4 @@
     font-size: 20px;
   }
 }
+

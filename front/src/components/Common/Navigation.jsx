@@ -5,13 +5,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import useTheme from '../../hooks/useTheme';
 import logo from '../../assets/images/Doctorsathi.png';
 import './Navigation.css';
 
 const Navigation = () => {
   const { user, logout, isAuthenticated } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
@@ -30,9 +28,6 @@ const Navigation = () => {
         <div className={`nav-menu ${showMenu ? 'active' : ''}`}>
           {!isAuthenticated ? (
             <div className="nav-menu-right">
-              <button onClick={toggleTheme} className="nav-theme-toggle" title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}>
-                {theme === 'light' ? '🌙' : '☀️'}
-              </button>
               <Link to="/login" className="nav-link nav-btn">
                 Login
               </Link>
@@ -66,9 +61,6 @@ const Navigation = () => {
               </div>
 
               <div className="nav-menu-right">
-                <button onClick={toggleTheme} className="nav-theme-toggle" title={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}>
-                  {theme === 'light' ? '🌙' : '☀️'}
-                </button>
                 <span className="nav-user-name">Welcome, {user?.name}</span>
                 <button onClick={handleLogout} className="nav-link nav-btn-logout">
                   Logout

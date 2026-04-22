@@ -15,14 +15,14 @@
   border-radius: 50%;
   transition: all 0.3s ease;
   user-select: none;
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   width: 48px;
   height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(14, 123, 158, 0.3);
+  box-shadow: 0 4px 12px rgba(42, 127, 255, 0.3);
 }
 
 .notification-bell:hover {
@@ -99,7 +99,7 @@
   align-items: center;
   padding: 1rem;
   border-bottom: 1px solid #eee;
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .notifications-list::-webkit-scrollbar-thumb {
-  background: #0E7B9E;
+  background: #2A7FFF;
   border-radius: 3px;
 }
 
@@ -166,7 +166,7 @@
 
 .notification-item.unread {
   background: #f0f7fb;
-  border-left: 4px solid #0E7B9E;
+  border-left: 4px solid #2A7FFF;
 }
 
 .notification-content {
@@ -219,8 +219,8 @@
 }
 
 .action-btn.mark-read {
-  color: #0E7B9E;
-  border-color: #0E7B9E;
+  color: #2A7FFF;
+  border-color: #2A7FFF;
 }
 
 .action-btn.mark-read:hover {
@@ -273,7 +273,7 @@
 .view-all-btn {
   width: 100%;
   padding: 0.75rem;
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
   border: none;
   border-radius: 6px;
@@ -340,3 +340,4 @@
     max-height: 250px;
   }
 }
+

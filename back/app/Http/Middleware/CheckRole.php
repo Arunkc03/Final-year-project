@@ -21,6 +21,14 @@ class CheckRole
 
         $user = auth()->user();
 
+        if ($user->requiresHospitalAccess() && !$user->hasAccessibleHospital()) {
+            if ($user->currentAccessToken()) {
+                $user->currentAccessToken()->delete();
+            }
+
+            return response()->json(['message' => 'Your hospital account is no longer available.'], 401);
+        }
+
         if (!in_array($user->role, $roles)) {
             return response()->json(['message' => 'Unauthorized: Insufficient permissions'], 403);
         }

@@ -96,6 +96,11 @@
   padding: 0 40px 40px;
 }
 
+/* Make reviews section full width */
+.dv-reviews-panel {
+  grid-column: 1 / -1;
+}
+
 /* ── PANELS ── */
 .dv-panel {
   background: #ffffff;
@@ -141,7 +146,7 @@
 .dv-avatar-letter {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .dv-doctor-name {
@@ -164,7 +169,7 @@
 
 .dv-dept-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #0E7B9E, #1a9bb8);
+  background: linear-gradient(135deg, #2A7FFF, #1F5FCC);
   color: white;
   padding: 0.25rem 0.7rem;
   border-radius: 20px;
@@ -262,24 +267,24 @@
 }
 
 .dv-btn.primary {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
 }
 
 .dv-btn.primary:hover {
-  background: #0a6580;
+  background: #1F5FCC;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(14, 123, 158, 0.3);
+  box-shadow: 0 4px 12px rgba(42, 127, 255, 0.3);
 }
 
 .dv-btn.secondary {
   background: white;
-  color: #0E7B9E;
-  border: 2px solid #0E7B9E;
+  color: #2A7FFF;
+  border: 2px solid #2A7FFF;
 }
 
 .dv-btn.secondary:hover {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
 }
 
@@ -291,7 +296,7 @@
 }
 
 .dv-btn.link:hover {
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .dv-book-btn {
@@ -326,9 +331,9 @@
 }
 
 .dv-hospital-link-card:hover {
-  background: #0E7B9E;
+  background: #2A7FFF;
   color: white;
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
 }
 
 .dv-hospital-link-card:hover strong,
@@ -446,8 +451,8 @@
 .dv-form-group select:focus,
 .dv-form-group textarea:focus {
   outline: none;
-  border-color: #0E7B9E;
-  box-shadow: 0 0 0 3px rgba(14, 123, 158, 0.1);
+  border-color: #2A7FFF;
+  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.1);
 }
 
 .dv-input-disabled {
@@ -484,14 +489,14 @@
 .dv-fee-info {
   padding: 1rem;
   background: #f0f9ff;
-  border-left: 3px solid #0E7B9E;
+  border-left: 3px solid #2A7FFF;
   border-radius: 6px;
   font-size: 0.92rem;
   color: #0c4a6e;
 }
 
 .dv-fee-info strong {
-  color: #0E7B9E;
+  color: #2A7FFF;
 }
 
 .dv-btn-full {
@@ -516,6 +521,12 @@
   }
   .dv-form-row {
     grid-template-columns: 1fr;
+  }
+  .dv-reviews-panel {
+    padding: 1.5rem;
+  }
+  .dv-reviews-scroll {
+    max-height: 500px;
   }
 }
 
@@ -544,21 +555,43 @@
   .dv-auth-btns {
     flex-direction: column;
   }
+  .dv-reviews-panel {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+  .dv-reviews-scroll {
+    max-height: 400px;
+    padding: 1rem;
+  }
+  .dv-rating-summary {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  .dv-average-number {
+    font-size: 2rem;
+  }
+  .dv-review-card {
+    padding: 1rem;
+  }
 }
 
-@media (max-width: 768px) {
-  .dv-content {
-    padding: 0 16px 16px;
+@media (max-width: 480px) {
+  .dv-reviews-panel {
+    padding: 1rem;
   }
-  .dv-hospital-section {
-    margin: 16px;
+  .dv-reviews-scroll {
+    max-height: 300px;
   }
-  .dv-hospital-view {
-    grid-template-columns: 80px 1fr;
+  .dv-rating-summary {
+    padding: 1rem;
+    gap: 1rem;
   }
-  .dv-hospital-img-wrap {
-    width: 80px;
-    height: 80px;
+  .dv-average-number {
+    font-size: 1.5rem;
+  }
+  .dv-review-card {
+    padding: 0.75rem;
+    border-radius: 8px;
   }
 }
 
@@ -607,15 +640,22 @@
 /* Review Section Styles */
 .dv-reviews-panel {
   margin-top: 2rem;
+  background: #ffffff;
+  padding: 2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 
 .dv-rating-summary {
   display: flex;
   gap: 2rem;
   margin-bottom: 2rem;
-  padding: 1.5rem;
-  background: #f8fafc;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
   border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  flex-wrap: wrap;
 }
 
 .dv-average-rating {
@@ -666,6 +706,8 @@
 .dv-write-review-btn {
   margin-bottom: 1.5rem;
   width: 100%;
+  min-height: 44px;
+  font-size: 1rem;
 }
 
 .dv-review-form {
@@ -721,6 +763,35 @@
   flex: 1;
 }
 
+.dv-reviews-scroll {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+/* Scrollbar styling */
+.dv-reviews-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dv-reviews-scroll::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.dv-reviews-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.dv-reviews-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
 .dv-reviews-list {
   display: flex;
   flex-direction: column;
@@ -770,3 +841,63 @@
   color: #999;
   padding: 2rem 1rem;
 }
+
+/* Final review layout tune-up */
+.dv-reviews-panel {
+  padding: 1.5rem;
+}
+
+.dv-rating-summary {
+  display: inline-flex;
+  width: auto;
+  min-width: 260px;
+  max-width: 360px;
+  margin-bottom: 1.25rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.dv-average-rating {
+  align-items: flex-start;
+}
+
+.dv-write-review-btn {
+  margin-bottom: 1rem;
+}
+
+.dv-reviews-scroll {
+  max-height: 520px;
+  padding: 1rem;
+}
+
+.dv-reviews-list {
+  gap: 0.9rem;
+  margin-top: 0;
+}
+
+.dv-review-card {
+  padding: 1rem;
+  border-radius: 10px;
+}
+
+.dv-review-header {
+  margin-bottom: 0.6rem;
+}
+
+.dv-review-comment {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+.dv-review-author {
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 768px) {
+  .dv-rating-summary {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+}
+

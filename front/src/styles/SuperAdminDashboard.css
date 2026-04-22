@@ -2,7 +2,7 @@
 
 .superadmin-dashboard {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: #f8fafb;
   color: var(--foreground);
   transition: background-color 0.3s ease, color 0.3s ease;
   display: flex;
@@ -11,10 +11,10 @@
 
 /* Header */
 .super-admin-header {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 2rem 2.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2);
 }
 
 .header-container {
@@ -114,7 +114,7 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   padding: 2.5rem 2rem;
   border-radius: 12px;
   border: none;
@@ -124,7 +124,7 @@
   justify-content: center !important;
   text-align: center;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(14, 123, 158, 0.2);
+  box-shadow: 0 4px 15px rgba(42, 127, 255, 0.2);
   min-height: 180px;
   position: relative;
   overflow: hidden;
@@ -148,7 +148,7 @@
 
 .stat-card:hover {
   transform: translateY(-10px);
-  box-shadow: 0 12px 30px rgba(14, 123, 158, 0.3);
+  box-shadow: 0 12px 30px rgba(42, 127, 255, 0.3);
 }
 
 .stat-card:hover::before {
@@ -226,18 +226,18 @@
 
 .action-card:hover {
   transform: translateY(-6px);
-  border-color: #0E7B9E;
-  box-shadow: 0 8px 20px rgba(14, 123, 158, 0.15);
+  border-color: #2A7FFF;
+  box-shadow: 0 8px 20px rgba(42, 127, 255, 0.15);
 }
 
 .action-card.primary {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
-  border-color: #0E7B9E;
+  border-color: #2A7FFF;
 }
 
 .action-card.primary:hover {
-  box-shadow: 0 8px 20px rgba(14, 123, 158, 0.25);
+  box-shadow: 0 8px 20px rgba(42, 127, 255, 0.25);
 }
 
 .action-icon {
@@ -924,8 +924,8 @@
   }
 
   .action-btn {
-    width: 32px;
-    height: 32px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.76rem;
   }
 }
 
@@ -949,13 +949,8 @@
   }
 
   .action-btn {
-    width: 30px;
-    height: 30px;
-  }
-
-  .action-btn svg {
-    width: 3.5px;
-    height: 3.5px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.72rem;
   }
 }
 
@@ -979,7 +974,7 @@
 
 /* ===== Footer ===== */
 .sa-footer {
-  background: linear-gradient(135deg, #0E7B9E 0%, #1a9bb8 100%);
+  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
   color: white;
   padding: 60px 40px 30px;
   margin-top: auto;
@@ -1060,3 +1055,687 @@
     gap: 24px;
   }
 }
+
+/* ===== Dark Dashboard Refresh ===== */
+.superadmin-dashboard {
+  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
+  color: #e5e7eb;
+}
+
+.dashboard-main {
+  max-width: 1500px;
+}
+
+.super-admin-header,
+.sa-footer {
+  background: #0f172a;
+}
+
+.stats-section,
+.table-responsive,
+.info-card,
+.feature-card,
+.no-hospitals,
+.search-container {
+  background: #1f2937;
+  border-color: #334155;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
+}
+
+.stats-section h2,
+.hospitals-header h2,
+.hospitals-table th,
+.hospitals-table td,
+.hospital-name-text,
+.action-text,
+.info-card h3,
+.feature-card h3,
+.stat-value,
+.stat-card h3 {
+  color: #f8fafc;
+}
+
+.hospitals-subtitle,
+.address-cell,
+.contact-email,
+.feature-card p,
+.no-hospitals p,
+.loading,
+.action-desc,
+.search-icon,
+.search-input::placeholder {
+  color: #cbd5e1;
+}
+
+.hospitals-table thead,
+.hospitals-table tbody tr:hover,
+.search-input,
+.status-badge.inactive {
+  background: #0f172a;
+}
+
+.hospitals-table td,
+.hospitals-table th,
+.hospitals-table tbody tr,
+.hospital-thumbnail,
+.search-container {
+  border-color: #334155;
+}
+
+.search-input {
+  color: #e5e7eb;
+}
+
+.btn-add-hospital,
+.btn-create,
+.action-card.primary,
+.action-btn.view-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+  box-shadow: 0 8px 20px rgba(29, 78, 216, 0.28);
+}
+
+.btn-add-hospital:hover,
+.btn-create:hover,
+.action-btn.view-btn:hover {
+  background: #1d4ed8;
+}
+
+.action-btn.edit-btn {
+  background: #6b21a8;
+  color: #f3e8ff;
+}
+
+.action-btn.delete-btn {
+  background: #991b1b;
+  color: #fee2e2;
+}
+
+.status-badge.active {
+  background: #14532d;
+  color: #dcfce7;
+}
+
+/* Button style update: white background, black text, no hover effect */
+.superadmin-dashboard button,
+.superadmin-dashboard .btn-add-hospital,
+.superadmin-dashboard .btn-create,
+.superadmin-dashboard .action-btn,
+.superadmin-dashboard .dash-sidebar-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+.superadmin-dashboard button:hover,
+.superadmin-dashboard .btn-add-hospital:hover,
+.superadmin-dashboard .btn-create:hover,
+.superadmin-dashboard .action-btn:hover,
+.superadmin-dashboard .dash-sidebar-btn:hover {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Final layout/readability setup */
+.superadmin-dashboard {
+  background: #f3f4f6 !important;
+}
+
+.superadmin-dashboard .dashboard-main {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2rem;
+}
+
+.superadmin-dashboard .dash-main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.superadmin-dashboard .stats-section,
+.superadmin-dashboard .hospitals-section,
+.superadmin-dashboard .admin-section,
+.superadmin-dashboard .patient-section {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.superadmin-dashboard .stats-section h2,
+.superadmin-dashboard .hospitals-header h2,
+.superadmin-dashboard .hospitals-table td,
+.superadmin-dashboard .hospital-name-text,
+.superadmin-dashboard .action-text,
+.superadmin-dashboard .info-card h3,
+.superadmin-dashboard .feature-card h3,
+.superadmin-dashboard .stat-value,
+.superadmin-dashboard .stat-card h3,
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .search-input::placeholder,
+.superadmin-dashboard .hospitals-subtitle,
+.superadmin-dashboard .address-cell,
+.superadmin-dashboard .contact-email,
+.superadmin-dashboard .feature-card p,
+.superadmin-dashboard .no-hospitals p,
+.superadmin-dashboard .loading,
+.superadmin-dashboard .action-desc {
+  color: #111827 !important;
+}
+
+.superadmin-dashboard .table-responsive {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.superadmin-dashboard .hospitals-table {
+  background: #ffffff !important;
+}
+
+.superadmin-dashboard .hospitals-table thead {
+  background: #0f172a !important;
+}
+
+.superadmin-dashboard .hospitals-table th {
+  color: #ffffff !important;
+  border-bottom: none !important;
+}
+
+.superadmin-dashboard .hospitals-table tbody tr {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+}
+
+.superadmin-dashboard .hospitals-table tbody tr:hover {
+  background: #ffffff !important;
+}
+
+.superadmin-dashboard .hospitals-table td {
+  color: #111827 !important;
+}
+
+.superadmin-dashboard .search-container {
+  background: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.superadmin-dashboard .search-input {
+  background: #ffffff !important;
+}
+
+/* Final gradient setup for Super Admin dashboard */
+.superadmin-dashboard {
+  background: linear-gradient(180deg, #081228 0%, #101d3a 100%) !important;
+  min-height: 100vh;
+}
+
+.superadmin-dashboard .dashboard-main,
+.superadmin-dashboard .dash-main-content {
+  background: transparent !important;
+}
+
+.superadmin-dashboard .stats-section,
+.superadmin-dashboard .hospitals-section,
+.superadmin-dashboard .admin-section,
+.superadmin-dashboard .patient-section,
+.superadmin-dashboard .table-responsive,
+.superadmin-dashboard .search-container,
+.superadmin-dashboard .no-hospitals,
+.superadmin-dashboard .stat-card,
+.superadmin-dashboard .dash-graph-card {
+  background: #13213f !important;
+  border: 1px solid #2b3f68 !important;
+}
+
+.superadmin-dashboard .stats-section h2,
+.superadmin-dashboard .hospitals-header h2,
+.superadmin-dashboard .hospitals-table td,
+.superadmin-dashboard .hospital-name-text,
+.superadmin-dashboard .stat-value,
+.superadmin-dashboard .stat-card h3,
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .hospitals-subtitle,
+.superadmin-dashboard .address-cell,
+.superadmin-dashboard .contact-email,
+.superadmin-dashboard .no-hospitals p,
+.superadmin-dashboard .action-desc,
+.superadmin-dashboard .action-text {
+  color: #f8fafc !important;
+}
+
+.superadmin-dashboard .hospitals-table thead {
+  background: #0b1630 !important;
+}
+
+.superadmin-dashboard .hospitals-table th {
+  color: #ffffff !important;
+}
+
+/* Super Admin sidebar layout fix */
+.superadmin-dashboard .dash-shell {
+  align-items: stretch !important;
+}
+
+.superadmin-dashboard .dash-sidebar {
+  min-height: 100% !important;
+  height: 100% !important;
+  align-self: stretch !important;
+}
+
+.superadmin-dashboard .dash-main-content {
+  min-height: 100% !important;
+}
+
+/* Full-bleed surface fix (remove left/bottom white strips) */
+.superadmin-dashboard {
+  width: 100vw !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
+.superadmin-dashboard .dashboard-main {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0.75rem 0.9rem 1.2rem !important;
+}
+
+.superadmin-dashboard .dash-shell {
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+.superadmin-dashboard .hospitals-table tbody tr,
+.superadmin-dashboard .hospitals-table tbody tr:hover {
+  background: #13213f !important;
+}
+
+.superadmin-dashboard .hospitals-table td {
+  color: #e2e8f0 !important;
+}
+
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .search-input::placeholder {
+  color: #c7d2fe !important;
+  background: transparent !important;
+}
+
+.superadmin-dashboard button,
+.superadmin-dashboard .btn-add-hospital,
+.superadmin-dashboard .btn-create,
+.superadmin-dashboard .action-btn,
+.superadmin-dashboard .dash-sidebar-btn {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #000000 !important;
+}
+
+/* Final white theme override for Super Admin */
+.superadmin-dashboard {
+  background: #ffffff !important;
+}
+
+.superadmin-dashboard .dash-sidebar {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.superadmin-dashboard .stats-section,
+.superadmin-dashboard .hospitals-section,
+.superadmin-dashboard .admin-section,
+.superadmin-dashboard .patient-section,
+.superadmin-dashboard .table-responsive,
+.superadmin-dashboard .search-container,
+.superadmin-dashboard .no-hospitals,
+.superadmin-dashboard .stat-card,
+.superadmin-dashboard .dash-graph-card,
+.superadmin-dashboard .dash-profile-card,
+.superadmin-dashboard .dash-profile-row,
+.superadmin-dashboard .dash-profile-stat,
+.superadmin-dashboard .hospitals-table,
+.superadmin-dashboard .hospitals-table tbody tr,
+.superadmin-dashboard .hospitals-table tbody tr:hover {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.superadmin-dashboard .hospitals-table thead,
+.superadmin-dashboard .dash-line-chart,
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .dash-pie-chart::after {
+  background: #f9fafb !important;
+  border-color: #d1d5db !important;
+}
+
+.superadmin-dashboard .stats-section h2,
+.superadmin-dashboard .hospitals-header h2,
+.superadmin-dashboard .hospitals-table th,
+.superadmin-dashboard .hospitals-table td,
+.superadmin-dashboard .hospital-name-text,
+.superadmin-dashboard .action-text,
+.superadmin-dashboard .info-card h3,
+.superadmin-dashboard .feature-card h3,
+.superadmin-dashboard .stat-value,
+.superadmin-dashboard .stat-card h3,
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .hospitals-subtitle,
+.superadmin-dashboard .address-cell,
+.superadmin-dashboard .contact-email,
+.superadmin-dashboard .feature-card p,
+.superadmin-dashboard .no-hospitals p,
+.superadmin-dashboard .loading,
+.superadmin-dashboard .action-desc,
+.superadmin-dashboard .dash-profile-title,
+.superadmin-dashboard .dash-profile-row span,
+.superadmin-dashboard .dash-profile-stat strong {
+  color: #111827 !important;
+}
+
+.superadmin-dashboard .dash-profile-subtitle,
+.superadmin-dashboard .dash-profile-row label,
+.superadmin-dashboard .dash-profile-stat span,
+.superadmin-dashboard .dash-sidebar-title,
+.superadmin-dashboard .dash-sidebar-footnote,
+.superadmin-dashboard .search-input::placeholder {
+  color: #6b7280 !important;
+}
+
+.superadmin-dashboard button,
+.superadmin-dashboard .btn-add-hospital,
+.superadmin-dashboard .btn-create,
+.superadmin-dashboard .action-btn,
+.superadmin-dashboard .dash-sidebar-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+.superadmin-dashboard button:hover,
+.superadmin-dashboard .btn-add-hospital:hover,
+.superadmin-dashboard .btn-create:hover,
+.superadmin-dashboard .action-btn:hover,
+.superadmin-dashboard .dash-sidebar-btn:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Final black theme override for Super Admin */
+.superadmin-dashboard {
+  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
+}
+
+.superadmin-dashboard .dash-sidebar {
+  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
+  border-color: #1a1a1a !important;
+}
+
+.superadmin-dashboard .stats-section,
+.superadmin-dashboard .hospitals-section,
+.superadmin-dashboard .admin-section,
+.superadmin-dashboard .patient-section,
+.superadmin-dashboard .table-responsive,
+.superadmin-dashboard .search-container,
+.superadmin-dashboard .no-hospitals,
+.superadmin-dashboard .stat-card,
+.superadmin-dashboard .dash-graph-card,
+.superadmin-dashboard .dash-profile-card,
+.superadmin-dashboard .dash-profile-row,
+.superadmin-dashboard .dash-profile-stat,
+.superadmin-dashboard .hospitals-table,
+.superadmin-dashboard .hospitals-table tbody tr,
+.superadmin-dashboard .hospitals-table tbody tr:hover {
+  background: #0a0a0a !important;
+  border-color: #1f1f1f !important;
+}
+
+.superadmin-dashboard .dash-line-chart,
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .hospitals-table thead,
+.superadmin-dashboard .dash-pie-chart::after {
+  background: #050505 !important;
+  border-color: #1f1f1f !important;
+}
+
+.superadmin-dashboard .dash-line-grid {
+  stroke: #202020 !important;
+}
+
+/* Absolute final Super Admin white theme */
+.superadmin-dashboard {
+  background: #ffffff !important;
+  color: #111827 !important;
+}
+
+.superadmin-dashboard .dashboard-main,
+.superadmin-dashboard .dash-main-content,
+.superadmin-dashboard .dash-shell {
+  background: transparent !important;
+}
+
+.superadmin-dashboard .dash-sidebar,
+.superadmin-dashboard .stats-section,
+.superadmin-dashboard .hospitals-section,
+.superadmin-dashboard .admin-section,
+.superadmin-dashboard .patient-section,
+.superadmin-dashboard .table-responsive,
+.superadmin-dashboard .search-container,
+.superadmin-dashboard .no-hospitals,
+.superadmin-dashboard .stat-card,
+.superadmin-dashboard .dash-graph-card,
+.superadmin-dashboard .dash-profile-card,
+.superadmin-dashboard .dash-profile-row,
+.superadmin-dashboard .dash-profile-stat,
+.superadmin-dashboard .hospitals-table,
+.superadmin-dashboard .hospitals-table tbody tr,
+.superadmin-dashboard .hospitals-table tbody tr:hover,
+.superadmin-dashboard .dash-line-chart,
+.superadmin-dashboard .dash-pie-chart::after,
+.superadmin-dashboard .search-input {
+  background: #ffffff !important;
+  border-color: #d1d5db !important;
+}
+
+.superadmin-dashboard .hospitals-table thead {
+  background: #f3f4f6 !important;
+}
+
+.superadmin-dashboard .hospitals-table th,
+.superadmin-dashboard .hospitals-table td,
+.superadmin-dashboard .hospital-name-text,
+.superadmin-dashboard .hospitals-subtitle,
+.superadmin-dashboard .address-cell,
+.superadmin-dashboard .contact-email,
+.superadmin-dashboard .stat-value,
+.superadmin-dashboard .stat-card h3,
+.superadmin-dashboard .dash-graph-card h3,
+.superadmin-dashboard .dash-graph-card p,
+.superadmin-dashboard .dash-line-labels span,
+.superadmin-dashboard .dash-pie-legend li,
+.superadmin-dashboard .dash-pie-value,
+.superadmin-dashboard .dash-sidebar-title,
+.superadmin-dashboard .dash-sidebar-footnote,
+.superadmin-dashboard .dash-profile-title,
+.superadmin-dashboard .dash-profile-subtitle,
+.superadmin-dashboard .dash-profile-row label,
+.superadmin-dashboard .dash-profile-row span,
+.superadmin-dashboard .dash-profile-stat strong,
+.superadmin-dashboard .dash-profile-stat span,
+.superadmin-dashboard .search-input,
+.superadmin-dashboard .search-input::placeholder {
+  color: #111827 !important;
+}
+
+.superadmin-dashboard .dash-line-grid {
+  stroke: #e5e7eb !important;
+}
+
+.superadmin-dashboard .dash-sidebar-btn,
+.superadmin-dashboard button,
+.superadmin-dashboard .btn-add-hospital,
+.superadmin-dashboard .btn-create,
+.superadmin-dashboard .action-btn {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #000000 !important;
+}
+
+.superadmin-dashboard .dash-sidebar-btn:hover,
+.superadmin-dashboard button:hover,
+.superadmin-dashboard .btn-add-hospital:hover,
+.superadmin-dashboard .btn-create:hover,
+.superadmin-dashboard .action-btn:hover {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Authoritative final palette override */
+.superadmin-dashboard {
+  background: #f8fafb !important;
+  color: #0f172a !important;
+}
+
+.superadmin-dashboard .dash-sidebar {
+  background: #ffffff !important;
+  border: 1px solid #dbe3ee !important;
+}
+
+.superadmin-dashboard .dash-sidebar-title,
+.superadmin-dashboard .dash-sidebar-footnote {
+  color: #334155 !important;
+}
+
+.superadmin-dashboard .dash-sidebar-btn,
+.superadmin-dashboard .dash-sidebar-btn.active,
+.superadmin-dashboard .dash-sidebar-logout,
+.superadmin-dashboard .btn-add-hospital,
+.superadmin-dashboard .btn-create,
+.superadmin-dashboard .action-btn.view-btn {
+  background: #2A7FFF !important;
+  color: #ffffff !important;
+  border: 1px solid #1F5FCC !important;
+  box-shadow: 0 8px 20px rgba(42, 127, 255, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.superadmin-dashboard .dash-sidebar-btn:hover,
+.superadmin-dashboard .dash-sidebar-btn.active:hover,
+.superadmin-dashboard .dash-sidebar-logout:hover,
+.superadmin-dashboard .btn-add-hospital:hover,
+.superadmin-dashboard .btn-create:hover,
+.superadmin-dashboard .action-btn.view-btn:hover {
+  background: #1F5FCC !important;
+  color: #ffffff !important;
+  border-color: #174A99 !important;
+}
+
+.superadmin-dashboard .action-btn.edit-btn {
+  background: #FF9800 !important;
+  color: #ffffff !important;
+  border-color: #E68900 !important;
+}
+
+.superadmin-dashboard .action-btn.edit-btn:hover {
+  background: #E68900 !important;
+  border-color: #CC7A00 !important;
+}
+
+.superadmin-dashboard .action-btn.delete-btn {
+  background: #DC3545 !important;
+  color: #ffffff !important;
+  border-color: #C82333 !important;
+}
+
+.superadmin-dashboard .action-btn.delete-btn:hover {
+  background: #C82333 !important;
+  border-color: #A71D2A !important;
+}
+
+.superadmin-dashboard .status-badge.active {
+  background: #28A745 !important;
+  color: #ffffff !important;
+}
+
+/* Final search layout cleanup */
+.superadmin-dashboard .search-container {
+  width: 100% !important;
+  max-width: none !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 0 1rem 0 !important;
+}
+
+.superadmin-dashboard .search-input {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+/* Force Hospital View modal to white theme */
+.superadmin-dashboard .hvm-modal {
+  background: #ffffff !important;
+  border: 1px solid #dbe3ee !important;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22) !important;
+}
+
+.superadmin-dashboard .hvm-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5edf7 !important;
+}
+
+.superadmin-dashboard .hvm-header h2,
+.superadmin-dashboard .hvm-field-label,
+.superadmin-dashboard .hvm-field-value,
+.superadmin-dashboard .hvm-dept-title,
+.superadmin-dashboard .hvm-dept-card-name,
+.superadmin-dashboard .hvm-doctor-name,
+.superadmin-dashboard .hvm-admin-name,
+.superadmin-dashboard .hvm-admin-detail,
+.superadmin-dashboard .hvm-doctor-qual,
+.superadmin-dashboard .hvm-doctor-meta,
+.superadmin-dashboard .hvm-doctor-fee,
+.superadmin-dashboard .hvm-no-doctors,
+.superadmin-dashboard .hvm-doctor-label {
+  color: #0f172a !important;
+}
+
+.superadmin-dashboard .hvm-admin-section,
+.superadmin-dashboard .hvm-dept-card,
+.superadmin-dashboard .hvm-doctor-card,
+.superadmin-dashboard .hvm-doctor-edit-form {
+  background: #f8fbff !important;
+  border: 1px solid #dbe7ff !important;
+  color: #0f172a !important;
+}
+
+.superadmin-dashboard .hvm-close-btn,
+.superadmin-dashboard .hvm-doctor-action-btn,
+.superadmin-dashboard .hvm-doctor-delete-btn,
+.superadmin-dashboard .hvm-btn-close {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.superadmin-dashboard .hvm-doctor-form-group label {
+  color: #334155 !important;
+}
+
+.superadmin-dashboard .hvm-doctor-form-group input,
+.superadmin-dashboard .hvm-doctor-form-group select,
+.superadmin-dashboard .hvm-doctor-form-group textarea {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid #c7d7ef !important;
+}
+

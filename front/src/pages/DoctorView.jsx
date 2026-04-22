@@ -160,7 +160,13 @@ const DoctorView = () => {
       setReviewsLoading(true);
       const res = await api.getDoctorReviews(id);
       if (res.status === 'success') {
-        setReviews(Array.isArray(res.data) ? res.data : []);
+        const list = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.data)
+            ? res.data.data
+            : [];
+
+        setReviews(list);
       } else {
         setReviews([]);
       }
@@ -277,7 +283,7 @@ const DoctorView = () => {
       }
     } catch (err) {
       console.error('Payment error:', err);
-      setBookingMessage(`Error: ${err.message || 'Payment failed'}`);
+      setBookingMessage(err.message || 'Payment failed');
     } finally {
       setBookingLoading(false);
     }
@@ -520,25 +526,27 @@ const DoctorView = () => {
           )}
 
           {reviews.length > 0 ? (
-            <div className="dv-reviews-list">
-              {reviews.map(review => (
-                <div key={review.id} className="dv-review-card">
-                  <div className="dv-review-header">
-                    <div className="dv-review-rating">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <span key={star} className={`dv-star-sm ${star <= review.rating ? 'active' : ''}`}>★</span>
-                      ))}
+            <div className="dv-reviews-scroll">
+              <div className="dv-reviews-list">
+                {reviews.map(review => (
+                  <div key={review.id} className="dv-review-card">
+                    <div className="dv-review-header">
+                      <div className="dv-review-rating">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <span key={star} className={`dv-star-sm ${star <= review.rating ? 'active' : ''}`}>★</span>
+                        ))}
+                      </div>
+                      <span className="dv-review-date">{new Date(review.created_at).toLocaleDateString()}</span>
                     </div>
-                    <span className="dv-review-date">{new Date(review.created_at).toLocaleDateString()}</span>
+                    {review.comment && (
+                      <p className="dv-review-comment">{review.comment}</p>
+                    )}
+                    {review.patient?.name && (
+                      <p className="dv-review-author">— {review.patient.name}</p>
+                    )}
                   </div>
-                  {review.comment && (
-                    <p className="dv-review-comment">{review.comment}</p>
-                  )}
-                  {review.patient?.name && (
-                    <p className="dv-review-author">— {review.patient.name}</p>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           ) : (
             !showReviewForm && <p className="dv-no-reviews">No reviews yet. Be the first to review this doctor!</p>

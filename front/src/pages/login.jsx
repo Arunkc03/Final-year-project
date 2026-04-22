@@ -11,11 +11,9 @@ const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { login } = useContext(AuthContext);
-  const [identifier, setIdentifier] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [isIdentifier, setIsIdentifier] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -23,9 +21,7 @@ const Login = () => {
     setError('');
     setLoading(true);
 
-    const loginData = isIdentifier 
-      ? { identifier, password }
-      : { email, password };
+    const loginData = { email, password };
 
     console.log('Attempting login with:', loginData);
 
@@ -85,53 +81,21 @@ const Login = () => {
           {/* Tabs */}
           <div className="auth-split-tabs">
             <button className="auth-split-tab active">Sign In</button>
-            <button className="auth-split-tab">Sign Up</button>
+            <button type="button" className="auth-split-tab" onClick={() => navigate('/register')}>Sign Up</button>
           </div>
 
           {error && <div className="error-message">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-            {/* Email/ID Toggle */}
-            <div className="auth-split-toggle">
-              <button
-                type="button"
-                className={!isIdentifier ? 'active' : ''}
-                onClick={() => setIsIdentifier(false)}
-              >
-                Email
-              </button>
-              <button
-                type="button"
-                className={isIdentifier ? 'active' : ''}
-                onClick={() => setIsIdentifier(true)}
-              >
-                ID
-              </button>
+            <div className="form-group">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+              />
             </div>
-
-            {/* Email/ID Input */}
-            {isIdentifier ? (
-              <div className="form-group">
-                <input
-                  type="text"
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder="Your ID"
-                  required
-                />
-                <small>Format: PAT/DOC/ADM/SUP + 6 chars</small>
-              </div>
-            ) : (
-              <div className="form-group">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  required
-                />
-              </div>
-            )}
 
             {/* Password */}
             <div className="form-group">
@@ -150,7 +114,7 @@ const Login = () => {
                 <input type="checkbox" />
                 Keep me logged in
               </label>
-              <Link to="#" className="forgot-password">Forgot password?</Link>
+              <Link to="/forgot-password" className="forgot-password">Forgot password?</Link>
             </div>
 
             {/* Sign In Button */}
@@ -168,7 +132,10 @@ const Login = () => {
           <button
             type="button"
             className="google-btn"
-            onClick={() => window.location.href = `${API_URL}/auth/google`}
+            onClick={() => {
+              localStorage.setItem('google_auth_mode', 'login');
+              window.location.href = `${API_URL}/auth/google?mode=login`;
+            }}
           >
             <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

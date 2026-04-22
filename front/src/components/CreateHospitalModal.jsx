@@ -81,9 +81,12 @@ export function CreateHospitalModal({ onClose, onSuccess }) {
         onSuccess();
         onClose();
       } else {
+        const firstValidationError = response.errors
+          ? Object.values(response.errors).flat()[0]
+          : null;
+
         const errorMsg =
-          response.errors?.['admin_email']?.[0] ||
-          response.errors?.['name']?.[0] ||
+          firstValidationError ||
           response.errors?.general?.[0] ||
           response.message ||
           'Failed to create hospital';
@@ -111,7 +114,7 @@ export function CreateHospitalModal({ onClose, onSuccess }) {
               <p className="modal-header-subtitle">Fill in the details to add a hospital</p>
             </div>
           </div>
-          <button className="modal-close-btn" onClick={onClose}>
+          <button type="button" className="modal-close-btn" onClick={onClose}>
             <X />
           </button>
         </div>

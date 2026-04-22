@@ -1,11 +1,11 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import Navigation from './components/Common/Navigation';
 import Home from './pages/Home';
 import Register from './pages/register';
 import Login from './pages/login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import GoogleCallback from './components/Auth/GoogleCallback';
 import Dashboard from './pages/Dashboard';
 import SuperAdminDashboard from './pages/SuperAdminDashboard';
@@ -16,8 +16,6 @@ import Hospitals from './pages/Hospitals';
 import Doctors from './pages/Doctors';
 import DoctorDetail from './pages/DoctorDetail';
 import HospitalDetail from './pages/HospitalDetail';
-import BrowseHospitals from './pages/BrowseHospitals';
-import BrowseDoctors from './pages/BrowseDoctors';
 import HospitalView from './pages/HospitalView';
 import DoctorView from './pages/DoctorView';
 import HospitalDepartments from './pages/HospitalDepartments';
@@ -27,22 +25,17 @@ import Reports from './pages/Reports';
 import DoctorSchedules from './pages/DoctorSchedules';
 
 import { PaymentVerify } from './components/Payment';
-import './styles/theme.css';
 import './App.css';
 
-// Wrapper component to conditionally show navbar
 const AppContent = () => {
-  const location = useLocation();
-  const hideNavbarPaths = ['/login', '/register', '/auth/google/callback', '/payment/verify', '/payment/success'];
-  const shouldHideNavbar = hideNavbarPaths.includes(location.pathname);
-
   return (
     <>
-      {!shouldHideNavbar && <Navigation />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/dashboard/super-admin" element={<SuperAdminDashboard />} />
@@ -55,8 +48,6 @@ const AppContent = () => {
         <Route path="/doctors" element={<Doctors />} />
         <Route path="/doctors/:id" element={<DoctorDetail />} />
         {/* Public browse routes - no login required */}
-        <Route path="/browse-hospitals" element={<BrowseHospitals />} />
-        <Route path="/browse-doctors" element={<BrowseDoctors />} />
         <Route path="/hospital/:id" element={<HospitalView />} />
         {/* Doctor schedules - must be before /doctor/:id */}
         <Route path="/doctor/schedules" element={<DoctorSchedules />} />
@@ -79,13 +70,11 @@ const AppContent = () => {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 }
 
