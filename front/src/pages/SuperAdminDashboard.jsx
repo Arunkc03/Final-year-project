@@ -9,11 +9,12 @@ import { EditAdminModal } from '../components/EditAdminModal';
 import { EditHospitalModal } from '../components/EditHospitalModal';
 import hospitalImage from '../assets/images/hospital.jpg';
 import '../styles/SuperAdminDashboard.css';
-import '../styles/DashboardWidgets.css';
 
 const SuperAdminDashboard = () => {
+  console.log('🎬 SuperAdminDashboard component rendering');
   const navigate = useNavigate();
   const { user, token, logout } = useContext(AuthContext);
+  console.log('📦 Context values:', { token: !!token, userId: user?.id, userRole: user?.role });
   const [dashboardData, setDashboardData] = useState(null);
   const [hospitals, setHospitals] = useState([]);
   const [filteredHospitals, setFilteredHospitals] = useState([]);
@@ -51,16 +52,34 @@ const SuperAdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('stats');
 
   useEffect(() => {
-    if (!token || user?.role !== 'super_admin') {
+    console.log('🎯 SuperAdminDashboard mounted');
+    
+    const contextToken = token;
+    const localStorageToken = localStorage.getItem('token');
+    const finalToken = contextToken || localStorageToken;
+    
+    console.log('🔍 Token check:', { 
+      contextToken: !!contextToken, 
+      localStorageToken: !!localStorageToken,
+      finalToken: !!finalToken,
+      userRole: user?.role,
+      userId: user?.id 
+    });
+    
+    if (!finalToken) {
+      console.warn('❌ No token found in context or localStorage, redirecting to login');
       navigate('/login');
       return;
     }
+    
+    console.log('✅ Token verified, fetching dashboard data');
+    
     fetchDashboard();
     fetchHospitals();
     fetchAdmins();
     fetchDoctors();
     fetchPatients();
-  }, [token, user, navigate]);
+  }, [token, navigate]);
 
   useEffect(() => {
     const filtered = admins.filter(a =>
@@ -97,7 +116,6 @@ const SuperAdminDashboard = () => {
   }, [hospitals]);
 
   useEffect(() => {
-    // Filter hospitals based on search term
     const filtered = hospitals.filter(hospital =>
       hospital.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       hospital.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -109,19 +127,27 @@ const SuperAdminDashboard = () => {
 
   const fetchAdmins = async () => {
     try {
-      const res = await api.getAdmins(token);
+      const finalToken = token || localStorage.getItem('token');
+      if (!finalToken) {
+        console.warn('🔴 fetchAdmins: Token is missing from both context and localStorage!');
+        return;
+      }
+      console.log('📡 Fetching admins with token:', finalToken.substring(0, 20) + '...');
+      const res = await api.getAdmins(finalToken);
+      console.log('Admins response:', res);
       const list = res?.data?.data || res?.data || [];
       const adminOnly = (Array.isArray(list) ? list : []).filter(a => a.role === 'admin');
       setAdmins(adminOnly);
     } catch (e) {
-      // silently fail
+      console.error('❌ Error fetching admins:', e);
     }
   };
 
   const handleDeleteAdmin = async (id, name) => {
     if (!window.confirm(`Delete admin "${name}"? This cannot be undone.`)) return;
     try {
-      await api.deleteAdmin(id, token);
+      const finalToken = token || localStorage.getItem('token');
+      await api.deleteAdmin(id, finalToken);
       fetchAdmins();
     } catch (e) {}
   };
@@ -134,9 +160,16 @@ const SuperAdminDashboard = () => {
 
   const fetchDoctors = async () => {
     try {
-      const res = await api.getDoctorsAdmin(token);
+      const finalToken = token || localStorage.getItem('token');
+      if (!finalToken) {
+        console.warn('🔴 fetchDoctors: Token is missing from both context and localStorage!');
+        return;
+      }
+      console.log('📡 Fetching doctors with token:', finalToken.substring(0, 20) + '...');
+      const res = await api.getDoctorsAdmin(finalToken);
+      console.log('Doctors response:', res);
       if (res?.status !== 'success') {
-        console.warn('Primary doctor endpoint failed:', res?.message);
+        console.warn('⚠️ Doctor endpoint warning:', res?.message);
       }
 
       const list = res?.data?.data || res?.data || [];
@@ -157,12 +190,11 @@ const SuperAdminDashboard = () => {
         bio: doctor.bio || '',
       }));
 
-      // Fallback for environments where the doctor list endpoint returns empty unexpectedly.
       if (normalized.length === 0 && hospitals.length > 0) {
         const hospitalDetails = await Promise.all(
           hospitals.map(async (hospital) => {
             try {
-              const details = await api.getHospital(hospital.id, token);
+              const details = await api.getHospital(hospital.id, finalToken);
               return { hospital, details };
             } catch {
               return null;
@@ -215,7 +247,8 @@ const SuperAdminDashboard = () => {
   const handleDeleteDoctor = async (id, name) => {
     if (!window.confirm(`Delete doctor "${name}"? This cannot be undone.`)) return;
     try {
-      const res = await api.deleteDoctor(id, token);
+      const finalToken = token || localStorage.getItem('token');
+      const res = await api.deleteDoctor(id, finalToken);
       if (res?.status === 'success') {
         fetchDoctors();
         fetchDashboard({ silent: true });
@@ -265,7 +298,8 @@ const SuperAdminDashboard = () => {
         department_id: doctorForm.department_id || null,
       };
 
-      const response = await api.updateDoctor(editDoctor.id, payload, token);
+      const finalToken = token || localStorage.getItem('token');
+      const response = await api.updateDoctor(editDoctor.id, payload, finalToken);
       if (response?.status === 'success') {
         setEditDoctor(null);
         fetchDoctors();
@@ -281,16 +315,24 @@ const SuperAdminDashboard = () => {
 
   const fetchPatients = async () => {
     try {
-      const res = await api.getPatients(token);
+      const finalToken = token || localStorage.getItem('token');
+      if (!finalToken) {
+        console.warn('❌ fetchPatients: Token is missing from both context and localStorage!');
+        return;
+      }
+      const res = await api.getPatients(finalToken);
       const list = res?.data?.data || res?.data || [];
       setPatients(Array.isArray(list) ? list : []);
-    } catch (e) {}
+    } catch (e) {
+      console.error('Error fetching patients:', e);
+    }
   };
 
   const handleDeletePatient = async (id, name) => {
     if (!window.confirm(`Remove patient "${name}" from the system? This cannot be undone.`)) return;
     try {
-      const res = await api.deletePatient(id, token);
+      const finalToken = token || localStorage.getItem('token');
+      const res = await api.deletePatient(id, finalToken);
       if (res?.status === 'success') {
         fetchPatients();
         fetchDashboard();
@@ -308,11 +350,20 @@ const SuperAdminDashboard = () => {
       if (!silent) {
         setLoading(true);
       }
-      console.log('Fetching dashboard with token:', token ? 'exists' : 'missing');
-      const response = await api.getDashboard('/dashboard/super-admin', token);
+      
+      const finalToken = token || localStorage.getItem('token');
+      
+      if (!finalToken) {
+        console.error('❌ fetchDashboard: Token is missing from both context and localStorage!');
+        setError('Authentication token is missing. Please login again.');
+        navigate('/login');
+        return;
+      }
+      
+      console.log('📡 Fetching dashboard with token:', finalToken ? `${finalToken.substring(0, 20)}...` : 'missing');
+      const response = await api.getDashboard('/dashboard/super-admin', finalToken);
       console.log('Dashboard response:', response);
       
-      // Check if response is HTML (error page)
       if (typeof response === 'string' && response.includes('<html')) {
         setError('Auth error: Invalid or expired token. Please login again.');
         return;
@@ -330,7 +381,10 @@ const SuperAdminDashboard = () => {
       if (err.status === 404) {
         setError('Dashboard endpoint not found. Try logging in again.');
       } else if (err.status === 401) {
+        console.error('Authentication failed - token may be invalid or expired');
         setError('Unauthorized. Your session may have expired. Please login again.');
+        logout();
+        navigate('/login');
       } else {
         setError('Error loading dashboard: ' + (err.message || 'Unknown error'));
       }
@@ -346,7 +400,6 @@ const SuperAdminDashboard = () => {
       const response = await api.getHospitals();
       console.log('Hospitals response:', response);
       
-      // Handle different response formats
       if (response && response.status === 'success' && response.data) {
         setHospitals(Array.isArray(response.data) ? response.data : []);
       } else if (Array.isArray(response)) {
@@ -365,7 +418,8 @@ const SuperAdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await api.logout(token);
+      const finalToken = token || localStorage.getItem('token');
+      await api.logout(finalToken);
     } catch (err) {
       console.error('Logout error:', err);
     }
@@ -382,11 +436,8 @@ const SuperAdminDashboard = () => {
       const response = await api.deleteHospital(hospitalId, token);
       if (response.status === 'success') {
         alert('Hospital deleted successfully!');
-        // Refresh hospitals list
         setHospitals(hospitals.filter(h => h.id !== hospitalId));
-        // Refresh admins list because hospital admin can be removed with hospital
         fetchAdmins();
-        // Refresh dashboard data
         fetchDashboard();
       } else {
         alert(response.message || 'Failed to delete hospital');
@@ -448,7 +499,7 @@ const SuperAdminDashboard = () => {
 
   return (
     <div className="superadmin-dashboard">
-      <main className="dashboard-main" style={{display:'flex', flexDirection:'column', width:'100%'}}>
+      <main className="dashboard-main">
         {error && <div className="error-message">{error}</div>}
 
         <div className="dash-shell">
@@ -469,479 +520,477 @@ const SuperAdminDashboard = () => {
           </aside>
 
           <div className="dash-main-content">
+            {activeSection === 'profile' && (
+              <section className="dash-profile-section">
+                <div className="dash-profile-card">
+                  <div className="dash-profile-top">
+                    <div className="dash-profile-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'S'}</div>
+                    <div>
+                      <h2 className="dash-profile-title">{user?.name || 'Super Admin'}</h2>
+                      <p className="dash-profile-subtitle">System owner account overview</p>
+                    </div>
+                  </div>
 
-        {activeSection === 'profile' && (
-        <section className="dash-profile-section">
-          <div className="dash-profile-card">
-            <div className="dash-profile-top">
-              <div className="dash-profile-avatar">{user?.name?.charAt(0)?.toUpperCase() || 'S'}</div>
-              <div>
-                <h2 className="dash-profile-title">{user?.name || 'Super Admin'}</h2>
-                <p className="dash-profile-subtitle">System owner account overview</p>
-              </div>
-            </div>
+                  <div className="dash-profile-details">
+                    <div className="dash-profile-row"><label>Name</label><span>{user?.name || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Role</label><span>Super Admin</span></div>
+                    <div className="dash-profile-row"><label>Managed Scope</label><span>Entire Platform</span></div>
+                  </div>
 
-            <div className="dash-profile-details">
-              <div className="dash-profile-row"><label>Name</label><span>{user?.name || 'N/A'}</span></div>
-              <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
-              <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
-              <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
-              <div className="dash-profile-row"><label>Role</label><span>Super Admin</span></div>
-              <div className="dash-profile-row"><label>Managed Scope</label><span>Entire Platform</span></div>
-            </div>
-
-            <div className="dash-profile-stats">
-              <div className="dash-profile-stat"><strong>{dashboardData?.total_hospitals || 0}</strong><span>Hospitals</span></div>
-              <div className="dash-profile-stat"><strong>{dashboardData?.total_admins || 0}</strong><span>Admins</span></div>
-              <div className="dash-profile-stat"><strong>{dashboardData?.total_doctors || 0}</strong><span>Doctors</span></div>
-              <div className="dash-profile-stat"><strong>{dashboardData?.total_patients || 0}</strong><span>Patients</span></div>
-            </div>
-          </div>
-        </section>
-        )}
-
-        {/* Doctor Management Section */}
-        {activeSection === 'doctors' && (
-        <section id="sa-doctors" className="patient-section">
-          <div className="hospitals-header">
-            <div>
-              <h2>Doctor Management</h2>
-              <p className="hospitals-subtitle">Manage all doctors in the system</p>
-            </div>
-          </div>
-
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search doctors..."
-              value={doctorSearch}
-              onChange={(e) => setDoctorSearch(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="table-responsive">
-            <table className="hospitals-table">
-              <thead>
-                <tr>
-                  <th>NAME</th>
-                  <th>EMAIL</th>
-                  <th>HOSPITAL</th>
-                  <th>SPECIALIZATION</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDoctors.length === 0 ? (
-                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>No doctors found.</td></tr>
-                ) : filteredDoctors.map((doctor) => (
-                  <tr key={doctor.id} className="hospital-row">
-                    <td style={{ fontWeight: 700, color: 'var(--foreground)' }}>{doctor.name}</td>
-                    <td className="contact-email" style={{ fontSize: '0.9rem' }}>{doctor.email}</td>
-                    <td className="address-cell">{doctor.hospitalName}</td>
-                    <td>{doctor.specialization}</td>
-                    <td className="action-cell">
-                      <button type="button" className="action-btn view-btn" onClick={() => setViewDoctor(doctor)}>View</button>
-                      <button type="button" className="action-btn edit-btn" onClick={() => openEditDoctor(doctor)}>Edit</button>
-                      <button type="button" className="action-btn delete-btn" onClick={() => handleDeleteDoctor(doctor.id, doctor.name)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-        )}
-
-        {/* Statistics Section */}
-        {activeSection === 'stats' && (
-        <section id="sa-stats" className="dash-analytics-kpi-section">
-          <h2>Analytics Dashboard</h2>
-          <p className="dash-kpi-subtitle">Real-time platform health snapshot</p>
-          <div className="dash-analytics">
-            <div className="dash-graph-card">
-              <h3>System Graph</h3>
-              <p>Platform-wide key metrics</p>
-              <div className="dash-line-wrap">
-                <svg className="dash-line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="System line graph">
-                  <line className="dash-line-grid" x1="0" y1="20" x2="100" y2="20" />
-                  <line className="dash-line-grid" x1="0" y1="40" x2="100" y2="40" />
-                  <line className="dash-line-grid" x1="0" y1="60" x2="100" y2="60" />
-                  <line className="dash-line-grid" x1="0" y1="80" x2="100" y2="80" />
-                  <polyline className="dash-line-path" points={superOverviewPath} />
-                  {superOverviewPoints.map((point, idx) => (
-                    <circle key={superOverviewBars[idx].label} className="dash-line-point" cx={point.x} cy={point.y} r="1.8" />
-                  ))}
-                </svg>
-                <div className="dash-line-labels">
-                  {superOverviewBars.map((item) => (
-                    <span key={item.label}>{item.label}: {item.value}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <div className="dash-graph-card">
-              <h3>Operations Pie Chart</h3>
-              <p>Live management activity</p>
-              <div className="dash-pie-wrap">
-                <div className="dash-pie-chart" style={{ background: superPieGradient }} aria-label="Operations pie chart" />
-                <ul className="dash-pie-legend">
-                  {superOpsBars.map((item, idx) => (
-                    <li key={item.label}>
-                      <span className="dash-pie-legend-name">
-                        <span className="dash-pie-dot" style={{ background: superPieColors[idx % superPieColors.length] }} />
-                        {item.label}
-                      </span>
-                      <span className="dash-pie-value">{item.value}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div className="dash-kpi-grid">
-            {superKpiCards.map((item) => (
-              <article key={item.label} className="dash-kpi-card">
-                <h4>{item.label}</h4>
-                <p>{item.value}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-        )}
-
-        {/* Hospitals Management Section */}
-        {activeSection === 'hospitals' && (
-        <section id="sa-hospitals" className="hospitals-section">
-          <div className="hospitals-header">
-            <div>
-              <h2>Hospital Management</h2>
-              <p className="hospitals-subtitle">Manage all hospitals in the system</p>
-            </div>
-            <button type="button" onClick={() => setShowCreateModal(true)} className="btn-add-hospital">
-              Add Hospital
-            </button>
-          </div>
-
-          {/* Search Bar */}
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search hospitals..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          {/* Hospitals Table */}
-          {filteredHospitals.length === 0 && hospitals.length === 0 ? (
-            <div className="no-hospitals">
-              <p>No hospitals found. Create your first hospital!</p>
-              <button type="button" onClick={() => navigate('/hospitals')} className="btn-create">
-                Create Hospital
-              </button>
-            </div>
-          ) : filteredHospitals.length === 0 ? (
-            <div className="no-hospitals">
-              <p>No hospitals match your search.</p>
-            </div>
-          ) : (
-            <div className="table-responsive">
-              <table className="hospitals-table">
-                <thead>
-                  <tr>
-                    <th>HOSPITAL NAME</th>
-                    <th>ADDRESS</th>
-                    <th>CONTACT</th>
-                    <th>CAPACITY</th>
-                    <th>STATUS</th>
-                    <th>ACTION</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredHospitals.map((hospital) => (
-                    <tr key={hospital.id} className="hospital-row">
-                      <td className="name-cell">
-                        <div className="hospital-name-wrapper">
-                          <img
-                            src={hospital.image ? `${api.getStorageUrl()}/${hospital.image}` : hospitalImage}
-                            alt={hospital.name}
-                            className="hospital-thumbnail"
-                            onError={(e) => {
-                              e.target.src = hospitalImage;
-                            }}
-                          />
-                          <span className="hospital-name-text">{hospital.name}</span>
-                        </div>
-                      </td>
-                      <td className="address-cell">{hospital.address || 'N/A'}</td>
-                      <td className="contact-cell">
-                        <div className="contact-info">
-                          <div>{hospital.phone || 'N/A'}</div>
-                          <div className="contact-email">{hospital.email || 'N/A'}</div>
-                        </div>
-                      </td>
-                      <td className="capacity-cell">{hospital.beds ? `${hospital.beds} beds` : (hospital.capacity ? `${hospital.capacity} beds` : 'N/A')}</td>
-                      <td className="status-cell">
-                        <span className={`status-badge ${hospital.is_active || hospital.status === 'active' ? 'active' : 'inactive'}`}>
-                          {hospital.is_active || hospital.status === 'active' ? 'active' : 'inactive'}
-                        </span>
-                      </td>
-                      <td className="action-cell">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedHospital(hospital)}
-                          className="action-btn view-btn"
-                        >
-                          View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditHospital(hospital)}
-                          className="action-btn edit-btn"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteHospital(hospital.id, hospital.name)}
-                          className="action-btn delete-btn"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </section>
-        )}
-
-        {/* Admin Management Section */}
-        {activeSection === 'admins' && (
-        <section id="sa-admins" className="admin-section">
-          <div className="hospitals-header">
-            <div>
-              <h2>Admin Management</h2>
-              <p className="hospitals-subtitle">Manage all administrators in the system</p>
-            </div>
-          </div>
-
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search admins..."
-              value={adminSearch}
-              onChange={(e) => setAdminSearch(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="table-responsive">
-            <table className="hospitals-table">
-              <thead>
-                <tr>
-                  <th>NAME</th>
-                  <th>EMAIL</th>
-                  <th>HOSPITAL</th>
-                  <th>STATUS</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAdmins.length === 0 ? (
-                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>No admins found.</td></tr>
-                ) : filteredAdmins.map((admin) => (
-                  <tr key={admin.id} className="hospital-row">
-                    <td style={{ fontWeight: 700, color: 'var(--foreground)' }}>{admin.name}</td>
-                    <td className="contact-email" style={{ fontSize: '0.9rem' }}>{admin.email}</td>
-                    <td className="address-cell">{admin.hospital?.name || '-'}</td>
-                    <td>
-                      <span className={`status-badge ${admin.is_active !== false ? 'active' : 'inactive'}`}>
-                        {admin.is_active !== false ? 'active' : 'inactive'}
-                      </span>
-                    </td>
-                    <td className="action-cell">
-                      <button type="button" className="action-btn edit-btn" onClick={() => setEditAdmin(admin)}>Edit</button>
-                      <button type="button" className="action-btn delete-btn" onClick={() => handleDeleteAdmin(admin.id, admin.name)}>Delete</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-        )}
-
-        {/* Patient Management Section */}
-        {activeSection === 'patients' && (
-        <section id="sa-patients" className="patient-section">
-          <div className="hospitals-header">
-            <div>
-              <h2>Patient Management</h2>
-              <p className="hospitals-subtitle">Manage all patients registered in the system</p>
-            </div>
-          </div>
-
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search patients..."
-              value={patientSearch}
-              onChange={(e) => setPatientSearch(e.target.value)}
-              className="search-input"
-            />
-          </div>
-
-          <div className="table-responsive">
-            <table className="hospitals-table">
-              <thead>
-                <tr>
-                  <th>NAME</th>
-                  <th>EMAIL</th>
-                  <th>PHONE</th>
-                  <th>IDENTIFIER</th>
-                  <th>STATUS</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPatients.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem', color: 'var(--muted-foreground)' }}>No patients found.</td></tr>
-                ) : filteredPatients.map((patient) => (
-                  <tr key={patient.id} className="hospital-row">
-                    <td style={{ fontWeight: 700, color: 'var(--foreground)' }}>{patient.name}</td>
-                    <td className="contact-email" style={{ fontSize: '0.9rem' }}>{patient.email}</td>
-                    <td>{patient.phone || '-'}</td>
-                    <td><code style={{ fontSize: '0.82rem', background: 'var(--muted)', padding: '2px 6px', borderRadius: '4px' }}>{patient.identifier || '-'}</code></td>
-                    <td>
-                      <span className={`status-badge ${patient.is_active !== false ? 'active' : 'inactive'}`}>
-                        {patient.is_active !== false ? 'active' : 'inactive'}
-                      </span>
-                    </td>
-                    <td className="action-cell">
-                      <button type="button" className="action-btn delete-btn" onClick={() => handleDeletePatient(patient.id, patient.name)}>Remove</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-        )}
-
-        {selectedHospital && (
-          <HospitalViewModal 
-            hospital={selectedHospital} 
-            onClose={() => setSelectedHospital(null)} 
-          />
-        )}
-
-        {showCreateModal && (
-          <CreateHospitalModal
-            onClose={() => setShowCreateModal(false)}
-            onSuccess={() => {
-              fetchHospitals();
-              fetchAdmins();
-              fetchDashboard({ silent: true });
-            }}
-          />
-        )}
-
-        {editHospital && (
-          <EditHospitalModal
-            hospital={editHospital}
-            onClose={() => setEditHospital(null)}
-            onSuccess={() => {
-              setEditHospital(null);
-              fetchHospitals();
-              fetchAdmins();
-              fetchDashboard({ silent: true });
-            }}
-          />
-        )}
-
-        {editAdmin && (
-          <EditAdminModal
-            admin={editAdmin}
-            hospitals={hospitals}
-            onClose={() => setEditAdmin(null)}
-            onSuccess={handleAdminUpdated}
-          />
-        )}
-
-        {viewDoctor && (
-          <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setViewDoctor(null)}>
-            <div className="create-hospital-modal">
-              <div className="modal-header">
-                <div className="modal-header-left">
-                  <div className="modal-header-icon">D</div>
-                  <div>
-                    <h2 className="modal-header-title">Doctor Details</h2>
-                    <p className="modal-header-subtitle">View doctor information</p>
+                  <div className="dash-profile-stats">
+                    <div className="dash-profile-stat"><strong>{dashboardData?.total_hospitals || 0}</strong><span>Hospitals</span></div>
+                    <div className="dash-profile-stat"><strong>{dashboardData?.total_admins || 0}</strong><span>Admins</span></div>
+                    <div className="dash-profile-stat"><strong>{dashboardData?.total_doctors || 0}</strong><span>Doctors</span></div>
+                    <div className="dash-profile-stat"><strong>{dashboardData?.total_patients || 0}</strong><span>Patients</span></div>
                   </div>
                 </div>
-                <button type="button" className="modal-close-btn" onClick={() => setViewDoctor(null)}>x</button>
-              </div>
-              <div className="modal-form">
-                <div className="form-grid">
-                  <div className="modal-field"><label>Name</label><input value={viewDoctor.name} disabled /></div>
-                  <div className="modal-field"><label>Email</label><input value={viewDoctor.email} disabled /></div>
-                  <div className="modal-field"><label>Phone</label><input value={viewDoctor.phone} disabled /></div>
-                  <div className="modal-field"><label>Hospital</label><input value={viewDoctor.hospitalName} disabled /></div>
-                  <div className="modal-field"><label>Department</label><input value={viewDoctor.departmentName} disabled /></div>
-                  <div className="modal-field"><label>Specialization</label><input value={viewDoctor.specialization} disabled /></div>
-                  <div className="modal-field"><label>Qualification</label><input value={viewDoctor.qualification} disabled /></div>
-                  <div className="modal-field"><label>Experience</label><input value={viewDoctor.experience_years || '-'} disabled /></div>
-                  <div className="modal-field"><label>Fee</label><input value={viewDoctor.consultation_fee || '-'} disabled /></div>
-                  <div className="modal-field col-span-2"><label>Bio</label><textarea value={viewDoctor.bio || '-'} disabled /></div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn-modal-submit" onClick={() => setViewDoctor(null)}>Close</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+              </section>
+            )}
 
-        {editDoctor && (
-          <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setEditDoctor(null)}>
-            <div className="create-hospital-modal">
-              <div className="modal-header">
-                <div className="modal-header-left">
-                  <div className="modal-header-icon">D</div>
+            {activeSection === 'doctors' && (
+              <section id="sa-doctors" className="patient-section">
+                <div className="hospitals-header">
                   <div>
-                    <h2 className="modal-header-title">Edit Doctor</h2>
-                    <p className="modal-header-subtitle">Update doctor information</p>
+                    <h2>Doctor Management</h2>
+                    <p className="hospitals-subtitle">Manage all doctors in the system</p>
                   </div>
                 </div>
-                <button type="button" className="modal-close-btn" onClick={() => setEditDoctor(null)}>x</button>
-              </div>
-              <div className="modal-form">
-                <div className="form-grid">
-                  <div className="modal-field"><label>Name</label><input name="name" value={doctorForm.name} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Email</label><input name="email" value={doctorForm.email} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Phone</label><input name="phone" value={doctorForm.phone} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Hospital</label><input value={editDoctor.hospitalName} disabled /></div>
-                  <div className="modal-field"><label>Department ID</label><input name="department_id" value={doctorForm.department_id} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Specialization</label><input name="specialization" value={doctorForm.specialization} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Qualification</label><input name="qualification" value={doctorForm.qualification} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Experience Years</label><input name="experience_years" type="number" min="0" value={doctorForm.experience_years} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>Consultation Fee</label><input name="consultation_fee" type="number" min="0" value={doctorForm.consultation_fee} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field"><label>License Number</label><input name="license_number" value={doctorForm.license_number} onChange={handleDoctorFormChange} /></div>
-                  <div className="modal-field col-span-2"><label>Bio</label><textarea name="bio" value={doctorForm.bio} onChange={handleDoctorFormChange} /></div>
+
+                <div className="search-container">
+                  <input
+                    type="text"
+                    placeholder="Search doctors..."
+                    value={doctorSearch}
+                    onChange={(e) => setDoctorSearch(e.target.value)}
+                    className="search-input"
+                  />
                 </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn-modal-cancel" onClick={() => setEditDoctor(null)}>Cancel</button>
-                  <button type="button" className="btn-modal-submit" disabled={doctorSaving} onClick={handleUpdateDoctor}>{doctorSaving ? 'Saving...' : 'Save Doctor'}</button>
+
+                <div className="table-responsive">
+                  <table className="hospitals-table">
+                    <thead>
+                      <tr>
+                        <th>NAME</th>
+                        <th>EMAIL</th>
+                        <th>HOSPITAL</th>
+                        <th>SPECIALIZATION</th>
+                        <th>ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredDoctors.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="empty-state-message">No doctors found.</td>
+                        </tr>
+                      ) : filteredDoctors.map((doctor) => (
+                        <tr key={doctor.id} className="hospital-row">
+                          <td className="name-cell">{doctor.name}</td>
+                          <td className="contact-email">{doctor.email}</td>
+                          <td className="address-cell">{doctor.hospitalName}</td>
+                          <td>{doctor.specialization}</td>
+                          <td className="action-cell">
+                            <button type="button" className="action-btn view-btn" onClick={() => setViewDoctor(doctor)}>View</button>
+                            <button type="button" className="action-btn edit-btn" onClick={() => openEditDoctor(doctor)}>Edit</button>
+                            <button type="button" className="action-btn delete-btn" onClick={() => handleDeleteDoctor(doctor.id, doctor.name)}>Delete</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {activeSection === 'stats' && (
+              <section id="sa-stats" className="dash-analytics-kpi-section">
+                <h2>Analytics Dashboard</h2>
+                <p className="dash-kpi-subtitle">Real-time platform health snapshot</p>
+                <div className="dash-analytics">
+                  <div className="dash-graph-card">
+                    <h3>System Graph</h3>
+                    <p>Platform-wide key metrics</p>
+                    <div className="dash-line-wrap">
+                      <svg className="dash-line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="System line graph">
+                        <line className="dash-line-grid" x1="0" y1="20" x2="100" y2="20" />
+                        <line className="dash-line-grid" x1="0" y1="40" x2="100" y2="40" />
+                        <line className="dash-line-grid" x1="0" y1="60" x2="100" y2="60" />
+                        <line className="dash-line-grid" x1="0" y1="80" x2="100" y2="80" />
+                        <polyline className="dash-line-path" points={superOverviewPath} />
+                        {superOverviewPoints.map((point, idx) => (
+                          <circle key={superOverviewBars[idx].label} className="dash-line-point" cx={point.x} cy={point.y} r="1.8" />
+                        ))}
+                      </svg>
+                      <div className="dash-line-labels">
+                        {superOverviewBars.map((item) => (
+                          <span key={item.label}>{item.label}: {item.value}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="dash-graph-card">
+                    <h3>Operations Pie Chart</h3>
+                    <p>Live management activity</p>
+                    <div className="dash-pie-wrap">
+                      <div className="dash-pie-chart" style={{ background: superPieGradient }} aria-label="Operations pie chart" />
+                      <ul className="dash-pie-legend">
+                        {superOpsBars.map((item, idx) => (
+                          <li key={item.label}>
+                            <span className="dash-pie-legend-name">
+                              <span className="dash-pie-dot" style={{ background: superPieColors[idx % superPieColors.length] }} />
+                              {item.label}
+                            </span>
+                            <span className="dash-pie-value">{item.value}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="dash-kpi-grid">
+                  {superKpiCards.map((item) => (
+                    <article key={item.label} className="dash-kpi-card">
+                      <h4>{item.label}</h4>
+                      <p>{item.value}</p>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {activeSection === 'hospitals' && (
+              <section id="sa-hospitals" className="hospitals-section">
+                <div className="hospitals-header">
+                  <div>
+                    <h2>Hospital Management</h2>
+                    <p className="hospitals-subtitle">Manage all hospitals in the system</p>
+                  </div>
+                  <button type="button" onClick={() => setShowCreateModal(true)} className="btn-add-hospital">
+                    Add Hospital
+                  </button>
+                </div>
+
+                <div className="search-container">
+                  <input
+                    type="text"
+                    placeholder="Search hospitals..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+
+                {filteredHospitals.length === 0 && hospitals.length === 0 ? (
+                  <div className="no-hospitals">
+                    <p>No hospitals found. Create your first hospital!</p>
+                    <button type="button" onClick={() => navigate('/hospitals')} className="btn-create">
+                      Create Hospital
+                    </button>
+                  </div>
+                ) : filteredHospitals.length === 0 ? (
+                  <div className="no-hospitals">
+                    <p>No hospitals match your search.</p>
+                  </div>
+                ) : (
+                  <div className="table-responsive">
+                    <table className="hospitals-table">
+                      <thead>
+                        <tr>
+                          <th>HOSPITAL NAME</th>
+                          <th>ADDRESS</th>
+                          <th>CONTACT</th>
+                          <th>CAPACITY</th>
+                          <th>STATUS</th>
+                          <th>ACTION</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredHospitals.map((hospital) => (
+                          <tr key={hospital.id} className="hospital-row">
+                            <td className="name-cell">
+                              <div className="hospital-name-wrapper">
+                                <img
+                                  src={hospital.image ? `${api.getStorageUrl()}/${hospital.image}` : hospitalImage}
+                                  alt={hospital.name}
+                                  className="hospital-thumbnail"
+                                  onError={(e) => {
+                                    e.target.src = hospitalImage;
+                                  }}
+                                />
+                                <span className="hospital-name-text">{hospital.name}</span>
+                              </div>
+                            </td>
+                            <td className="address-cell">{hospital.address || 'N/A'}</td>
+                            <td className="contact-cell">
+                              <div className="contact-info">
+                                <div>{hospital.phone || 'N/A'}</div>
+                                <div className="contact-email">{hospital.email || 'N/A'}</div>
+                              </div>
+                            </td>
+                            <td className="capacity-cell">{hospital.beds ? `${hospital.beds} beds` : (hospital.capacity ? `${hospital.capacity} beds` : 'N/A')}</td>
+                            <td className="status-cell">
+                              <span className={`status-badge ${hospital.is_active || hospital.status === 'active' ? 'active' : 'inactive'}`}>
+                                {hospital.is_active || hospital.status === 'active' ? 'active' : 'inactive'}
+                              </span>
+                            </td>
+                            <td className="action-cell">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedHospital(hospital)}
+                                className="action-btn view-btn"
+                              >
+                                View
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditHospital(hospital)}
+                                className="action-btn edit-btn"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteHospital(hospital.id, hospital.name)}
+                                className="action-btn delete-btn"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+            )}
+
+            {activeSection === 'admins' && (
+              <section id="sa-admins" className="admin-section">
+                <div className="hospitals-header">
+                  <div>
+                    <h2>Admin Management</h2>
+                    <p className="hospitals-subtitle">Manage all administrators in the system</p>
+                  </div>
+                </div>
+
+                <div className="search-container">
+                  <input
+                    type="text"
+                    placeholder="Search admins..."
+                    value={adminSearch}
+                    onChange={(e) => setAdminSearch(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+
+                <div className="table-responsive">
+                  <table className="hospitals-table">
+                    <thead>
+                      <tr>
+                        <th>NAME</th>
+                        <th>EMAIL</th>
+                        <th>HOSPITAL</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredAdmins.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="empty-state-message">No admins found.</td>
+                        </tr>
+                      ) : filteredAdmins.map((admin) => (
+                        <tr key={admin.id} className="hospital-row">
+                          <td className="name-cell">{admin.name}</td>
+                          <td className="contact-email">{admin.email}</td>
+                          <td className="address-cell">{admin.hospital?.name || '-'}</td>
+                          <td>
+                            <span className={`status-badge ${admin.is_active !== false ? 'active' : 'inactive'}`}>
+                              {admin.is_active !== false ? 'active' : 'inactive'}
+                            </span>
+                          </td>
+                          <td className="action-cell">
+                            <button type="button" className="action-btn edit-btn" onClick={() => setEditAdmin(admin)}>Edit</button>
+                            <button type="button" className="action-btn delete-btn" onClick={() => handleDeleteAdmin(admin.id, admin.name)}>Delete</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {activeSection === 'patients' && (
+              <section id="sa-patients" className="patient-section">
+                <div className="hospitals-header">
+                  <div>
+                    <h2>Patient Management</h2>
+                    <p className="hospitals-subtitle">Manage all patients registered in the system</p>
+                  </div>
+                </div>
+
+                <div className="search-container">
+                  <input
+                    type="text"
+                    placeholder="Search patients..."
+                    value={patientSearch}
+                    onChange={(e) => setPatientSearch(e.target.value)}
+                    className="search-input"
+                  />
+                </div>
+
+                <div className="table-responsive">
+                  <table className="hospitals-table">
+                    <thead>
+                      <tr>
+                        <th>NAME</th>
+                        <th>EMAIL</th>
+                        <th>PHONE</th>
+                        <th>IDENTIFIER</th>
+                        <th>STATUS</th>
+                        <th>ACTIONS</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredPatients.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="empty-state-message">No patients found.</td>
+                        </tr>
+                      ) : filteredPatients.map((patient) => (
+                        <tr key={patient.id} className="hospital-row">
+                          <td className="name-cell">{patient.name}</td>
+                          <td className="contact-email">{patient.email}</td>
+                          <td>{patient.phone || '-'}</td>
+                          <td><code className="identifier-code">{patient.identifier || '-'}</code></td>
+                          <td>
+                            <span className={`status-badge ${patient.is_active !== false ? 'active' : 'inactive'}`}>
+                              {patient.is_active !== false ? 'active' : 'inactive'}
+                            </span>
+                          </td>
+                          <td className="action-cell">
+                            <button type="button" className="action-btn delete-btn" onClick={() => handleDeletePatient(patient.id, patient.name)}>Remove</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            )}
+
+            {selectedHospital && (
+              <HospitalViewModal 
+                hospital={selectedHospital} 
+                onClose={() => setSelectedHospital(null)} 
+              />
+            )}
+
+            {showCreateModal && (
+              <CreateHospitalModal
+                onClose={() => setShowCreateModal(false)}
+                onSuccess={() => {
+                  fetchHospitals();
+                  fetchAdmins();
+                  fetchDashboard({ silent: true });
+                }}
+              />
+            )}
+
+            {editHospital && (
+              <EditHospitalModal
+                hospital={editHospital}
+                onClose={() => setEditHospital(null)}
+                onSuccess={() => {
+                  setEditHospital(null);
+                  fetchHospitals();
+                  fetchAdmins();
+                  fetchDashboard({ silent: true });
+                }}
+              />
+            )}
+
+            {editAdmin && (
+              <EditAdminModal
+                admin={editAdmin}
+                hospitals={hospitals}
+                onClose={() => setEditAdmin(null)}
+                onSuccess={handleAdminUpdated}
+              />
+            )}
+
+            {viewDoctor && (
+              <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setViewDoctor(null)}>
+                <div className="create-hospital-modal">
+                  <div className="modal-header">
+                    <div className="modal-header-left">
+                      <div className="modal-header-icon">D</div>
+                      <div>
+                        <h2 className="modal-header-title">Doctor Details</h2>
+                        <p className="modal-header-subtitle">View doctor information</p>
+                      </div>
+                    </div>
+                    <button type="button" className="modal-close-btn" onClick={() => setViewDoctor(null)}>x</button>
+                  </div>
+                  <div className="modal-form">
+                    <div className="form-grid">
+                      <div className="modal-field"><label>Name</label><input value={viewDoctor.name} disabled /></div>
+                      <div className="modal-field"><label>Email</label><input value={viewDoctor.email} disabled /></div>
+                      <div className="modal-field"><label>Phone</label><input value={viewDoctor.phone} disabled /></div>
+                      <div className="modal-field"><label>Hospital</label><input value={viewDoctor.hospitalName} disabled /></div>
+                      <div className="modal-field"><label>Department</label><input value={viewDoctor.departmentName} disabled /></div>
+                      <div className="modal-field"><label>Specialization</label><input value={viewDoctor.specialization} disabled /></div>
+                      <div className="modal-field"><label>Qualification</label><input value={viewDoctor.qualification} disabled /></div>
+                      <div className="modal-field"><label>Experience</label><input value={viewDoctor.experience_years || '-'} disabled /></div>
+                      <div className="modal-field"><label>Fee</label><input value={viewDoctor.consultation_fee || '-'} disabled /></div>
+                      <div className="modal-field col-span-2"><label>Bio</label><textarea value={viewDoctor.bio || '-'} disabled /></div>
+                    </div>
+                    <div className="modal-footer">
+                      <button type="button" className="btn-modal-submit" onClick={() => setViewDoctor(null)}>Close</button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            )}
+
+            {editDoctor && (
+              <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setEditDoctor(null)}>
+                <div className="create-hospital-modal">
+                  <div className="modal-header">
+                    <div className="modal-header-left">
+                      <div className="modal-header-icon">D</div>
+                      <div>
+                        <h2 className="modal-header-title">Edit Doctor</h2>
+                        <p className="modal-header-subtitle">Update doctor information</p>
+                      </div>
+                    </div>
+                    <button type="button" className="modal-close-btn" onClick={() => setEditDoctor(null)}>x</button>
+                  </div>
+                  <div className="modal-form">
+                    <div className="form-grid">
+                      <div className="modal-field"><label>Name</label><input name="name" value={doctorForm.name} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Email</label><input name="email" value={doctorForm.email} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Phone</label><input name="phone" value={doctorForm.phone} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Hospital</label><input value={editDoctor.hospitalName} disabled /></div>
+                      <div className="modal-field"><label>Department ID</label><input name="department_id" value={doctorForm.department_id} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Specialization</label><input name="specialization" value={doctorForm.specialization} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Qualification</label><input name="qualification" value={doctorForm.qualification} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Experience Years</label><input name="experience_years" type="number" min="0" value={doctorForm.experience_years} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>Consultation Fee</label><input name="consultation_fee" type="number" min="0" value={doctorForm.consultation_fee} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field"><label>License Number</label><input name="license_number" value={doctorForm.license_number} onChange={handleDoctorFormChange} /></div>
+                      <div className="modal-field col-span-2"><label>Bio</label><textarea name="bio" value={doctorForm.bio} onChange={handleDoctorFormChange} /></div>
+                    </div>
+                    <div className="modal-footer">
+                      <button type="button" className="btn-modal-cancel" onClick={() => setEditDoctor(null)}>Cancel</button>
+                      <button type="button" className="btn-modal-submit" disabled={doctorSaving} onClick={handleUpdateDoctor}>{doctorSaving ? 'Saving...' : 'Save Doctor'}</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

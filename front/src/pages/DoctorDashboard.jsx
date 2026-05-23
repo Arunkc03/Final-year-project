@@ -60,8 +60,6 @@ const DoctorDashboard = () => {
     return `${start} - ${end}`;
   };
 
-
-
   // Reviews
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -154,7 +152,6 @@ const DoctorDashboard = () => {
   const fetchReviews = async () => {
     setReviewsLoading(true);
     try {
-      // Use authenticated endpoint so doctor sees ALL reviews (including pending)
       const res = await api.getMyReviews(token);
       if (res.status === 'success') setReviews(res.data?.data || res.data || []);
     } catch (err) { console.error('Reviews fetch error:', err); }
@@ -259,7 +256,6 @@ const DoctorDashboard = () => {
     setReportLoading(true);
     setReportMessage({ type: '', text: '' });
     try {
-      // At least title and diagnosis are required
       if (!reportForm.title || !reportForm.diagnosis) {
         setReportMessage({ type: 'error', text: 'Title and Diagnosis are required' });
         setReportLoading(false);
@@ -294,15 +290,11 @@ const DoctorDashboard = () => {
               : a
           ));
         }
-        // Reset form
-        setReportForm({ title: '', description: '', diagnosis: '', treatment: '', notes: '' });
         setTimeout(() => { closeReportModal(); fetchAll(); }, 1200);
       } else {
         setReportMessage({ type: 'error', text: res.message || 'Failed to submit report' });
-        console.error('Report submission error:', res);
       }
     } catch (err) {
-      console.error('Report error:', err);
       setReportMessage({ type: 'error', text: 'Error submitting report: ' + (err.message || err.toString()) });
     } finally {
       setReportLoading(false);
@@ -359,7 +351,6 @@ const DoctorDashboard = () => {
         throw new Error('Invalid time range or slot duration');
       }
 
-      // Create ONE schedule record with the full time range
       const payloadForm = {
         date: scheduleForm.date,
         start_time: scheduleForm.start_time,
@@ -387,17 +378,14 @@ const DoctorDashboard = () => {
     setDeletingScheduleId(id);
     try {
       const res = await api.deleteSchedule(id, token);
-      console.log('Delete schedule response:', res);
       if (res.status === 'success') {
         setSchedules(prev => prev.filter(s => s.id !== id));
         setActionMessage({ type: 'success', text: 'Schedule deleted successfully!' });
         fetchSchedules();
       } else {
         setActionMessage({ type: 'error', text: res.message || 'Failed to delete schedule' });
-        console.error('Delete failed:', res);
       }
     } catch (err) {
-      console.error('Error deleting schedule:', err);
       setActionMessage({ type: 'error', text: 'Error deleting schedule: ' + (err.message || err.toString()) });
     } finally {
       setDeletingScheduleId(null);
@@ -412,14 +400,11 @@ const DoctorDashboard = () => {
         const res = await api.deleteSchedule(schedule.id, token);
         if (res.status === 'success') {
           deletedCount++;
-        } else {
-          console.error('Failed to delete schedule', schedule.id, res.message);
         }
       }
       setActionMessage({ type: 'success', text: `Deleted ${deletedCount} of ${schedules.length} schedules` });
       fetchSchedules();
     } catch (err) {
-      console.error('Error deleting schedules:', err);
       setActionMessage({ type: 'error', text: 'Error deleting schedules: ' + (err.message || err.toString()) });
     }
   };
@@ -441,15 +426,10 @@ const DoctorDashboard = () => {
       const fd = new FormData();
       fd.append('image', profileImage);
       
-      // Upload doctor image - Find doctor by user_id (use the doctor ID from dashboard or fetch it)
-      // Since we're a doctor, let's use the endpoint without an ID (doctor's own profile)
       const res = await api.uploadDoctorImage(fd, token);
-      console.log('Doctor image upload response:', res);
       if (res.status === 'success') {
-        // Update only image-related state so dashboard doesn't enter global loading state
         if (res.doctor?.image) {
           const imageUrl = api.getStorageUrl() + '/' + res.doctor.image;
-          console.log('Setting doctor image URL:', imageUrl);
           setProfileImagePreview(imageUrl);
           if (user) {
             updateUser({ ...user, avatar: res.doctor.image });
@@ -457,13 +437,11 @@ const DoctorDashboard = () => {
         }
         setActionMessage({ type: 'success', text: 'Profile image updated successfully!' });
         setProfileImage(null);
-        // Reset the file input
         if (profilePhotoInputRef.current) profilePhotoInputRef.current.value = '';
       } else {
         setActionMessage({ type: 'error', text: res.message || 'Failed to upload image' });
       }
     } catch (err) {
-      console.error('Upload error:', err);
       setActionMessage({ type: 'error', text: 'Error uploading image: ' + (err.message || err.toString()) });
     } finally {
       setUploadingProfile(false);
@@ -565,7 +543,6 @@ const DoctorDashboard = () => {
   // Filter appointments by tab
   const filteredAppointments = activeTab === 'all' ? appointments : appointments.filter(a => a.status === activeTab);
   
-  // Reset pagination when tab changes
   React.useEffect(() => {
     setAppointmentCurrentPage(1);
   }, [activeTab]);
@@ -605,40 +582,6 @@ const DoctorDashboard = () => {
       )
     : uniquePatients;
 
-  const doctorOverviewBars = [
-    { label: 'Appointments', value: appointments.length || 0 },
-    { label: 'Patients', value: uniquePatients.length || 0 },
-    { label: 'Schedules', value: schedules.length || 0 },
-    { label: 'Reviews', value: reviews.length || 0 },
-  ];
-
-  const doctorStatusBars = [
-    { label: 'Pending', value: appointments.filter(a => a.status === 'pending').length || 0 },
-    { label: 'Confirmed', value: appointments.filter(a => a.status === 'confirmed').length || 0 },
-    { label: 'Completed', value: appointments.filter(a => a.status === 'completed').length || 0 },
-    { label: 'Cancelled', value: appointments.filter(a => a.status === 'cancelled').length || 0 },
-  ];
-
-  const doctorOverviewMax = Math.max(1, ...doctorOverviewBars.map(item => item.value));
-  const doctorOverviewPoints = doctorOverviewBars.map((item, idx) => {
-    const x = doctorOverviewBars.length === 1 ? 50 : (idx * 100) / (doctorOverviewBars.length - 1);
-    const y = 95 - (item.value / doctorOverviewMax) * 80;
-    return { x, y };
-  });
-  const doctorOverviewPath = doctorOverviewPoints.map(point => `${point.x},${point.y}`).join(' ');
-
-  const doctorPieColors = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444'];
-  const doctorStatusTotal = Math.max(1, doctorStatusBars.reduce((sum, item) => sum + item.value, 0));
-  let doctorAccumulated = 0;
-  const doctorPieGradient = `conic-gradient(${doctorStatusBars
-    .map((item, idx) => {
-      const start = (doctorAccumulated / doctorStatusTotal) * 360;
-      doctorAccumulated += item.value;
-      const end = (doctorAccumulated / doctorStatusTotal) * 360;
-      return `${doctorPieColors[idx % doctorPieColors.length]} ${start}deg ${end}deg`;
-    })
-    .join(', ')})`;
-
   if (loading) return <div className="dd-loading">Loading dashboard...</div>;
   if (!user) return null;
 
@@ -661,736 +604,558 @@ const DoctorDashboard = () => {
         </aside>
 
         <div className="dash-main-content">
-      <section className="dash-analytics">
-        <div className="dash-graph-card">
-          <h3>Practice Graph</h3>
-          <p>Doctor workload overview</p>
-          <div className="dash-line-wrap">
-            <svg className="dash-line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Practice line graph">
-              <line className="dash-line-grid" x1="0" y1="20" x2="100" y2="20" />
-              <line className="dash-line-grid" x1="0" y1="40" x2="100" y2="40" />
-              <line className="dash-line-grid" x1="0" y1="60" x2="100" y2="60" />
-              <line className="dash-line-grid" x1="0" y1="80" x2="100" y2="80" />
-              <polyline className="dash-line-path" points={doctorOverviewPath} />
-              {doctorOverviewPoints.map((point, idx) => (
-                <circle key={doctorOverviewBars[idx].label} className="dash-line-point" cx={point.x} cy={point.y} r="1.8" />
-              ))}
-            </svg>
-            <div className="dash-line-labels">
-              {doctorOverviewBars.map((item) => (
-                <span key={item.label}>{item.label}: {item.value}</span>
-              ))}
-            </div>
-          </div>
-        </div>
-        <div className="dash-graph-card">
-          <h3>Status Pie Chart</h3>
-          <p>Appointment status split</p>
-          <div className="dash-pie-wrap">
-            <div className="dash-pie-chart" style={{ background: doctorPieGradient }} aria-label="Status pie chart" />
-            <ul className="dash-pie-legend">
-              {doctorStatusBars.map((item, idx) => (
-                <li key={item.label}>
-                  <span className="dash-pie-legend-name">
-                    <span className="dash-pie-dot" style={{ background: doctorPieColors[idx % doctorPieColors.length] }} />
-                    {item.label}
-                  </span>
-                  <span className="dash-pie-value">{item.value}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+          {/* REMOVED: Analytics section with bar graph and pie chart */}
 
-      <section className="dash-profile-section" style={{ display: activeSection === 'profile' ? 'block' : 'none' }}>
-        <div className="dash-profile-card">
-          <div className="dd-profile-header-row">
-            <h2 className="dd-panel-title dd-profile-main-title">My Profile</h2>
-            {!profileEditMode ? (
-              <button type="button" className="dd-edit-profile-btn" onClick={() => setProfileEditMode(true)}>
-                Edit Profile
-              </button>
-            ) : null}
-          </div>
-
-          {profileMessage.text && (
-            <div className={`dd-msg ${profileMessage.type}`}>{profileMessage.text}</div>
-          )}
-
-          {actionMessage.text && (
-            <div className={`dd-msg ${actionMessage.type}`}>{actionMessage.text}</div>
-          )}
-
-          {!profileEditMode ? (
-            <>
-              <div className="dash-profile-top">
-                <div className="dash-profile-avatar">
-                  {profileImagePreview ? (
-                    <img src={profileImagePreview} alt={user?.name || 'Doctor'} />
-                  ) : (
-                    <span>{user?.name?.charAt(0)?.toUpperCase() || 'D'}</span>
-                  )}
-                </div>
-                <div>
-                  <h2 className="dash-profile-title">Dr. {user?.name || 'Doctor'}</h2>
-                  <p className="dash-profile-subtitle">Doctor account overview</p>
-                </div>
-              </div>
-
-              <div className="dash-profile-details">
-                <div className="dash-profile-row"><label>Name</label><span>Dr. {user?.name || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Qualification</label><span>{dashboardData?.qualification || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Experience</label><span>{dashboardData?.experience_years ? `${dashboardData.experience_years} years` : 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Consultation Fee</label><span>{dashboardData?.consultation_fee ? `Rs ${dashboardData.consultation_fee}` : 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Hospital</label><span>{hospitalInfo?.name || 'N/A'}</span></div>
-              </div>
-
-              <div className="dd-photo-actions dd-profile-photo-actions">
-                <label className="dd-photo-upload-btn" htmlFor="profile-photo-input">
-                  Change Photo
-                </label>
-                <input id="profile-photo-input" ref={profilePhotoInputRef} type="file" accept="image/*" onChange={handleProfileImageChange} style={{ display: 'none' }} />
-                {profileImage && profileImage !== user?.avatar && (
-                  <button type="button" onClick={handleUploadProfileImage} disabled={uploadingProfile} className="dd-save-photo-btn">
-                    {uploadingProfile ? 'Saving...' : 'Save Photo'}
+          {/* Profile Section */}
+          <section className="dash-profile-section" style={{ display: activeSection === 'profile' ? 'block' : 'none' }}>
+            <div className="dash-profile-card">
+              <div className="dd-profile-header-row">
+                <h2 className="dd-panel-title dd-profile-main-title">My Profile</h2>
+                {!profileEditMode ? (
+                  <button type="button" className="dd-edit-profile-btn" onClick={() => setProfileEditMode(true)}>
+                    Edit Profile
                   </button>
-                )}
+                ) : null}
               </div>
-            </>
-          ) : (
-            <form className="dd-profile-form" onSubmit={handleProfileSave}>
-              <div className="dash-profile-top">
-                <div className="dash-profile-avatar">
-                  {profileImagePreview ? (
-                    <img src={profileImagePreview} alt={profileFormData.name || 'Doctor'} />
+
+              {profileMessage.text && (
+                <div className={`dd-msg ${profileMessage.type}`}>{profileMessage.text}</div>
+              )}
+
+              {actionMessage.text && (
+                <div className={`dd-msg ${actionMessage.type}`}>{actionMessage.text}</div>
+              )}
+
+              {!profileEditMode ? (
+                <>
+                  <div className="dash-profile-top">
+                    <div className="dash-profile-avatar">
+                      {profileImagePreview ? (
+                        <img src={profileImagePreview} alt={user?.name || 'Doctor'} />
+                      ) : (
+                        <span>{user?.name?.charAt(0)?.toUpperCase() || 'D'}</span>
+                      )}
+                    </div>
+                    <div>
+                      <h2 className="dash-profile-title">Dr. {user?.name || 'Doctor'}</h2>
+                      <p className="dash-profile-subtitle">Doctor account overview</p>
+                    </div>
+                  </div>
+
+                  <div className="dash-profile-details">
+                    <div className="dash-profile-row"><label>Name</label><span>Dr. {user?.name || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Qualification</label><span>{dashboardData?.qualification || 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Experience</label><span>{dashboardData?.experience_years ? `${dashboardData.experience_years} years` : 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Consultation Fee</label><span>{dashboardData?.consultation_fee ? `Rs ${dashboardData.consultation_fee}` : 'N/A'}</span></div>
+                    <div className="dash-profile-row"><label>Hospital</label><span>{hospitalInfo?.name || 'N/A'}</span></div>
+                  </div>
+
+                  <div className="dd-photo-actions dd-profile-photo-actions">
+                    <label className="dd-photo-upload-btn" htmlFor="profile-photo-input">
+                      Change Photo
+                    </label>
+                    <input id="profile-photo-input" ref={profilePhotoInputRef} type="file" accept="image/*" onChange={handleProfileImageChange} style={{ display: 'none' }} />
+                    {profileImage && profileImage !== user?.avatar && (
+                      <button type="button" onClick={handleUploadProfileImage} disabled={uploadingProfile} className="dd-save-photo-btn">
+                        {uploadingProfile ? 'Saving...' : 'Save Photo'}
+                      </button>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <form className="dd-profile-form" onSubmit={handleProfileSave}>
+                  <div className="dash-profile-top">
+                    <div className="dash-profile-avatar">
+                      {profileImagePreview ? (
+                        <img src={profileImagePreview} alt={profileFormData.name || 'Doctor'} />
+                      ) : (
+                        <span>{profileFormData.name?.charAt(0)?.toUpperCase() || 'D'}</span>
+                      )}
+                    </div>
+                    <div>
+                      <h2 className="dash-profile-title">Dr. {profileFormData.name || 'Doctor'}</h2>
+                      <p className="dash-profile-subtitle">Update your account information</p>
+                      <label className="dd-photo-upload-btn dd-inline-upload">
+                        Change Avatar
+                        <input type="file" accept="image/*" name="avatar" onChange={handleProfileInputChange} style={{ display: 'none' }} />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="dd-profile-form-grid">
+                    <div className="dd-form-group">
+                      <label>Name</label>
+                      <input name="name" value={profileFormData.name} onChange={handleProfileInputChange} placeholder="Full name" />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>Phone</label>
+                      <input name="phone" value={profileFormData.phone} onChange={handleProfileInputChange} placeholder="Phone number" />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>Date of Birth</label>
+                      <input type="date" name="date_of_birth" value={profileFormData.date_of_birth} onChange={handleProfileInputChange} />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>Gender</label>
+                      <select name="gender" value={profileFormData.gender} onChange={handleProfileInputChange}>
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div className="dd-form-group dd-form-group--full">
+                      <label>Address</label>
+                      <input name="address" value={profileFormData.address} onChange={handleProfileInputChange} placeholder="Address" />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>City</label>
+                      <input name="city" value={profileFormData.city} onChange={handleProfileInputChange} placeholder="City" />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>State</label>
+                      <input name="state" value={profileFormData.state} onChange={handleProfileInputChange} placeholder="State" />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>Postal Code</label>
+                      <input name="postal_code" value={profileFormData.postal_code} onChange={handleProfileInputChange} placeholder="Postal code" />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>Email</label>
+                      <input value={user?.email || ''} disabled readOnly />
+                    </div>
+                  </div>
+
+                  <div className="dd-form-actions">
+                    <button type="button" className="dd-cancel-btn" onClick={handleProfileCancel}>Cancel</button>
+                    <button type="submit" className="dd-save-btn" disabled={profileSaving}>{profileSaving ? 'Saving...' : 'Save Changes'}</button>
+                  </div>
+                </form>
+              )}
+
+              <div className="dash-profile-stats">
+                <div className="dash-profile-stat"><strong>{appointments.length || 0}</strong><span>Appointments</span></div>
+                <div className="dash-profile-stat"><strong>{uniquePatients.length || 0}</strong><span>Patients</span></div>
+                <div className="dash-profile-stat"><strong>{schedules.length || 0}</strong><span>Schedules</span></div>
+                <div className="dash-profile-stat"><strong>{reviews.length || 0}</strong><span>Reviews</span></div>
+              </div>
+            </div>
+          </section>
+
+          {/* Hospital Information Section */}
+          <section id="dd-hospital" className="dd-hospital-section" style={{ display: activeSection === 'hospital' ? 'block' : 'none' }}>
+            {hospitalInfo ? (
+              <div className="dd-hospital-view">
+                <div className="dd-hospital-img-wrap">
+                  {hospitalInfo.image ? (
+                    <img src={`${api.getStorageUrl()}/${hospitalInfo.image}`} alt={hospitalInfo.name} className="dd-hospital-img" onError={e => { e.target.style.display = 'none'; }} />
                   ) : (
-                    <span>{profileFormData.name?.charAt(0)?.toUpperCase() || 'D'}</span>
+                    <div className="dd-hospital-img-placeholder">H</div>
                   )}
                 </div>
-                <div>
-                  <h2 className="dash-profile-title">Dr. {profileFormData.name || 'Doctor'}</h2>
-                  <p className="dash-profile-subtitle">Update your account information</p>
-                  <label className="dd-photo-upload-btn dd-inline-upload">
-                    Change Avatar
-                    <input type="file" accept="image/*" name="avatar" onChange={handleProfileInputChange} style={{ display: 'none' }} />
-                  </label>
+                <div className="dd-hospital-details">
+                  <h1 className="dd-hospital-name">{hospitalInfo.name || 'Hospital'}</h1>
+                  {hospitalInfo.address && <p>{hospitalInfo.address}</p>}
+                  {hospitalInfo.phone && <p>{hospitalInfo.phone}</p>}
+                  {hospitalInfo.email && <p>{hospitalInfo.email}</p>}
+                  {hospitalInfo.description && <p className="dd-hospital-desc">{hospitalInfo.description}</p>}
+                  <div className="dd-hospital-stats">
+                    <span className="dd-hstat">{dashboardData?.total_doctors || 0} Doctors</span>
+                    <span className="dd-hstat">{uniquePatients.length} Patients</span>
+                    <span className="dd-hstat">{appointments.length} Appointments</span>
+                  </div>
                 </div>
               </div>
-
-              <div className="dd-profile-form-grid">
-                <div className="dd-form-group">
-                  <label>Name</label>
-                  <input name="name" value={profileFormData.name} onChange={handleProfileInputChange} placeholder="Full name" />
-                </div>
-                <div className="dd-form-group">
-                  <label>Phone</label>
-                  <input name="phone" value={profileFormData.phone} onChange={handleProfileInputChange} placeholder="Phone number" />
-                </div>
-                <div className="dd-form-group">
-                  <label>Date of Birth</label>
-                  <input type="date" name="date_of_birth" value={profileFormData.date_of_birth} onChange={handleProfileInputChange} />
-                </div>
-                <div className="dd-form-group">
-                  <label>Gender</label>
-                  <select name="gender" value={profileFormData.gender} onChange={handleProfileInputChange}>
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div className="dd-form-group dd-form-group--full">
-                  <label>Address</label>
-                  <input name="address" value={profileFormData.address} onChange={handleProfileInputChange} placeholder="Address" />
-                </div>
-                <div className="dd-form-group">
-                  <label>City</label>
-                  <input name="city" value={profileFormData.city} onChange={handleProfileInputChange} placeholder="City" />
-                </div>
-                <div className="dd-form-group">
-                  <label>State</label>
-                  <input name="state" value={profileFormData.state} onChange={handleProfileInputChange} placeholder="State" />
-                </div>
-                <div className="dd-form-group">
-                  <label>Postal Code</label>
-                  <input name="postal_code" value={profileFormData.postal_code} onChange={handleProfileInputChange} placeholder="Postal code" />
-                </div>
-                <div className="dd-form-group">
-                  <label>Email</label>
-                  <input value={user?.email || ''} disabled readOnly />
-                </div>
-              </div>
-
-              <div className="dd-form-actions">
-                <button type="button" className="dd-cancel-btn" onClick={handleProfileCancel}>Cancel</button>
-                <button type="submit" className="dd-save-btn" disabled={profileSaving}>{profileSaving ? 'Saving...' : 'Save Changes'}</button>
-              </div>
-            </form>
-          )}
-
-          <div className="dash-profile-stats">
-            <div className="dash-profile-stat"><strong>{appointments.length || 0}</strong><span>Appointments</span></div>
-            <div className="dash-profile-stat"><strong>{uniquePatients.length || 0}</strong><span>Patients</span></div>
-            <div className="dash-profile-stat"><strong>{schedules.length || 0}</strong><span>Schedules</span></div>
-            <div className="dash-profile-stat"><strong>{reviews.length || 0}</strong><span>Reviews</span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 1: Hospital Information */}
-      <section id="dd-hospital" className="dd-hospital-section" style={{ display: activeSection === 'hospital' ? 'block' : 'none' }}>
-        {hospitalInfo ? (
-          <div className="dd-hospital-view">
-            <div className="dd-hospital-img-wrap">
-              {hospitalInfo.image ? (
-                <img src={`${api.getStorageUrl()}/${hospitalInfo.image}`} alt={hospitalInfo.name} className="dd-hospital-img" onError={e => { e.target.style.display = 'none'; }} />
-              ) : (
-                <div className="dd-hospital-img-placeholder">H</div>
-              )}
-            </div>
-            <div className="dd-hospital-details">
-              <h1 className="dd-hospital-name">{hospitalInfo.name || 'Hospital'}</h1>
-              {hospitalInfo.address && <p>{hospitalInfo.address}</p>}
-              {hospitalInfo.phone && <p>{hospitalInfo.phone}</p>}
-              {hospitalInfo.email && <p>{hospitalInfo.email}</p>}
-              {hospitalInfo.description && <p className="dd-hospital-desc">{hospitalInfo.description}</p>}
-              <div className="dd-hospital-stats">
-                <span className="dd-hstat">{dashboardData?.total_doctors || hospitalInfo.departments?.reduce((sum, d) => sum + (d.doctors?.length || 0), 0) || 0} Doctors</span>
-                <span className="dd-hstat">{uniquePatients.length} Patients</span>
-                <span className="dd-hstat">{appointments.length} Appointments</span>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="dd-empty">Hospital information not available</p>
-        )}
-      </section>
-
-      {/* ── TOP ROW: My Info (left) + Appointments (right) ── */}
-      <div className="dd-top-row" style={{ display: activeSection === 'appointments' ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
-
-        {/* PANEL 1: My Information */}
-        <div className="dd-panel dd-info-panel" style={{ display: 'none' }}>
-          <h2 className="dd-panel-title">My Information</h2>
-          <div className="dd-avatar-wrap">
-            <div className="dd-avatar">
-              {profileImagePreview ? (
-                <img 
-                  src={profileImagePreview} 
-                  alt={user.name} 
-                  className="dd-avatar-img"                  onLoad={() => console.log('Image loaded successfully:', profileImagePreview)}                  onError={(e) => {
-                    console.error('Image failed to load:', profileImagePreview);
-                    e.target.style.display = 'none';
-                    e.target.parentElement.innerHTML = `<span class="dd-avatar-letter">${user.name.charAt(0).toUpperCase()}</span>`;
-                  }}
-                />
-              ) : (
-                <span className="dd-avatar-letter">{user.name.charAt(0).toUpperCase()}</span>
-              )}
-            </div>
-            <span className="dd-role-badge">Doctor</span>
-          </div>
-          {actionMessage.text && (
-            <div className={`dd-msg ${actionMessage.type}`}>{actionMessage.text}</div>
-          )}
-          <div className="dd-detail-rows">
-            <div className="dd-detail-row"><label>Name</label><span>Dr. {user.name}</span></div>
-            <div className="dd-detail-row"><label>Email</label><span>{user.email || 'N/A'}</span></div>
-            <div className="dd-detail-row"><label>Phone</label><span>{user.phone || 'N/A'}</span></div>
-            <div className="dd-detail-row"><label>Staff ID</label><span>{user.identifier || 'N/A'}</span></div>
-            {dashboardData?.qualification && <div className="dd-detail-row"><label>Qualification</label><span>{dashboardData.qualification}</span></div>}
-            {dashboardData?.experience_years && <div className="dd-detail-row"><label>Experience</label><span>{dashboardData.experience_years} years</span></div>}
-            {dashboardData?.consultation_fee && <div className="dd-detail-row"><label>Fee</label><span>Rs {dashboardData.consultation_fee}</span></div>}
-          </div>
-          <div className="dd-mini-stats">
-            <div className="dd-mini-stat"><span className="dd-mini-val">{appointments.length}</span><span className="dd-mini-label">Appointments</span></div>
-            <div className="dd-mini-stat"><span className="dd-mini-val">{uniquePatients.length}</span><span className="dd-mini-label">Patients</span></div>
-            <div className="dd-mini-stat"><span className="dd-mini-val">{appointments.filter(a => a.status === 'pending').length}</span><span className="dd-mini-label">Pending Appts</span></div>
-            <div className="dd-mini-stat"><span className="dd-mini-val">{appointments.filter(a => a.status === 'completed').length}</span><span className="dd-mini-label">Completed</span></div>
-          </div>
-          <div className="dd-photo-actions">
-            <label className="dd-photo-upload-btn" htmlFor="profile-photo-input">
-              Change Photo
-            </label>
-            <input id="profile-photo-input" ref={profilePhotoInputRef} type="file" accept="image/*" onChange={handleProfileImageChange} style={{ display: 'none' }} />
-            {profileImage && profileImage !== user?.avatar && (
-              <button type="button" onClick={handleUploadProfileImage} disabled={uploadingProfile} className="dd-save-photo-btn">
-                {uploadingProfile ? 'Saving...' : 'Save Photo'}
-              </button>
+            ) : (
+              <p className="dd-empty">Hospital information not available</p>
             )}
-          </div>
-        </div>
+          </section>
 
-        {/* PANEL 2: Appointments */}
-        <div id="dd-appointments" className="dd-panel dd-appt-panel">
-          <h2 className="dd-panel-title">Appointments</h2>
-          <div className="dd-tabs">
-            {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(tab => (
-              <button key={tab} className={`dd-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                <span className="dd-tab-count">
-                  {tab === 'all' ? appointments.length : appointments.filter(a => a.status === tab).length}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {filteredAppointments.length === 0 ? (
-            <p className="dd-empty">No {activeTab !== 'all' ? activeTab : ''} appointments found.</p>
-          ) : (
-            <>
-              <div className="dd-appt-table-wrap dd-appt-scroll">
-                <table className="dd-table">
-                  <thead>
-                    <tr>
-                      <th>PATIENT</th>
-                      <th>DATE</th>
-                      <th>REASON</th>
-                      <th>STATUS</th>
-                      <th>ACTIONS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredAppointments
-                      .slice((appointmentCurrentPage - 1) * appointmentsPerPage, appointmentCurrentPage * appointmentsPerPage)
-                      .map(apt => (
-                        (() => {
-                          const hasSubmittedReport = Boolean(
-                            apt.report || apt.report_id || apt.has_report || apt.report_submitted_at
-                          );
-
-                          return (
-                        <tr key={apt.id}>
-                          <td><strong>{apt.user?.name || 'Unknown'}</strong></td>
-                          <td>{new Date(apt.date).toLocaleDateString()}{apt.time ? ` ${apt.time}` : ''}</td>
-                          <td>{apt.reason || '\u2014'}</td>
-                          <td><span className={`dd-status-badge ${apt.status}`}>{apt.status}</span></td>
-                          <td>
-                            <div className="dd-appt-actions">
-                              {apt.status === 'pending' && (
-                                <>
-                                  <button className="dd-btn confirm" onClick={() => handleAcceptAppointment(apt.id)} disabled={actionLoading === apt.id}>Mark Confirmed</button>
-                                  <button className="dd-btn decline" onClick={() => handleRejectAppointment(apt.id)} disabled={actionLoading === apt.id}>Decline</button>
-                                </>
-                              )}
-                              {apt.status === 'confirmed' && (
-                                <>
-                                  <button className="dd-btn confirm" onClick={() => handleCompleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Mark Completed</button>
-                                  {hasSubmittedReport ? (
-                                    <span className="dd-report-submitted" title="Report already submitted">
-                                      Report Submitted
-                                    </span>
-                                  ) : (
-                                    <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
-                                  )}
-                                </>
-                              )}
-                              {apt.status === 'completed' && (
-                                hasSubmittedReport ? (
-                                  <span className="dd-report-submitted" title="Report already submitted">
-                                    Report Submitted
-                                  </span>
-                                ) : (
-                                  <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
-                                )
-                              )}
-                              <button className="dd-btn delete" onClick={() => handleDeleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Delete</button>
-                            </div>
-                          </td>
-                        </tr>
-                          );
-                        })()
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {filteredAppointments.length > appointmentsPerPage && (
-                <div className="dd-appt-pagination">
-                  <button
-                    className="dd-pagination-btn"
-                    onClick={() => setAppointmentCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={appointmentCurrentPage === 1}
-                  >
-                    Previous
+          {/* Appointments Section */}
+          <div style={{ display: activeSection === 'appointments' ? 'block' : 'none' }}>
+            <div className="dd-panel dd-appt-panel">
+              <h2 className="dd-panel-title">Appointments</h2>
+              <div className="dd-tabs">
+                {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(tab => (
+                  <button key={tab} className={`dd-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setActiveTab(tab)}>
+                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                    <span className="dd-tab-count">
+                      {tab === 'all' ? appointments.length : appointments.filter(a => a.status === tab).length}
+                    </span>
                   </button>
-                  <span className="dd-pagination-info">
-                    Page {appointmentCurrentPage} of {Math.ceil(filteredAppointments.length / appointmentsPerPage)}
-                  </span>
-                  <button
-                    className="dd-pagination-btn"
-                    onClick={() => setAppointmentCurrentPage(p => Math.min(Math.ceil(filteredAppointments.length / appointmentsPerPage), p + 1))}
-                    disabled={appointmentCurrentPage === Math.ceil(filteredAppointments.length / appointmentsPerPage)}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-      </div>
-
-      {error && <div className="dd-error">{error}</div>}
-
-      {/* ── MIDDLE ROW: Patients + Schedule ── */}
-      <div className="dd-middle-row" style={{ display: activeSection === 'schedule' ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
-
-        {/* My Patients */}
-        <div className="dd-panel dd-patients-panel" style={{ display: 'none' }}>
-          <div className="dd-panel-header-row">
-            <h2 className="dd-panel-title">My Patients ({uniquePatients.length})</h2>
-            <input
-              type="text"
-              className="dd-search-input"
-              placeholder="Search patients..."
-              value={patientSearch}
-              onChange={e => setPatientSearch(e.target.value)}
-            />
-          </div>
-        {filteredPatients.length === 0 ? (
-          <p className="dd-empty">{patientSearch ? 'No matching patients.' : 'No patients yet.'}</p>
-        ) : (
-          <div className="dd-appt-table-wrap">
-            <table className="dd-table">
-              <thead>
-                <tr>
-                  <th>NAME</th>
-                  <th>EMAIL</th>
-                  <th>PHONE</th>
-                  <th>VISITS</th>
-                  <th>LAST VISIT</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredPatients.map(p => (
-                  <tr key={p.id}>
-                    <td><strong>{p.name}</strong></td>
-                    <td>{p.email || '—'}</td>
-                    <td>{p.phone || '—'}</td>
-                    <td>{p.totalAppointments}</td>
-                    <td>{p.lastVisit ? p.lastVisit.toLocaleDateString() : '—'}</td>
-                  </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-        </div>
-
-        {/* Schedule Management */}
-        <div id="dd-schedule" className="dd-panel dd-schedule-panel">
-          <div className="dd-panel-header-row">
-            <h2 className="dd-panel-title">My Schedule</h2>
-            <button className="dd-add-btn" onClick={() => setShowScheduleForm(!showScheduleForm)}>
-              {showScheduleForm ? 'Cancel' : '+ Add Schedule'}
-            </button>
-          </div>
-
-          {showScheduleForm && (
-            <form className="dd-schedule-form" onSubmit={handleCreateSchedule}>
-              {scheduleFormError && <div className="dd-form-error">{scheduleFormError}</div>}
-              <div className="dd-form-row">
-                <div className="dd-form-group">
-                  <label>Date *</label>
-                  <input type="date" name="date" value={scheduleForm.date} onChange={handleScheduleFormChange} min={todayDate} required />
-                </div>
-                <div className="dd-form-group">
-                  <label>Start Time *</label>
-                  <input type="time" name="start_time" value={scheduleForm.start_time} onChange={handleScheduleFormChange} required />
-                </div>
-                <div className="dd-form-group">
-                  <label>End Time *</label>
-                  <input type="time" name="end_time" value={scheduleForm.end_time} onChange={handleScheduleFormChange} required />
-                </div>
               </div>
-              <div className="dd-form-row">
-                <div className="dd-form-group">
-                  <label>Slot Duration *</label>
-                  <input type="number" name="slot_duration" value={scheduleForm.slot_duration} onChange={handleScheduleFormChange} min="15" max="120" step="15" required />
-                  <small>Minutes</small>
-                </div>
-              </div>
-              
-              {scheduleForm.start_time && scheduleForm.end_time && scheduleForm.slot_duration && (
-                <div className="dd-slot-preview">
-                  <p className="dd-slot-info">
-                    <strong>{calculateSlotCount()}</strong> slots of <strong>{scheduleForm.slot_duration}</strong> minutes will be created
-                  </p>
-                </div>
+
+              {filteredAppointments.length === 0 ? (
+                <p className="dd-empty">No {activeTab !== 'all' ? activeTab : ''} appointments found.</p>
+              ) : (
+                <>
+                  <div className="dd-appt-table-wrap dd-appt-scroll">
+                    <table className="dd-table">
+                      <thead>
+                        <tr>
+                          <th>PATIENT</th>
+                          <th>DATE</th>
+                          <th>REASON</th>
+                          <th>STATUS</th>
+                          <th>ACTIONS</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredAppointments
+                          .slice((appointmentCurrentPage - 1) * appointmentsPerPage, appointmentCurrentPage * appointmentsPerPage)
+                          .map(apt => {
+                            const hasSubmittedReport = Boolean(
+                              apt.report || apt.report_id || apt.has_report || apt.report_submitted_at
+                            );
+
+                            return (
+                              <tr key={apt.id}>
+                                <td><strong>{apt.user?.name || 'Unknown'}</strong></td>
+                                <td>{new Date(apt.date).toLocaleDateString()}{apt.time ? ` ${apt.time}` : ''}</td>
+                                <td>{apt.reason || '\u2014'}</td>
+                                <td><span className={`dd-status-badge ${apt.status}`}>{apt.status}</span></td>
+                                <td>
+                                  <div className="dd-appt-actions">
+                                    {apt.status === 'pending' && (
+                                      <>
+                                        <button className="dd-btn confirm" onClick={() => handleAcceptAppointment(apt.id)} disabled={actionLoading === apt.id}>Mark Confirmed</button>
+                                        <button className="dd-btn decline" onClick={() => handleRejectAppointment(apt.id)} disabled={actionLoading === apt.id}>Decline</button>
+                                      </>
+                                    )}
+                                    {apt.status === 'confirmed' && (
+                                      <>
+                                        <button className="dd-btn confirm" onClick={() => handleCompleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Mark Completed</button>
+                                        {hasSubmittedReport ? (
+                                          <span className="dd-report-submitted" title="Report already submitted">Report Submitted</span>
+                                        ) : (
+                                          <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
+                                        )}
+                                      </>
+                                    )}
+                                    {apt.status === 'completed' && (
+                                      hasSubmittedReport ? (
+                                        <span className="dd-report-submitted" title="Report already submitted">Report Submitted</span>
+                                      ) : (
+                                        <button className="dd-btn report" onClick={() => openReportModal(apt)}>Upload Report</button>
+                                      )
+                                    )}
+                                    <button className="dd-btn delete" onClick={() => handleDeleteAppointment(apt.id)} disabled={actionLoading === apt.id}>Delete</button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {filteredAppointments.length > appointmentsPerPage && (
+                    <div className="dd-appt-pagination">
+                      <button className="dd-pagination-btn" onClick={() => setAppointmentCurrentPage(p => Math.max(1, p - 1))} disabled={appointmentCurrentPage === 1}>
+                        Previous
+                      </button>
+                      <span className="dd-pagination-info">Page {appointmentCurrentPage} of {Math.ceil(filteredAppointments.length / appointmentsPerPage)}</span>
+                      <button className="dd-pagination-btn" onClick={() => setAppointmentCurrentPage(p => Math.min(Math.ceil(filteredAppointments.length / appointmentsPerPage), p + 1))} disabled={appointmentCurrentPage === Math.ceil(filteredAppointments.length / appointmentsPerPage)}>
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
-              
-              <button type="submit" className="dd-submit-btn" disabled={scheduleFormLoading || calculateSlotCount() === 0}>
-                {scheduleFormLoading ? 'Creating...' : `Create Schedule (${calculateSlotCount()} slots)`}
-              </button>
-            </form>
-          )}
+            </div>
+          </div>
 
-          {scheduleLoading ? (
-            <p className="dd-empty">Loading schedules...</p>
-          ) : schedules.length === 0 ? (
-            <p className="dd-empty">No schedules yet. Add your first schedule slot.</p>
-          ) : (
-            <div className="dd-schedules-grouped">
-              {(() => {
-                // Group schedules by date
-                const groupedByDate = {};
-                schedules.forEach(s => {
-                  if (!groupedByDate[s.date]) {
-                    groupedByDate[s.date] = [];
-                  }
-                  groupedByDate[s.date].push(s);
-                });
+          {error && <div className="dd-error">{error}</div>}
 
-                // Sort by date
-                return Object.entries(groupedByDate)
-                  .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
-                  .map(([date, dateSchedules]) => {
-                    const dateLabel = getDateLabel(date);
-                    const isExpanded = expandedTimeRange === date;
-                    
-                    // Find overall start and end times across all schedules on this date
-                    let minStartTime = dateSchedules[0].start_time;
-                    let maxEndTime = dateSchedules[0].end_time;
-                    let totalSlots = 0;
-                    let duration = dateSchedules[0].slot_duration || 30;
-                    
-                    dateSchedules.forEach(s => {
-                      if (s.start_time < minStartTime) minStartTime = s.start_time;
-                      if (s.end_time > maxEndTime) maxEndTime = s.end_time;
-                      totalSlots += s.available_slots;
-                    });
-                    
-                    const normalizeTimeKey = (timeValue) => String(timeValue || '').slice(0, 5);
-                    const dateKey = String(date || '').split('T')[0];
-                    const bookedTimes = new Set(
-                      appointments
-                        .filter(a => String(a.date || '').split('T')[0] === dateKey && a.status !== 'cancelled')
-                        .map(a => normalizeTimeKey(a.time))
-                    );
+          {/* Schedule Management Section */}
+          <div style={{ display: activeSection === 'schedule' ? 'block' : 'none' }}>
+            <div id="dd-schedule" className="dd-panel dd-schedule-panel">
+              <div className="dd-panel-header-row">
+                <h2 className="dd-panel-title">My Schedule</h2>
+                <button className="dd-add-btn" onClick={() => setShowScheduleForm(!showScheduleForm)}>
+                  {showScheduleForm ? 'Cancel' : '+ Add Schedule'}
+                </button>
+              </div>
 
-                    // Flatten all slots from all schedules on this date
-                    const allSlots = [];
-                    dateSchedules.forEach(s => {
-                      const dur = s.slot_duration || 30;
-                      const [startH, startM] = s.start_time.split(':').map(Number);
-                      for (let i = 0; i < s.available_slots; i++) {
-                        let slotStartMin = startH * 60 + startM + (i * dur);
-                        const slotEnd = slotStartMin + dur;
-                        const slotStartHour = Math.floor(slotStartMin / 60);
-                        const slotStartMins = slotStartMin % 60;
-                        const slotEndHour = Math.floor(slotEnd / 60);
-                        const slotEndMins = slotEnd % 60;
-                        const slotStart = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMins).padStart(2, '0')}`;
-                        allSlots.push({
-                          scheduleId: s.id,
-                          start: slotStart,
-                          end: `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMins).padStart(2, '0')}`,
-                          isBooked: bookedTimes.has(slotStart)
-                        });
+              {showScheduleForm && (
+                <form className="dd-schedule-form" onSubmit={handleCreateSchedule}>
+                  {scheduleFormError && <div className="dd-form-error">{scheduleFormError}</div>}
+                  <div className="dd-form-row">
+                    <div className="dd-form-group">
+                      <label>Date *</label>
+                      <input type="date" name="date" value={scheduleForm.date} onChange={handleScheduleFormChange} min={todayDate} required />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>Start Time *</label>
+                      <input type="time" name="start_time" value={scheduleForm.start_time} onChange={handleScheduleFormChange} required />
+                    </div>
+                    <div className="dd-form-group">
+                      <label>End Time *</label>
+                      <input type="time" name="end_time" value={scheduleForm.end_time} onChange={handleScheduleFormChange} required />
+                    </div>
+                  </div>
+                  <div className="dd-form-row">
+                    <div className="dd-form-group">
+                      <label>Slot Duration *</label>
+                      <input type="number" name="slot_duration" value={scheduleForm.slot_duration} onChange={handleScheduleFormChange} min="15" max="120" step="15" required />
+                      <small>Minutes</small>
+                    </div>
+                  </div>
+                  
+                  {scheduleForm.start_time && scheduleForm.end_time && scheduleForm.slot_duration && (
+                    <div className="dd-slot-preview">
+                      <p className="dd-slot-info">
+                        <strong>{calculateSlotCount()}</strong> slots of <strong>{scheduleForm.slot_duration}</strong> minutes will be created
+                      </p>
+                    </div>
+                  )}
+                  
+                  <button type="submit" className="dd-submit-btn" disabled={scheduleFormLoading || calculateSlotCount() === 0}>
+                    {scheduleFormLoading ? 'Creating...' : `Create Schedule (${calculateSlotCount()} slots)`}
+                  </button>
+                </form>
+              )}
+
+              {scheduleLoading ? (
+                <p className="dd-empty">Loading schedules...</p>
+              ) : schedules.length === 0 ? (
+                <p className="dd-empty">No schedules yet. Add your first schedule slot.</p>
+              ) : (
+                <div className="dd-schedules-grouped">
+                  {(() => {
+                    const groupedByDate = {};
+                    schedules.forEach(s => {
+                      if (!groupedByDate[s.date]) {
+                        groupedByDate[s.date] = [];
                       }
+                      groupedByDate[s.date].push(s);
                     });
 
-                    return (
-                      <div key={date} className="dd-date-group">
-                        <div className="dd-date-header">
-                          <div>
-                            <h3 className="dd-date-label">{dateLabel}</h3>
-                            <div className="dd-schedules-summary">
-                              <div className="dd-schedule-time-range">
-                                <span className="dd-time-badge">{minStartTime} - {maxEndTime}</span>
-                                <span className="dd-duration-info">{duration} min</span>
-                                <span className="dd-slots-info">{totalSlots} slots</span>
+                    return Object.entries(groupedByDate)
+                      .sort(([dateA], [dateB]) => new Date(dateA) - new Date(dateB))
+                      .map(([date, dateSchedules]) => {
+                        const dateLabel = getDateLabel(date);
+                        const isExpanded = expandedTimeRange === date;
+                        
+                        let minStartTime = dateSchedules[0].start_time;
+                        let maxEndTime = dateSchedules[0].end_time;
+                        let totalSlots = 0;
+                        let duration = dateSchedules[0].slot_duration || 30;
+                        
+                        dateSchedules.forEach(s => {
+                          if (s.start_time < minStartTime) minStartTime = s.start_time;
+                          if (s.end_time > maxEndTime) maxEndTime = s.end_time;
+                          totalSlots += s.available_slots;
+                        });
+                        
+                        const normalizeTimeKey = (timeValue) => String(timeValue || '').slice(0, 5);
+                        const dateKey = String(date || '').split('T')[0];
+                        const bookedTimes = new Set(
+                          appointments
+                            .filter(a => String(a.date || '').split('T')[0] === dateKey && a.status !== 'cancelled')
+                            .map(a => normalizeTimeKey(a.time))
+                        );
+
+                        const allSlots = [];
+                        dateSchedules.forEach(s => {
+                          const dur = s.slot_duration || 30;
+                          const [startH, startM] = s.start_time.split(':').map(Number);
+                          for (let i = 0; i < s.available_slots; i++) {
+                            let slotStartMin = startH * 60 + startM + (i * dur);
+                            const slotEnd = slotStartMin + dur;
+                            const slotStartHour = Math.floor(slotStartMin / 60);
+                            const slotStartMins = slotStartMin % 60;
+                            const slotEndHour = Math.floor(slotEnd / 60);
+                            const slotEndMins = slotEnd % 60;
+                            const slotStart = `${String(slotStartHour).padStart(2, '0')}:${String(slotStartMins).padStart(2, '0')}`;
+                            allSlots.push({
+                              scheduleId: s.id,
+                              start: slotStart,
+                              end: `${String(slotEndHour).padStart(2, '0')}:${String(slotEndMins).padStart(2, '0')}`,
+                              isBooked: bookedTimes.has(slotStart)
+                            });
+                          }
+                        });
+
+                        return (
+                          <div key={date} className="dd-date-group">
+                            <div className="dd-date-header">
+                              <div>
+                                <h3 className="dd-date-label">{dateLabel}</h3>
+                                <div className="dd-schedules-summary">
+                                  <div className="dd-schedule-time-range">
+                                    <span className="dd-time-badge">{minStartTime} - {maxEndTime}</span>
+                                    <span className="dd-duration-info">{duration} min</span>
+                                    <span className="dd-slots-info">{totalSlots} slots</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="dd-date-actions">
+                                <button className="dd-btn-view-slots" onClick={() => setExpandedTimeRange(isExpanded ? null : date)}>
+                                  {isExpanded ? 'Hide Slots' : 'View Slots'}
+                                </button>
+                                {dateSchedules.length > 0 && (
+                                  <button className="dd-btn-delete-all" onClick={() => handleDeleteAllSchedulesOnDate(dateSchedules)}>
+                                    Delete All
+                                  </button>
+                                )}
                               </div>
                             </div>
-                          </div>
-                          <div className="dd-date-actions">
-                            <button 
-                              className="dd-btn-view-slots"
-                              onClick={() => setExpandedTimeRange(isExpanded ? null : date)}
-                            >
-                              {isExpanded ? 'Hide Slots' : 'View Slots'}
-                            </button>
-                            {dateSchedules.length > 0 && (
-                              <button 
-                                className="dd-btn-delete-all"
-                                onClick={() => handleDeleteAllSchedulesOnDate(dateSchedules)}
-                              >
-                                Delete All
-                              </button>
+
+                            {isExpanded && (
+                              <div className="dd-slots-list-container">
+                                <div className="dd-slots-scroll-wrapper">
+                                  {allSlots.map((slot, idx) => (
+                                    <div key={idx} className={`dd-slot-card ${slot.isBooked ? 'booked' : ''}`}>
+                                      <span className="dd-slot-num">{idx + 1}</span>
+                                      <span className="dd-slot-time-range">{slot.start} - {slot.end}</span>
+                                      {slot.isBooked && <span className="dd-slot-booked-badge">Booked</span>}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
                             )}
                           </div>
-                        </div>
+                        );
+                      });
+                  })()}
+                </div>
+              )}
+            </div>
+          </div>
 
-                        {isExpanded && (
-                          <div className="dd-slots-list-container">
-                            <div className="dd-slots-scroll-wrapper">
-                              {allSlots.map((slot, idx) => (
-                                <div key={idx} className={`dd-slot-card ${slot.isBooked ? 'booked' : ''}`}>
-                                  <span className="dd-slot-num">{idx + 1}</span>
-                                  <span className="dd-slot-time-range">{slot.start} - {slot.end}</span>
-                                  {slot.isBooked && <span className="dd-slot-booked-badge">Booked</span>}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  });
-              })()}
+          {/* Reviews Section */}
+          <div style={{ display: activeSection === 'reviews' ? 'block' : 'none' }}>
+            <div id="dd-reviews" className="dd-panel dd-reviews-panel">
+              <h2 className="dd-panel-title">Patient Reviews</h2>
+              {reviewsLoading ? (
+                <p className="dd-empty">Loading reviews...</p>
+              ) : reviews.length === 0 ? (
+                <p className="dd-empty">No reviews yet.</p>
+              ) : reviews.map((r, idx) => (
+                <div className="dd-review-card" key={r.id || idx}>
+                  <div className="dd-review-top">
+                    <strong>{r.patient?.name || r.user?.name || 'Patient'}</strong>
+                    <div className="dd-review-stars">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <span key={i} className={i < r.rating ? 'star filled' : 'star empty'}>&#9733;</span>
+                      ))}
+                    </div>
+                    {r.status !== 'pending' && (
+                      <span className={`dd-review-status ${r.status}`}>{r.status}</span>
+                    )}
+                  </div>
+                  {r.comment && <p className="dd-review-comment">{r.comment.length > 140 ? `${r.comment.slice(0, 140)}...` : r.comment}</p>}
+                  <div className="dd-review-footer">
+                    <span className="dd-review-date">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ''}</span>
+                    <div className="dd-review-actions">
+                      <button type="button" className="dd-btn-sm view" onClick={() => openReviewModal(r)}>View</button>
+                      <button type="button" className="dd-review-delete-btn" onClick={() => handleDeleteReview(r.id)} disabled={deletingReviewId === r.id}>
+                        {deletingReviewId === r.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {selectedReview && (
+            <div className="modal-overlay" onClick={closeReviewModal}>
+              <div className="modal-content dd-review-modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-header dd-review-modal-header">
+                  <div>
+                    <p className="dd-review-kicker">Patient Feedback</p>
+                    <h2>Review Details</h2>
+                  </div>
+                  <button className="close-modal-btn" onClick={closeReviewModal}>&times;</button>
+                </div>
+
+                <div className="dd-review-hero">
+                  <div className="dd-review-avatar">
+                    {(selectedReview.patient?.name || selectedReview.user?.name || 'P').charAt(0).toUpperCase()}
+                  </div>
+                  <div className="dd-review-hero-copy">
+                    <h3>{selectedReview.patient?.name || selectedReview.user?.name || 'Patient'}</h3>
+                    <p>{selectedReview.created_at ? new Date(selectedReview.created_at).toLocaleString() : 'Recent review'}</p>
+                  </div>
+                  {selectedReview.status !== 'pending' && (
+                    <span className={`dd-review-status ${selectedReview.status}`}>{selectedReview.status}</span>
+                  )}
+                </div>
+
+                <div className="dd-review-modal-body">
+                  <div className="dd-review-rating-panel">
+                    <span className="dd-review-rating-number">{selectedReview.rating}.0</span>
+                    <div className="dd-review-stars lg">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <span key={i} className={i < selectedReview.rating ? 'star filled' : 'star empty'}>&#9733;</span>
+                      ))}
+                    </div>
+                    <p>{selectedReview.rating === 5 ? 'Excellent experience' : selectedReview.rating >= 4 ? 'Very positive feedback' : selectedReview.rating >= 3 ? 'Average experience' : 'Needs improvement'}</p>
+                  </div>
+
+                  <div className="dd-review-message-card">
+                    <h4>Patient Comment</h4>
+                    <p>{selectedReview.comment || 'No written comment provided for this review.'}</p>
+                  </div>
+                </div>
+
+                <div className="dd-review-modal-actions">
+                  <button type="button" className="dd-btn cancel" onClick={closeReviewModal}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Report Modal */}
+          {showReportModal && selectedPatient && (
+            <div className="modal-overlay" onClick={closeReportModal}>
+              <div className="modal-content dd-report-modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                  <h2>Create Patient Report</h2>
+                  <button className="close-modal-btn" onClick={closeReportModal}>&times;</button>
+                </div>
+                <div className="dd-patient-summary">
+                  <p><strong>Patient:</strong> {selectedPatient.user?.name || 'Unknown'}</p>
+                  <p><strong>Date:</strong> {new Date(selectedPatient.date).toLocaleDateString()}</p>
+                  {selectedPatient.reason && <p><strong>Reason:</strong> {selectedPatient.reason}</p>}
+                </div>
+                {reportMessage.text && <div className={`dd-msg ${reportMessage.type}`}>{reportMessage.text}</div>}
+                <form onSubmit={handleSubmitReport} className="dd-report-form">
+                  <div className="dd-form-group">
+                    <label>Report Title *</label>
+                    <input type="text" name="title" value={reportForm.title} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} required />
+                  </div>
+                  <div className="dd-form-group">
+                    <label>Diagnosis *</label>
+                    <textarea name="diagnosis" value={reportForm.diagnosis} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="3" required />
+                  </div>
+                  <div className="dd-form-group">
+                    <label>Treatment Plan</label>
+                    <textarea name="treatment" value={reportForm.treatment} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="3" />
+                  </div>
+                  <div className="dd-form-group">
+                    <label>Description</label>
+                    <textarea name="description" value={reportForm.description} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="2" />
+                  </div>
+                  <div className="dd-form-group">
+                    <label>Notes</label>
+                    <textarea name="notes" value={reportForm.notes} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="2" />
+                  </div>
+                  <div className="dd-form-actions">
+                    <button type="button" onClick={closeReportModal} className="dd-btn cancel">Cancel</button>
+                    <button type="submit" disabled={reportLoading} className="dd-btn submit">{reportLoading ? 'Submitting...' : 'Submit Report'}</button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
         </div>
-
-      </div>
-
-      {/* ── BOTTOM ROW: Reviews ── */}
-      <div className="dd-bottom-row" style={{ display: activeSection === 'reviews' ? 'block' : 'none' }}>
-        {/* Patient Reviews */}
-        <div id="dd-reviews" className="dd-panel dd-reviews-panel">
-          <h2 className="dd-panel-title">Patient Reviews</h2>
-          {reviewsLoading ? (
-            <p className="dd-empty">Loading reviews...</p>
-          ) : reviews.length === 0 ? (
-            <p className="dd-empty">No reviews yet.</p>
-          ) : reviews.map((r, idx) => (
-            <div className="dd-review-card" key={r.id || idx}>
-              <div className="dd-review-top">
-                <strong>{r.patient?.name || r.user?.name || 'Patient'}</strong>
-                <div className="dd-review-stars">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} className={i < r.rating ? 'star filled' : 'star empty'}>&#9733;</span>
-                  ))}
-                </div>
-                {r.status !== 'pending' && (
-                  <span className={`dd-review-status ${r.status}`}>{r.status}</span>
-                )}
-              </div>
-              {r.comment && <p className="dd-review-comment">{r.comment.length > 140 ? `${r.comment.slice(0, 140)}...` : r.comment}</p>}
-              <div className="dd-review-footer">
-                <span className="dd-review-date">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ''}</span>
-                <div className="dd-review-actions">
-                  <button
-                    type="button"
-                    className="dd-btn-sm view"
-                    onClick={() => openReviewModal(r)}
-                  >
-                    View
-                  </button>
-                  <button
-                    type="button"
-                    className="dd-review-delete-btn"
-                    onClick={() => handleDeleteReview(r.id)}
-                    disabled={deletingReviewId === r.id}
-                  >
-                    {deletingReviewId === r.id ? 'Deleting...' : 'Delete'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {selectedReview && (
-        <div className="modal-overlay" onClick={closeReviewModal}>
-          <div className="modal-content dd-review-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header dd-review-modal-header">
-              <div>
-                <p className="dd-review-kicker">Patient Feedback</p>
-                <h2>Review Details</h2>
-              </div>
-              <button className="close-modal-btn" onClick={closeReviewModal}>&times;</button>
-            </div>
-
-            <div className="dd-review-hero">
-              <div className="dd-review-avatar">
-                {(selectedReview.patient?.name || selectedReview.user?.name || 'P').charAt(0).toUpperCase()}
-              </div>
-              <div className="dd-review-hero-copy">
-                <h3>{selectedReview.patient?.name || selectedReview.user?.name || 'Patient'}</h3>
-                <p>{selectedReview.created_at ? new Date(selectedReview.created_at).toLocaleString() : 'Recent review'}</p>
-              </div>
-              {selectedReview.status !== 'pending' && (
-                <span className={`dd-review-status ${selectedReview.status}`}>{selectedReview.status}</span>
-              )}
-            </div>
-
-            <div className="dd-review-modal-body">
-              <div className="dd-review-rating-panel">
-                <span className="dd-review-rating-number">{selectedReview.rating}.0</span>
-                <div className="dd-review-stars lg">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} className={i < selectedReview.rating ? 'star filled' : 'star empty'}>&#9733;</span>
-                  ))}
-                </div>
-                <p>{selectedReview.rating === 5 ? 'Excellent experience' : selectedReview.rating >= 4 ? 'Very positive feedback' : selectedReview.rating >= 3 ? 'Average experience' : 'Needs improvement'}</p>
-              </div>
-
-              <div className="dd-review-message-card">
-                <h4>Patient Comment</h4>
-                <p>{selectedReview.comment || 'No written comment provided for this review.'}</p>
-              </div>
-            </div>
-
-            <div className="dd-review-modal-actions">
-              <button type="button" className="dd-btn cancel" onClick={closeReviewModal}>Close</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Report Modal */}
-      {showReportModal && selectedPatient && (
-        <div className="modal-overlay" onClick={closeReportModal}>
-          <div className="modal-content dd-report-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Create Patient Report</h2>
-              <button className="close-modal-btn" onClick={closeReportModal}>&times;</button>
-            </div>
-            <div className="dd-patient-summary">
-              <p><strong>Patient:</strong> {selectedPatient.user?.name || 'Unknown'}</p>
-              <p><strong>Date:</strong> {new Date(selectedPatient.date).toLocaleDateString()}</p>
-              {selectedPatient.reason && <p><strong>Reason:</strong> {selectedPatient.reason}</p>}
-            </div>
-            {reportMessage.text && <div className={`dd-msg ${reportMessage.type}`}>{reportMessage.text}</div>}
-            <form onSubmit={handleSubmitReport} className="dd-report-form">
-              <div className="dd-form-group">
-                <label>Report Title *</label>
-                <input type="text" name="title" value={reportForm.title} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} required />
-              </div>
-              <div className="dd-form-group">
-                <label>Diagnosis *</label>
-                <textarea name="diagnosis" value={reportForm.diagnosis} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="3" required />
-              </div>
-              <div className="dd-form-group">
-                <label>Treatment Plan</label>
-                <textarea name="treatment" value={reportForm.treatment} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="3" />
-              </div>
-              <div className="dd-form-group">
-                <label>Description</label>
-                <textarea name="description" value={reportForm.description} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="2" />
-              </div>
-              <div className="dd-form-group">
-                <label>Notes</label>
-                <textarea name="notes" value={reportForm.notes} onChange={e => setReportForm(p => ({ ...p, [e.target.name]: e.target.value }))} rows="2" />
-              </div>
-              <div className="dd-form-actions">
-                <button type="button" onClick={closeReportModal} className="dd-btn cancel">Cancel</button>
-                <button type="submit" disabled={reportLoading} className="dd-btn submit">{reportLoading ? 'Submitting...' : 'Submit Report'}</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      </div>
       </div>
     </div>
   );

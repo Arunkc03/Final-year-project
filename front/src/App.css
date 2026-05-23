@@ -244,16 +244,16 @@ button,
 /* PRIMARY BUTTON (Blue) - Default State */
 button,
 .btn-primary {
-  background-color: #2A7FFF;
+  background-color: #000000;
   color: #ffffff;
-  border: 2px solid #2A7FFF;
+  border: 2px solid #002d70;
 }
 
 /* PRIMARY BUTTON - Hover State */
 button:hover,
 .btn-primary:hover {
-  background-color: #1F5FCC;
-  border-color: #1F5FCC;
+  background-color: #00112f;
+  border-color: #000000;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(42, 127, 255, 0.25);
 }

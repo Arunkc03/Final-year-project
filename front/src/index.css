@@ -51,7 +51,7 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* Scrollbar Styling */
+ Scrollbar Styling 
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

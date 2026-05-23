@@ -6,8 +6,8 @@
 }
 
 .page-header {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
-  color: white;
+  background: linear-gradient(135deg, #d0d0d0 0%, #c0c0c0 100%);
+  color: #000000;
   padding: 50px 40px;
   display: flex;
   justify-content: space-between;
@@ -23,6 +23,7 @@
   font-size: 36px;
   font-weight: 700;
   line-height: 1.2;
+  color: #000000;
 }
 
 .page-header p {
@@ -30,12 +31,13 @@
   opacity: 0.95;
   font-size: 15px;
   line-height: 1.5;
+  color: #000000;
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
+  background: #e0e0e0;
+  border: 1px solid #999;
+  color: #000000;
   padding: 14px 28px;
   border-radius: 4px;
   cursor: pointer;
@@ -45,8 +47,8 @@
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: white;
+  background: #c0c0c0;
+  border-color: #666;
 }
 
 .page-content {
@@ -64,11 +66,11 @@
 
 .hospitals-header h2 {
   margin: 0;
-  color: #333;
+  color: #000000;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
+  background: linear-gradient(135deg, #666666 0%, #555555 100%);
   color: white;
   border: none;
   padding: 14px 28px;
@@ -81,7 +83,7 @@
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(14, 123, 158, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .hospital-form {
@@ -105,7 +107,7 @@
 
 .form-group label {
   margin-bottom: 8px;
-  color: #333;
+  color: #000000;
   font-weight: 600;
   font-size: 15px;
 }
@@ -126,8 +128,8 @@
 
 .form-group input:focus {
   outline: none;
-  border-color: #2A7FFF;
-  box-shadow: 0 0 5px rgba(42, 127, 255, 0.3);
+  border-color: #666666;
+  box-shadow: 0 0 5px rgba(102, 102, 102, 0.3);
 }
 
 .form-group textarea {
@@ -142,28 +144,28 @@
 
 .form-group textarea:focus {
   outline: none;
-  border-color: #2A7FFF;
-  box-shadow: 0 0 5px rgba(42, 127, 255, 0.3);
+  border-color: #666666;
+  box-shadow: 0 0 5px rgba(102, 102, 102, 0.3);
 }
 
 .form-divider {
   font-weight: 600;
-  color: #2A7FFF;
+  color: #000000;
   margin: 20px 0 15px;
   padding-top: 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #ddd;
 }
 
 .hospital-form > h3 {
   margin: 0 0 20px;
-  color: #333;
+  color: #000000;
   font-size: 1.3rem;
   font-weight: 600;
 }
 
 .edit-info-box {
-  background: #f0f7ff;
-  border-left: 4px solid #2A7FFF;
+  background: #e0e0e0;
+  border-left: 4px solid #666666;
   padding: 15px;
   border-radius: 4px;
   margin-bottom: 20px;
@@ -171,7 +173,7 @@
 
 .edit-info-box h4 {
   margin: 0 0 10px;
-  color: #2A7FFF;
+  color: #000000;
   font-size: 14px;
   font-weight: 600;
   text-transform: uppercase;
@@ -179,7 +181,7 @@
 
 .edit-info-box p {
   margin: 5px 0;
-  color: #555;
+  color: #000000;
   font-size: 14px;
 }
 
@@ -193,14 +195,14 @@
 }
 
 .image-upload-group:hover {
-  border-color: #2A7FFF;
-  background: #f0f7ff;
+  border-color: #666666;
+  background: #e0e0e0;
 }
 
 .image-upload-placeholder {
   cursor: pointer;
   display: block;
-  color: #2A7FFF;
+  color: #000000;
   font-weight: 500;
   padding: 20px;
   border-radius: 4px;
@@ -208,7 +210,7 @@
 }
 
 .image-upload-placeholder:hover {
-  background: rgba(14, 123, 158, 0.05);
+  background: rgba(102, 102, 102, 0.05);
 }
 
 .image-preview {
@@ -288,13 +290,13 @@
 
 .hospital-card-info h3 {
   margin: 0 0 10px;
-  color: #333;
+  color: #000000;
   font-size: 1.2rem;
   font-weight: 600;
 }
 
 .hospital-id {
-  color: #2A7FFF;
+  color: #666666;
   font-weight: 600;
   font-size: 12px;
   margin-bottom: 10px;

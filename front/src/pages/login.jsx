@@ -23,45 +23,59 @@ const Login = () => {
 
     const loginData = { email, password };
 
-    console.log('Attempting login with:', loginData);
+    console.log('🔐 Attempting login with:', loginData);
 
     try {
-      console.log('Calling api.login...');
+      console.log('📡 Calling api.login...');
       const response = await api.login(loginData);
-      console.log('Login response:', response);
+      console.log('✅ Login response received:', { status: response.status, userRole: response.user?.role, userId: response.user?.id });
+      
       if (response.status === 'success') {
         const user = response.user;
         const token = response.token;
+        const dashboardUrl = response.dashboard;
         
-        login(user, token, response.dashboard);
+        console.log('👤 User object:', { id: user.id, email: user.email, role: user.role, hasRole: !!user.role });
+        console.log('📊 Backend dashboard route:', dashboardUrl);
+        console.log('💾 Saving to localStorage and context...');
+        
+        // First, call login to update the context and localStorage
+        login(user, token, dashboardUrl);
+        console.log('✅ Login context updated, token and user saved to localStorage');
+        console.log('📍 localStorage.token:', localStorage.getItem('token')?.substring(0, 20) + '...');
+        console.log('📍 localStorage.user:', localStorage.getItem('user'));
         
         // Check for redirect URL (e.g., booking flow)
         const redirectUrl = searchParams.get('redirect');
         if (redirectUrl) {
-          navigate(redirectUrl);
+          console.log('↩️ Redirect parameter found:', redirectUrl);
+          setTimeout(() => {
+            navigate(redirectUrl);
+          }, 100);
           return;
         }
         
-        let dashboardUrl = '/dashboard';
-        
-        if (user.role === 'patient') {
-          dashboardUrl = '/dashboard/patient';
-        } else if (user.role === 'doctor') {
-          dashboardUrl = '/dashboard/doctor';
-        } else if (user.role === 'admin') {
-          dashboardUrl = '/dashboard/admin';
-        } else if (user.role === 'super_admin') {
-          dashboardUrl = '/dashboard/super-admin';
+        // Use the dashboard URL from the backend response
+        if (dashboardUrl) {
+          console.log('🚀 Redirecting to:', dashboardUrl, '(from backend)');
+          // Use setTimeout to ensure context is updated before navigating
+          setTimeout(() => {
+            console.log('⏰ Redirect timeout triggered, calling navigate()');
+            navigate(dashboardUrl);
+          }, 100);
+        } else {
+          console.warn('⚠️ No dashboard URL provided by backend, using fallback');
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 100);
         }
-        
-        navigate(dashboardUrl);
       } else {
         setError(response.message || 'Login failed');
+        setLoading(false);
       }
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('❌ Login error:', err);
       setError(err.message || 'Error connecting to server. Make sure backend is running on port 8000.');
-    } finally {
       setLoading(false);
     }
   };

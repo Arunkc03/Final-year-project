@@ -1,9 +1,9 @@
 /* Footer Styles */
 .footer {
-  background: linear-gradient(135deg, #1a2b3c 0%, #2a3f54 100%);
-  color: #e0e7f0;
+  background: linear-gradient(135deg, #8B4513 0%, #6B3410 100%);
+  color: #ffffff;
   margin-top: 4rem;
-  border-top: 3px solid #2A7FFF;
+  border-top: 3px solid #D2691E;
   padding-top: 3rem;
   padding-bottom: 1.5rem;
   font-size: 0.95rem;
@@ -41,7 +41,7 @@
 .footer-section p {
   font-size: 0.9rem;
   line-height: 1.6;
-  color: #c5cfd9;
+  color: #f5f5f5;
   margin-bottom: 1.5rem;
 }
 
@@ -58,23 +58,23 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: rgba(42, 127, 255, 0.2);
-  color: #66b3ff;
+  background: rgba(255, 255, 255, 0.2);
+  color: #f5f5f5;
   border-radius: 50%;
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 600;
   font-size: 0.9rem;
-  border: 1px solid rgba(42, 127, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   cursor: pointer;
 }
 
 .social-link:hover {
-  background: #2A7FFF;
+  background: #D2691E;
   color: #fff;
-  border-color: #2A7FFF;
+  border-color: #D2691E;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(42, 127, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(210, 105, 30, 0.3);
 }
 
 /* Footer Links */
@@ -91,7 +91,7 @@
 
 .footer-links a,
 .footer-contact a {
-  color: #c5cfd9;
+  color: #f5f5f5;
   text-decoration: none;
   transition: all 0.3s ease;
   display: inline-flex;
@@ -101,7 +101,7 @@
 
 .footer-links a:hover,
 .footer-contact a:hover {
-  color: #66b3ff;
+  color: #FFD700;
   padding-left: 0.3rem;
 }
 
@@ -127,13 +127,13 @@
 .footer-bottom p {
   margin: 0.5rem 0;
   font-size: 0.9rem;
-  color: #9aa5b1;
+  color: #f5f5f5;
   letter-spacing: 0.3px;
 }
 
 .footer-bottom p:first-child {
   font-weight: 500;
-  color: #c5cfd9;
+  color: #ffffff;
 }
 
 /* Responsive Design */
@@ -187,8 +187,8 @@
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
   .footer {
-    background: linear-gradient(135deg, #0a1628 0%, #132a42 100%);
-    border-top-color: #2A7FFF;
+    background: linear-gradient(135deg, #6B3410 0%, #4A2410 100%);
+    border-top-color: #D2691E;
   }
 
   .footer-socials {

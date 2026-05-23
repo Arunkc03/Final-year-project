@@ -1,504 +1,863 @@
-/* Doctor Dashboard - Redesigned */
+/* DoctorDashboard.css - Gray-White Theme with Brown Buttons */
 
+/* ============================================
+   VARIABES & RESET
+   ============================================ */
+:root {
+  --primary: #8B4513;
+  --primary-dark: #654321;
+  --primary-light: #A0522D;
+  --primary-hover: #9B5E2E;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --success: #22c55e;
+  --info: #8b5cf6;
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ============================================
+   MAIN CONTAINER
+   ============================================ */
 .dd-page {
   min-height: 100vh;
-  background: #ffffff;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #1a1a2e;
+  background: linear-gradient(135deg, #e8e8e8 0%, #d4d4d4 100%);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.dd-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 60vh;
-  font-size: 1.1rem;
-  color: #545461;
-}
-
-.dd-error {
-  background: #fdeef0;
-  color: #a4161a;
-  padding: 12px 20px;
-  margin: 0 40px 20px;
-  border-radius: 6px;
-  border-left: 4px solid #DC3545;
-}
-
-.dd-empty {
-  color: #999;
-  text-align: center;
+/* ============================================
+   DASHBOARD SHELL (Sidebar + Content)
+   ============================================ */
+.dash-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  align-items: start;
+  min-height: calc(100vh - 24px);
+  max-width: 1600px;
+  margin: 0 auto;
   padding: 20px;
-  font-size: 0.95rem;
 }
 
-/* -- HOSPITAL SECTION -- */
-.dd-hospital-section {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  padding: 1.25rem;
-  margin: 24px 40px;
-}
-.dd-hospital-view {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 1rem;
-  align-items: center;
-}
-.dd-hospital-img-wrap {
-  width: 120px;
-  height: 120px;
-}
-.dd-hospital-img,
-.dd-hospital-img-placeholder {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
-}
-.dd-hospital-img {
-  object-fit: cover;
-  border: 1px solid #e2e8f0;
-}
-.dd-hospital-img-placeholder {
+/* Sidebar - Gray-White */
+.dash-sidebar {
+  position: sticky;
+  top: 20px;
+  z-index: 40;
+  background: linear-gradient(180deg, #f0f0f0 0%, #e0e0e0 100%);
+  border: 1px solid #d0d0d0;
+  border-radius: var(--border-radius);
+  padding: 20px 16px;
+  min-height: calc(100vh - 40px);
+  box-shadow: var(--shadow-md);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
+  flex-direction: column;
+}
+
+.dash-sidebar-title {
+  color: #000000;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: #0d9488;
-  background: linear-gradient(135deg, #e0f2fe, #ecfeff);
+  margin: 0 0 16px;
+  padding: 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
-.dd-hospital-name {
-  margin: 0 0 0.25rem;
-  font-size: 1.45rem;
+
+.dash-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.dash-sidebar-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #d0d0d0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dash-sidebar-logout {
   font-weight: 700;
-  color: #0f172a;
-}
-.dd-hospital-details p {
-  margin: 0.15rem 0;
-  color: #475569;
-  font-size: 0.9rem;
-  line-height: 1.5;
-}
-.dd-hospital-desc {
-  color: #64748b !important;
-  font-size: 0.85rem !important;
-  margin-top: 0.3rem !important;
-}
-.dd-hospital-stats {
-  margin-top: 0.7rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-.dd-hstat {
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  font-size: 0.82rem;
-  color: #334155;
+  background: #ef4444 !important;
 }
 
-/* -- DOCTOR INFO PANEL (admin style) -- */
-.dd-avatar-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 0.7rem;
-}
-.dd-avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  background: #ecfeff;
-  overflow: hidden;
-}
-.dd-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.dd-avatar-letter {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #2A7FFF;
-}
-.dd-role-badge {
-  font-size: 0.8rem;
-  background: #cffafe;
-  color: #155e75;
-  padding: 0.25rem 0.55rem;
-  border-radius: 999px;
-  font-weight: 600;
-}
-.dd-msg {
-  padding: 8px 14px;
-  border-radius: 6px;
-  margin: 10px 0;
-  font-size: 0.88rem;
-}
-.dd-msg.success { background: #eef8ee; color: #2d7a2d; border-left: 3px solid #2d7a2d; }
-.dd-msg.error { background: #fff0f0; color: #c00; border-left: 3px solid #c00; }
-
-.dd-detail-rows {
-  margin-bottom: 0.5rem;
-}
-.dd-detail-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.6rem;
-  padding: 0.45rem 0;
-  border-bottom: 1px solid #f1f5f9;
-}
-.dd-detail-row label {
-  color: #64748b;
-  font-size: 0.85rem;
-}
-.dd-detail-row span {
-  color: #0f172a;
-  font-weight: 600;
-  font-size: 0.9rem;
+.dash-sidebar-logout:hover {
+  background: #dc2626 !important;
 }
 
-.dd-mini-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.5rem;
-  margin-top: 0.8rem;
-}
-.dd-mini-stat {
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 0.5rem;
+.dash-sidebar-footnote {
+  margin: 0;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #666666;
   text-align: center;
 }
-.dd-mini-val {
-  display: block;
+
+.dash-sidebar-btn {
+  border: 1px solid transparent;
+  background: #8B4513;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dash-sidebar-btn::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dash-sidebar-btn:hover {
+  background: #A0522D;
+  transform: translateX(4px);
+}
+
+.dash-sidebar-btn.active {
+  background: #654321;
+  border-color: #ffffff;
+  font-weight: 700;
+}
+
+.dash-sidebar-btn.active::before {
+  background: #ffffff;
+}
+
+/* Main Content */
+.dash-main-content {
+  min-width: 0;
+  width: 100%;
+  background: #f5f5f5;
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+/* ============================================
+   ANALYTICS SECTION
+   ============================================ */
+.dash-analytics {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.dash-graph-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  transition: var(--transition);
+}
+
+.dash-graph-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.dash-graph-card h3 {
+  margin: 0 0 4px;
+  color: #000000;
   font-size: 1rem;
   font-weight: 700;
-  color: #0f172a;
-}
-.dd-mini-label {
-  font-size: 0.72rem;
-  color: #64748b;
 }
 
-.dd-photo-actions {
+.dash-graph-card p {
+  margin: 0 0 16px;
+  color: #666666;
+  font-size: 0.75rem;
+}
+
+/* Line Chart */
+.dash-line-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dash-line-chart {
+  width: 100%;
+  height: 160px;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius-sm);
+}
+
+.dash-line-grid {
+  stroke: #d0d0d0;
+  stroke-width: 0.6;
+}
+
+.dash-line-path {
+  fill: none;
+  stroke: #8B4513;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dash-line-point {
+  fill: #ffffff;
+  stroke: #8B4513;
+  stroke-width: 1.5;
+  transition: var(--transition);
+}
+
+.dash-line-point:hover {
+  fill: #8B4513;
+  r: 3;
+}
+
+.dash-line-labels {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.dash-line-labels span {
+  color: #333333;
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+/* Pie Chart */
+.dash-pie-wrap {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: center;
+  gap: 16px;
+}
+
+.dash-pie-chart {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 1px solid #e0e0e0;
+  transition: transform 0.3s ease;
+}
+
+.dash-pie-chart:hover {
+  transform: scale(1.05);
+}
+
+.dash-pie-legend {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dash-pie-legend li {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 0.75rem;
+  justify-content: space-between;
+  gap: 10px;
+  color: #000000;
+  font-size: 0.8rem;
 }
-.dd-photo-upload-btn {
-  background: #f0f4f8;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 0.82rem;
-  cursor: pointer;
-  color: #555;
-  transition: background 0.2s;
-}
-.dd-photo-upload-btn:hover { background: #e5e9ec; }
-.dd-save-photo-btn {
-  background: #2A7FFF;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 16px;
-  font-size: 0.82rem;
-  cursor: pointer;
-}
-.dd-save-photo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.dd-profile-photo-actions {
-  margin-top: 16px;
+.dash-pie-legend-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-pie-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dash-pie-value {
+  font-weight: 700;
+  color: #333333;
+}
+
+/* ============================================
+   PROFILE SECTION
+   ============================================ */
+.dash-profile-section {
+  margin-bottom: 24px;
+}
+
+.dash-profile-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  padding: 24px;
 }
 
 .dd-profile-header-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 12px;
 }
 
-.dd-profile-main-title {
+.dash-profile-top {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.dash-profile-avatar {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dash-profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dash-profile-avatar span {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333333;
+}
+
+.dash-profile-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 4px;
+}
+
+.dash-profile-subtitle {
+  font-size: 0.8rem;
+  color: #666666;
   margin: 0;
 }
 
-.dd-edit-profile-btn {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #1e293b;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.dash-profile-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.dd-edit-profile-btn:hover {
-  border-color: #2a7fff;
-  color: #2a7fff;
-}
-
-.dd-inline-upload {
-  display: inline-flex;
-  margin-top: 10px;
-}
-
-.dd-profile-form {
+.dash-profile-row {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f5f5f5;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #e0e0e0;
+}
+
+.dash-profile-row label {
+  font-weight: 600;
+  color: #666666;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.dash-profile-row span {
+  color: #000000;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.dash-profile-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.dash-profile-stat {
+  text-align: center;
+  padding: 14px;
+  background: #f5f5f5;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #e0e0e0;
+  transition: var(--transition);
+}
+
+.dash-profile-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.dash-profile-stat strong {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #8B4513;
+  margin-bottom: 6px;
+}
+
+.dash-profile-stat span {
+  font-size: 0.7rem;
+  color: #666666;
+  text-transform: uppercase;
+}
+
+/* Profile Form */
+.dd-profile-form {
+  margin-top: 20px;
 }
 
 .dd-profile-form-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dd-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .dd-form-group--full {
-  grid-column: 1 / -1;
+  grid-column: span 2;
 }
 
-.dd-cancel-btn,
-.dd-save-btn {
-  border: none;
-  border-radius: 8px;
-  padding: 9px 16px;
-  font-size: 0.85rem;
+.dd-form-group label {
+  font-size: 0.7rem;
   font-weight: 600;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.dd-form-group input,
+.dd-form-group select,
+.dd-form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  background: #ffffff;
+  color: #000000;
+  transition: var(--transition);
+}
+
+.dd-form-group input:focus,
+.dd-form-group select:focus,
+.dd-form-group textarea:focus {
+  outline: none;
+  border-color: #8B4513;
+  box-shadow: 0 0 0 2px rgba(139, 69, 19, 0.1);
+}
+
+.dd-form-group input:disabled {
+  background: #f5f5f5;
+  color: #888888;
+}
+
+.dd-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* Photo Actions */
+.dd-photo-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dd-photo-upload-btn {
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #000000;
+  transition: var(--transition);
 }
 
-.dd-cancel-btn {
-  background: #e2e8f0;
-  color: #334155;
+.dd-photo-upload-btn:hover {
+  background: #e0e0e0;
 }
 
-.dd-save-btn {
-  background: #2a7fff;
+.dd-save-photo-btn {
+  background: #8B4513;
   color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  transition: var(--transition);
 }
 
-.dd-save-btn:disabled {
-  opacity: 0.7;
+.dd-save-photo-btn:hover:not(:disabled) {
+  background: #A0522D;
+}
+
+.dd-save-photo-btn:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
-  .dd-profile-form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.dd-logout-btn {
-  display: block;
-  width: 100%;
-  margin-top: 0.75rem;
-  background: #e74c3c;
-  color: white;
+.dd-edit-profile-btn {
+  background: #8B4513;
+  color: #ffffff;
   border: none;
   padding: 8px 20px;
-  border-radius: 6px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-size: 0.88rem;
   font-weight: 600;
-  transition: background 0.2s;
+  transition: var(--transition);
 }
-.dd-logout-btn:hover { background: #c0392b; }
 
-/* -- PANELS -- */
-.dd-panel {
+.dd-edit-profile-btn:hover {
+  background: #A0522D;
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   HOSPITAL SECTION
+   ============================================ */
+.dd-hospital-section {
+  margin-bottom: 24px;
+}
+
+.dd-hospital-view {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-  padding: 1rem;
-}
-.dd-panel-title {
-  margin: 0 0 0.85rem;
-  font-size: 1.05rem;
-  color: #0f172a;
-  font-weight: 700;
-}
-.dd-panel-header-row {
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  overflow: hidden;
   display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.75rem;
-}
-.dd-panel-header-row .dd-panel-title { margin-bottom: 0; }
-
-.dd-search-input {
-  padding: 7px 14px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  outline: none;
-  min-width: 200px;
-  transition: border-color 0.2s;
-}
-.dd-search-input:focus { border-color: #2A7FFF; }
-
-/* -- LAYOUT ROWS -- */
-.dd-top-row {
-  display: grid;
-  grid-template-columns: 1fr 2.5fr;
-  gap: 1rem;
-  align-items: start;
-  padding: 0 40px;
-  margin-bottom: 1rem;
-}
-
-.dd-middle-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  padding: 0 40px;
-  margin-bottom: 1rem;
-  align-items: start;
-}
-
-.dd-bottom-row {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-  padding: 0 40px 30px;
-  align-items: start;
-}
-
-/* -- TABS -- */
-.dd-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 16px;
   flex-wrap: wrap;
 }
-.dd-tab {
-  background: #f0f4f8;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 0.82rem;
-  cursor: pointer;
-  color: #555;
-  transition: all 0.2s;
+
+.dd-hospital-img-wrap {
+  width: 280px;
+  background: #f5f5f5;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  padding: 20px;
 }
-.dd-tab:hover { background: #e5e9ec; }
-.dd-tab.active {
-  background: #2A7FFF;
-  color: #fff;
-  border-color: #2A7FFF;
-}
-.dd-tab-count {
-  background: rgba(0,0,0,0.1);
-  padding: 1px 7px;
-  border-radius: 10px;
-  font-size: 0.75rem;
-}
-.dd-tab.active .dd-tab-count { background: rgba(255,255,255,0.25); }
 
-/* -- TABLE -- */
-.dd-appt-table-wrap,
-.dd-schedule-table-wrap {
+.dd-hospital-img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: var(--border-radius-sm);
+}
+
+.dd-hospital-img-placeholder {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  font-weight: 700;
+  color: #888888;
+  border-radius: var(--border-radius-sm);
+}
+
+.dd-hospital-details {
+  flex: 1;
+  padding: 24px;
+}
+
+.dd-hospital-name {
+  font-size: 1.5rem;
+  color: #000000;
+  margin: 0 0 12px;
+}
+
+.dd-hospital-details p {
+  color: #555555;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.dd-hospital-desc {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e0e0e0;
+  color: #666666;
+  line-height: 1.5;
+}
+
+.dd-hospital-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.dd-hstat {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #8B4513;
+}
+
+/* ============================================
+   APPOINTMENTS SECTION
+   ============================================ */
+.dd-panel {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.dd-panel-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #000000;
+  margin: 0 0 16px;
+}
+
+.dd-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 12px;
+}
+
+.dd-tab {
+  background: transparent;
+  border: 1px solid #d0d0d0;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #555555;
+  transition: var(--transition);
+}
+
+.dd-tab:hover {
+  background: #f0f0f0;
+}
+
+.dd-tab.active {
+  background: #8B4513;
+  border-color: #8B4513;
+  color: #ffffff;
+}
+
+.dd-tab-count {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 0.7rem;
+}
+
+.dd-tab.active .dd-tab-count {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Table Styles */
+.dd-appt-table-wrap {
   overflow-x: auto;
 }
 
-.dd-appt-scroll {
-  max-height: 340px;
-  overflow-y: auto;
-  border: 1px solid #eef2f6;
-  border-radius: 8px;
-}
 .dd-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
 }
-.dd-table thead th {
-  text-align: left;
-  padding: 10px 12px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #999;
-  border-bottom: 2px solid #e5e9ec;
-}
-.dd-table tbody td {
-  padding: 12px;
-  border-bottom: 1px solid #f0f2f4;
-  vertical-align: middle;
-  color: #333;
-}
-.dd-table tbody tr:hover { background: #fafbfc; }
 
-/* Status badges */
+.dd-table th {
+  text-align: left;
+  padding: 12px;
+  background: #f5f5f5;
+  color: #000000;
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.dd-table td {
+  padding: 12px;
+  color: #333333;
+  font-size: 0.8rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dd-table tr:hover td {
+  background: #fafafa;
+}
+
+/* Status Badge */
 .dd-status-badge {
   display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: capitalize;
 }
-.dd-status-badge.pending { background: #fff3cd; color: #856404; }
-.dd-status-badge.confirmed { background: #d4edda; color: #155724; }
-.dd-status-badge.completed { background: #cce5ff; color: #004085; }
-.dd-status-badge.cancelled { background: #f8d7da; color: #721c24; }
-.dd-status-badge.available { background: #d4edda; color: #155724; }
 
-/* Appointment Pagination */
+.dd-status-badge.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.dd-status-badge.confirmed {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.dd-status-badge.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.dd-status-badge.cancelled {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Appointment Actions */
+.dd-appt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dd-btn {
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.dd-btn.confirm {
+  background: #22c55e;
+  color: white;
+}
+
+.dd-btn.confirm:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.dd-btn.decline {
+  background: #ef4444;
+  color: white;
+}
+
+.dd-btn.decline:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.dd-btn.report {
+  background: #8B4513;
+  color: white;
+}
+
+.dd-btn.report:hover:not(:disabled) {
+  background: #A0522D;
+}
+
+.dd-btn.delete {
+  background: #6b7280;
+  color: white;
+}
+
+.dd-btn.delete:hover:not(:disabled) {
+  background: #4b5563;
+}
+
+.dd-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dd-report-submitted {
+  font-size: 0.7rem;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* Pagination */
 .dd-appt-pagination {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: #f9fbfd;
-  border: 1px solid #eef2f6;
-  border-top: none;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-  margin-top: -1px;
+  align-items: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
 }
 
 .dd-pagination-btn {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
+  padding: 6px 14px;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
   border-radius: 6px;
-  font-weight: 600;
-  font-size: 0.85rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  white-space: nowrap;
+  font-size: 0.75rem;
+  transition: var(--transition);
 }
 
 .dd-pagination-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(14, 123, 158, 0.3);
+  background: #e0e0e0;
 }
 
 .dd-pagination-btn:disabled {
@@ -507,713 +866,110 @@
 }
 
 .dd-pagination-info {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #333;
-  min-width: 150px;
-  text-align: center;
-}
-.dd-status-badge.unavailable { background: #e2e3e5; color: #383d41; }
-
-/* -- BUTTONS -- */
-.dd-appt-actions {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.dd-btn {
-  border: none;
-  padding: 6px 14px;
-  border-radius: 5px;
   font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-.dd-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.dd-btn.approve { background: #28a745; color: #fff; }
-.dd-btn.approve:hover { background: #218838; }
-.dd-btn.confirm { background: #28a745; color: #fff; }
-.dd-btn.confirm:hover { background: #218838; }
-.dd-btn.decline { background: #dc3545; color: #fff; }
-.dd-btn.decline:hover { background: #c82333; }
-.dd-btn.report { background: #2A7FFF; color: #fff; }
-.dd-btn.report:hover { background: #1F5FCC; }
-.dd-report-submitted {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #e8f7ec;
-  color: #1f7a36;
-  border: 1px solid #b7e2c2;
-  font-size: 0.78rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.dd-btn.delete { background: #dc3545; color: #fff; }
-.dd-btn.delete:hover { background: #c82333; }
-.dd-btn.cancel { background: #e0e0e0; color: #333; }
-.dd-btn.submit { background: #2A7FFF; color: #fff; }
-.dd-btn.submit:hover { background: #0a6580; }
-
-.dd-btn-sm {
-  border: none;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.dd-btn-sm.del { background: #dc3545; color: #fff; }
-.dd-btn-sm.del:hover { background: #c82333; }
-.dd-btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.dd-add-btn {
-  background: #2A7FFF;
-  color: #fff;
-  border: none;
-  padding: 7px 18px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-.dd-add-btn:hover { background: #0a6580; }
-
-/* -- SCHEDULE FORM -- */
-.dd-schedule-form {
-  background: #f8fafb;
-  border: 1px solid #e5e9ec;
-  border-radius: 8px;
-  padding: 18px;
-  margin-bottom: 18px;
-}
-.dd-form-error {
-  background: #fff0f0;
-  color: #c00;
-  padding: 8px 12px;
-  border-radius: 5px;
-  margin-bottom: 12px;
-  font-size: 0.85rem;
-}
-.dd-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.dd-form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.dd-form-group label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #555;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-.dd-form-group input,
-.dd-form-group textarea,
-.dd-form-group select {
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  font-size: 0.9rem;
-  color: #333;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.dd-form-group input:focus,
-.dd-form-group textarea:focus {
-  border-color: #2A7FFF;
-}
-.dd-submit-btn {
-  background: #2A7FFF;
-  color: #fff;
-  border: none;
-  padding: 9px 22px;
-  border-radius: 6px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 4px;
-}
-.dd-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.dd-submit-btn:hover { background: #1F5FCC; }
-
-/* -- SLOT PREVIEW -- */
-.dd-slots-preview {
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 8px;
-  padding: 14px;
-  margin: 14px 0;
+  color: #666666;
 }
 
-.dd-slots-preview h4 {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  color: #0c4a6e;
-  font-weight: 600;
-}
-
-.dd-slots-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px;
-}
-
-.dd-slot-item {
-  background: #ffffff;
-  border: 1px solid #bae6fd;
-  border-radius: 6px;
-  padding: 8px;
-  text-align: center;
-}
-
-.dd-slot-number {
-  font-weight: 600;
-  color: #2A7FFF;
-  font-size: 0.85rem;
-  margin-bottom: 4px;
-}
-
-.dd-slot-time {
-  font-size: 0.75rem;
-  color: #0c4a6e;
-}
-
-.dd-slot-badge {
-  background: #2A7FFF;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.dd-duration-badge {
-  background: #10b981;
-  color: white;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  display: inline-block;
-}
-
-/* -- SLOT TIME SELECTION -- */
-.dd-time-slots-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 8px;
-  margin: 12px 0;
-}
-
-.dd-time-slot-btn {
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.8rem;
-  text-align: center;
-  font-weight: 500;
-}
-
-.dd-time-slot-btn:hover {
-  border-color: #2A7FFF;
-  background: #f0f9ff;
-}
-
-.dd-time-slot-btn.selected {
-  background: #2A7FFF;
-  color: white;
-  border-color: #2A7FFF;
-  box-shadow: 0 2px 8px rgba(42, 127, 255, 0.3);
-}
-
-.dd-slot-start {
-  display: block;
-  font-weight: 600;
-}
-
-/* -- SELECTED SLOTS -- */
-.dd-selected-slots {
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 12px 0;
-}
-
-.dd-selected-slots h4 {
-  margin: 0 0 10px 0;
-  font-size: 0.9rem;
-  color: #0c4a6e;
-  font-weight: 600;
-}
-
-.dd-selected-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.dd-selected-tag {
-  background: #2A7FFF;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* -- REVIEWS -- */
-.dd-review-card {
-  border-bottom: 1px solid #f0f2f4;
-  padding: 14px 0;
-  background: #ffffff;
-}
-.dd-review-card:last-child { border-bottom: none; }
-.dd-review-top {
+/* ============================================
+   SCHEDULE SECTION
+   ============================================ */
+.dd-panel-header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
-}
-.dd-review-top strong {
-  font-size: 0.93rem;
-  color: #0f172a;
-  font-weight: 700;
-}
-.dd-review-stars .star { font-size: 1rem; margin-right: 1px; }
-.dd-review-stars .star.filled { color: #f5a623; }
-.dd-review-stars .star.empty { color: #94a3b8; }
-.dd-review-comment {
-  color: #334155;
-  font-size: 0.9rem;
-  margin: 8px 0;
-  line-height: 1.7;
-}
-.dd-review-date {
-  font-size: 0.78rem;
-  color: #64748b;
-  font-weight: 600;
-}
-
-.dd-review-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
   gap: 12px;
 }
 
-.dd-review-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dd-review-delete-btn {
+.dd-add-btn {
+  background: #8B4513;
+  color: #ffffff;
   border: none;
-  background: #dc3545;
-  color: #fff;
-  border-radius: 6px;
-  padding: 5px 10px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--border-radius-sm);
   cursor: pointer;
+  font-weight: 600;
+  font-size: 0.8rem;
+  transition: var(--transition);
 }
 
-.dd-review-delete-btn:disabled {
+.dd-add-btn:hover {
+  background: #A0522D;
+  transform: translateY(-1px);
+}
+
+/* Schedule Form */
+.dd-schedule-form {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.dd-form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dd-form-error {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+}
+
+.dd-slot-preview {
+  background: #f0f0f0;
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  margin: 16px 0;
+  text-align: center;
+}
+
+.dd-slot-info {
+  margin: 0;
+  color: #333333;
+  font-size: 0.8rem;
+}
+
+.dd-submit-btn {
+  width: 100%;
+  background: #8B4513;
+  color: #ffffff;
+  border: none;
+  padding: 10px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.dd-submit-btn:hover:not(:disabled) {
+  background: #A0522D;
+}
+
+.dd-submit-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.dd-review-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  border-radius: 999px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: capitalize;
-}
-
-.dd-review-status.pending {
-  background: #fff7db;
-  color: #8a5a00;
-}
-
-.dd-review-status.approved,
-.dd-review-status.active {
-  background: #e9f9ef;
-  color: #166534;
-}
-
-.dd-review-status.rejected {
-  background: #fef0f0;
-  color: #b42318;
-}
-
-.dd-review-status.hidden,
-.dd-review-status.inactive {
-  background: #eef2f7;
-  color: #475569;
-}
-
-.dd-review-modal {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbfd 100%);
-  border-radius: 20px;
-  width: 95%;
-  max-width: 720px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 0;
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.22);
-}
-
-.dd-review-modal-header {
-  padding-bottom: 14px;
-}
-
-.dd-review-kicker {
-  margin: 0 0 6px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #0b6b88;
-}
-
-.dd-review-hero {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #ebf8ff 0%, #f8fafc 100%);
-  border-bottom: 1px solid #e5e9ec;
-}
-
-.dd-review-avatar {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #2A7FFF, #1F5FCC);
-  color: #fff;
-  font-size: 1.5rem;
-  font-weight: 700;
-  flex-shrink: 0;
-}
-
-.dd-review-hero-copy {
-  flex: 1;
-}
-
-.dd-review-hero-copy h3 {
-  margin: 0 0 4px;
-  font-size: 1.15rem;
-  color: #0f172a;
-}
-
-.dd-review-hero-copy p {
-  margin: 0;
-  color: #64748b;
-  font-size: 0.9rem;
-}
-
-.dd-review-modal-body {
-  display: grid;
-  grid-template-columns: minmax(180px, 220px) 1fr;
-  gap: 18px;
-  padding: 24px;
-}
-
-.dd-review-rating-panel {
-  padding: 20px;
-  border-radius: 18px;
-  background: linear-gradient(180deg, #0f172a 0%, #16324f 100%);
-  color: #fff;
-  text-align: center;
-}
-
-.dd-review-rating-number {
-  display: block;
-  font-size: 2.5rem;
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: 12px;
-}
-
-.dd-review-stars.lg .star {
-  font-size: 1.3rem;
-}
-
-.dd-review-stars.lg .star.empty {
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.dd-review-rating-panel p {
-  margin: 12px 0 0;
-  color: #e2e8f0;
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.dd-review-message-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  background: #fff;
-  padding: 20px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
-}
-
-.dd-review-message-card h4 {
-  margin: 0 0 12px;
-  font-size: 1rem;
-  color: #0f172a;
-}
-
-.dd-review-message-card p {
-  margin: 0;
-  color: #1e293b;
-  font-size: 0.96rem;
-  line-height: 1.8;
-  white-space: pre-wrap;
-}
-
-.dd-review-modal .modal-header h2 {
-  color: #0f172a;
-}
-
-.dd-review-modal .close-modal-btn {
-  color: #475569;
-}
-
-.dd-review-modal .close-modal-btn:hover {
-  color: #0f172a;
-}
-
-.dd-review-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 0 24px 24px;
-}
-
-/* -- REPORT MODAL -- */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-.modal-content.dd-report-modal {
-  background: #fff;
-  border-radius: 12px;
-  width: 95%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  padding: 0;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 18px 24px;
-  border-bottom: 1px solid #e5e9ec;
-}
-.modal-header h2 {
-  margin: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-.close-modal-btn {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #999;
-  padding: 0;
-  line-height: 1;
-}
-.close-modal-btn:hover { color: #333; }
-
-.dd-patient-summary {
-  padding: 14px 24px;
-  background: #f8fafb;
-  border-bottom: 1px solid #e5e9ec;
-}
-.dd-patient-summary p {
-  margin: 3px 0;
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.dd-report-form {
-  padding: 20px 24px 24px;
-}
-.dd-report-form .dd-form-group { margin-bottom: 14px; }
-
-.dd-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 16px;
-}
-
-.dd-slot-preview {
-  background: #f0f8ff;
-  border: 2px solid #2A7FFF;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-}
-.dd-slot-info {
-  margin: 0;
-  color: #2A7FFF;
-  font-size: 0.95rem;
-  line-height: 1.4;
-}
-.dd-slot-info strong {
-  font-weight: 700;
-  color: #005f7a;
-}
-
-.dd-slot-number {
-  background: #e3f2fd;
-  color: #2A7FFF;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.dd-slot-count {
-  background: #c8e6c9;
-  color: #1b5e20;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.dd-slot-row {
-  background: #f9f9f9;
-}
-.dd-slot-row td {
-  padding: 8px 12px !important;
-}
-
-.dd-slot-detail {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 10px 0;
-}
-
-.dd-slot-time {
-  background: #e3f2fd;
-  color: #2A7FFF;
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  min-width: 130px;
-}
-
-.dd-slot-info {
-  color: #666;
-  font-size: 0.9rem;
-  flex: 1;
-}
-
-.dd-btn-sm.view {
-  background: #2A7FFF;
-  color: white;
-  border: none;
-  padding: 6px 14px;
-  border-radius: 5px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.dd-btn-sm.view:hover {
-  background: #1F5FCC;
-}
-
-.dd-slots-scroll {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-.dd-slot-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px 14px;
-  min-width: 180px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.dd-slot-number-badge {
-  background: #2A7FFF;
-  color: white;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-}
-
-.dd-slot-time-display {
-  color: #333;
-  font-weight: 600;
-  font-size: 0.9rem;
-}
-
-/* -- NEW GROUP VIEW -- */
+/* Schedules Grouped */
 .dd-schedules-grouped {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .dd-date-group {
   border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   overflow: hidden;
-  background: white;
 }
 
 .dd-date-header {
@@ -1221,923 +977,594 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
-  border-bottom: 2px solid #2A7FFF;
+  background: #f5f5f5;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .dd-date-label {
-  margin: 0 0 12px 0;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 700;
-  color: #2A7FFF;
+  color: #000000;
+  margin: 0 0 8px;
 }
 
 .dd-schedules-summary {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.dd-schedule-time-range {
-  display: flex;
   gap: 12px;
-  align-items: center;
+  font-size: 0.75rem;
 }
 
 .dd-time-badge {
-  background: #e3f2fd;
-  color: #2A7FFF;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  min-width: 130px;
+  background: #8B4513;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 12px;
 }
 
-.dd-duration-info {
-  background: #c8e6c9;
-  color: #1b5e20;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
+.dd-duration-info,
 .dd-slots-info {
-  background: #fff3cd;
-  color: #856404;
-  padding: 4px 10px;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  color: #666666;
 }
 
 .dd-date-actions {
   display: flex;
-  gap: 12px;
+  gap: 10px;
 }
 
 .dd-btn-view-slots {
-  background: #2A7FFF;
-  color: white;
-  border: none;
-  padding: 8px 18px;
+  background: #f0f0f0;
+  border: 1px solid #d0d0d0;
+  padding: 6px 14px;
   border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  font-size: 0.75rem;
+  transition: var(--transition);
 }
 
 .dd-btn-view-slots:hover {
-  background: #1F5FCC;
+  background: #e0e0e0;
 }
 
 .dd-btn-delete-all {
-  background: #e53935;
+  background: #ef4444;
   color: white;
   border: none;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  font-size: 0.75rem;
+  transition: var(--transition);
 }
 
 .dd-btn-delete-all:hover {
-  background: #c62828;
+  background: #dc2626;
 }
 
+/* Slots List */
 .dd-slots-list-container {
   padding: 20px;
-  background: #fafafa;
+  background: #ffffff;
+  border-top: 1px solid #e0e0e0;
 }
 
 .dd-slots-scroll-wrapper {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  max-height: 180px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-height: 300px;
   overflow-y: auto;
-  padding-right: 8px;
 }
 
 .dd-slot-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: white;
-  border: 2px solid #2A7FFF;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 12px 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.2s;
-  min-height: 90px;
-}
-
-.dd-slot-card:hover {
-  box-shadow: 0 4px 8px rgba(42, 127, 255, 0.2);
-  transform: translateY(-2px);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  transition: var(--transition);
 }
 
 .dd-slot-card.booked {
-  border-color: #d32f2f;
-  background: #fff5f5;
-}
-
-.dd-slot-card.booked .dd-slot-num {
-  background: #d32f2f;
+  background: #fee2e2;
+  border-color: #fecaca;
+  opacity: 0.7;
 }
 
 .dd-slot-num {
-  background: #2A7FFF;
+  background: #8B4513;
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.dd-slot-time-range {
+  color: #333333;
+}
+
+.dd-slot-booked-badge {
+  background: #ef4444;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+}
+
+/* ============================================
+   REVIEWS SECTION
+   ============================================ */
+.dd-reviews-panel {
+  margin-bottom: 0;
+}
+
+.dd-review-card {
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius-sm);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: var(--transition);
+}
+
+.dd-review-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.dd-review-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dd-review-top strong {
+  color: #000000;
+  font-size: 0.9rem;
+}
+
+.dd-review-stars {
+  display: flex;
+  gap: 2px;
+}
+
+.dd-review-stars .star {
+  font-size: 0.9rem;
+}
+
+.dd-review-stars .star.filled {
+  color: #f59e0b;
+}
+
+.dd-review-stars .star.empty {
+  color: #d0d0d0;
+}
+
+.dd-review-status {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.dd-review-status.pending {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.dd-review-status.approved {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.dd-review-comment {
+  color: #555555;
+  font-size: 0.8rem;
+  margin: 10px 0;
+  line-height: 1.4;
+}
+
+.dd-review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.dd-review-date {
+  font-size: 0.7rem;
+  color: #888888;
+}
+
+.dd-review-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dd-btn-sm {
+  padding: 4px 10px;
+  border: 1px solid #d0d0d0;
+  background: #f0f0f0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: var(--transition);
+}
+
+.dd-btn-sm:hover {
+  background: #e0e0e0;
+}
+
+.dd-review-delete-btn {
+  padding: 4px 10px;
+  border: none;
+  background: #ef4444;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.7rem;
+  transition: var(--transition);
+}
+
+.dd-review-delete-btn:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.dd-review-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   MODAL STYLES
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: var(--border-radius);
+  width: 90%;
+  max-width: 550px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.modal-header h2 {
+  font-size: 1.25rem;
+  color: #000000;
+  margin: 0;
+}
+
+.close-modal-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666666;
+  transition: var(--transition);
+}
+
+.close-modal-btn:hover {
+  color: #000000;
+}
+
+/* Review Modal */
+.dd-review-modal {
+  max-width: 600px;
+}
+
+.dd-review-modal-header {
+  background: #f5f5f5;
+}
+
+.dd-review-kicker {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #8B4513;
+  margin-bottom: 4px;
+}
+
+.dd-review-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: #fafafa;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dd-review-avatar {
+  width: 50px;
+  height: 50px;
+  background: #8B4513;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 1.2rem;
   font-weight: 700;
-  font-size: 0.9rem;
-  flex-shrink: 0;
+  color: #ffffff;
 }
 
-.dd-slot-time-range {
-  color: #333;
-  font-weight: 600;
-  font-size: 0.9rem;
+.dd-review-hero-copy h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #000000;
+}
+
+.dd-review-hero-copy p {
+  margin: 4px 0 0;
+  font-size: 0.7rem;
+  color: #888888;
+}
+
+.dd-review-modal-body {
+  padding: 24px;
+}
+
+.dd-review-rating-panel {
   text-align: center;
-  white-space: nowrap;
+  margin-bottom: 24px;
 }
 
-.dd-slot-booked-badge {
-  background: #d32f2f;
-  color: #fff;
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 0.72rem;
+.dd-review-rating-number {
+  font-size: 2rem;
   font-weight: 700;
-  line-height: 1.3;
+  color: #8B4513;
 }
 
-/* -- FOOTER -- */
-.dd-footer {
-  background: #1a1a2e;
-  color: #ccc;
-  margin-top: 40px;
+.dd-review-stars.lg .star {
+  font-size: 1.2rem;
 }
-.dd-footer-content {
-  max-width: 1400px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: 40px;
-  padding: 40px;
+
+.dd-review-message-card {
+  background: #f5f5f5;
+  border-radius: var(--border-radius-sm);
+  padding: 16px;
 }
-.dd-footer-brand h3 {
-  color: #fff;
-  margin: 0 0 8px;
-  font-size: 1.1rem;
-}
-.dd-footer-brand p {
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: #999;
-}
-.dd-footer-links h4 {
-  color: #fff;
+
+.dd-review-message-card h4 {
   margin: 0 0 12px;
-  font-size: 0.95rem;
-}
-.dd-footer-links ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.dd-footer-links li { margin-bottom: 8px; }
-.dd-footer-links a {
-  color: #999;
-  text-decoration: none;
-  font-size: 0.88rem;
-  transition: color 0.2s;
-}
-.dd-footer-links a:hover { color: #fff; }
-.dd-footer-bottom {
-  border-top: 1px solid #333;
-  text-align: center;
-  padding: 16px 40px;
-}
-.dd-footer-bottom p {
-  margin: 0;
-  font-size: 0.82rem;
-  color: #777;
+  font-size: 0.9rem;
+  color: #000000;
 }
 
-/* -- RESPONSIVE -- */
-@media (max-width: 1024px) {
-  .dd-top-row { grid-template-columns: 1fr; }
-  .dd-middle-row { grid-template-columns: 1fr; }
-  .dd-hospital-section { margin-left: 24px; margin-right: 24px; }
-  .dd-top-row,
-  .dd-middle-row,
-  .dd-bottom-row { padding-left: 24px; padding-right: 24px; }
-  .dd-footer-content { grid-template-columns: 1fr; gap: 24px; padding: 30px 24px; }
+.dd-review-message-card p {
+  margin: 0;
+  color: #555555;
+  line-height: 1.5;
 }
+
+.dd-review-modal-actions {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Report Modal */
+.dd-report-modal {
+  max-width: 650px;
+}
+
+.dd-patient-summary {
+  background: #f5f5f5;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dd-patient-summary p {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: #333333;
+}
+
+.dd-report-form {
+  padding: 24px;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+.dd-empty {
+  text-align: center;
+  padding: 40px;
+  color: #888888;
+  font-size: 0.875rem;
+}
+
+.dd-msg {
+  padding: 10px 14px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+}
+
+.dd-msg.success {
+  background: #dcfce7;
+  color: #166534;
+  border-left: 3px solid #22c55e;
+}
+
+.dd-msg.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 3px solid #ef4444;
+}
+
+.dd-error {
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 12px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 20px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #e8e8e8;
+}
+
+.dd-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  font-size: 1rem;
+  color: #666666;
+  background: linear-gradient(135deg, #e8e8e8 0%, #d4d4d4 100%);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+@media (max-width: 1024px) {
+  .dash-shell {
+    grid-template-columns: 1fr;
+  }
+  
+  .dash-sidebar {
+    position: static;
+    min-height: auto;
+  }
+  
+  .dash-sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .dash-analytics {
+    grid-template-columns: 1fr;
+  }
+  
+  .dash-profile-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .dd-profile-form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dd-form-group--full {
+    grid-column: span 1;
+  }
+  
+  .dd-hospital-view {
+    flex-direction: column;
+  }
+  
+  .dd-hospital-img-wrap {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
-  .dd-hospital-view { grid-template-columns: 1fr; text-align: center; justify-items: center; }
-  .dd-hospital-section { margin-left: 16px; margin-right: 16px; }
-  .dd-top-row,
-  .dd-middle-row,
-  .dd-bottom-row { padding-left: 16px; padding-right: 16px; }
-  .dd-form-row { grid-template-columns: 1fr; }
-  .dd-tabs { flex-wrap: wrap; justify-content: center; }
-  .dd-hospital-stats { justify-content: center; }
-  .dd-panel-header-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-  .dd-search-input { min-width: 0; width: 100%; }
-  .dd-review-footer {
+  .dash-main-content {
+    padding: 16px;
+  }
+  
+  .dash-pie-wrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  
+  .dd-tabs {
+    justify-content: center;
+  }
+  
+  .dd-date-header {
     flex-direction: column;
     align-items: flex-start;
   }
-  .dd-review-actions {
+  
+  .dd-appt-actions {
+    flex-direction: column;
+  }
+  
+  .dd-btn {
     width: 100%;
-    justify-content: space-between;
+    text-align: center;
   }
-  .dd-review-modal-body {
+  
+  .dash-profile-stats {
     grid-template-columns: 1fr;
-    padding: 18px;
   }
-  .dd-review-hero {
+}
+
+@media (max-width: 480px) {
+  .dash-profile-top {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .dd-hospital-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .dd-form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .dd-review-top {
+    flex-direction: column;
     align-items: flex-start;
-    flex-wrap: wrap;
-  }
-  .dd-review-modal-actions {
-    padding: 0 18px 18px;
   }
 }
 
-/* ===== Dark Dashboard Refresh ===== */
-.dd-page {
-  background: linear-gradient(180deg, #0b1220 0%, #111827 100%);
-  color: #e5e7eb;
+/* ============================================
+   SCROLLBAR
+   ============================================ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-.dd-hospital-section,
-.dd-panel,
-.dd-date-group,
-.dd-slot-card,
-.dd-review-card,
-.dd-review-modal,
-.dd-report-modal {
-  background: #1f2937;
-  border-color: #334155;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.25);
+::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 10px;
 }
 
-.dd-hospital-name,
-.dd-panel-title,
-.dd-detail-row span,
-.dd-mini-val,
-.dd-table th,
-.dd-table td,
-.dd-date-label,
-.dd-slot-time-range,
-.dd-review-top strong,
-.dd-review-rating-number,
-.dd-review-message-card h4,
-.dd-review-message-card p {
-  color: #f8fafc;
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 10px;
 }
 
-.dd-hospital-details p,
-.dd-hospital-desc,
-.dd-detail-row label,
-.dd-mini-label,
-.dd-empty,
-.dd-review-date,
-.dd-review-comment,
-.dd-review-hero-copy p,
-.dd-review-rating-panel p {
-  color: #cbd5e1;
+::-webkit-scrollbar-thumb:hover {
+  background: #8B4513;
 }
-
-.dd-hstat,
-.dd-mini-stat,
-.dd-table thead,
-.dd-date-header,
-.dd-slots-list-container {
-  background: #0f172a;
-  border-color: #334155;
-}
-
-.dd-table td,
-.dd-table th,
-.dd-detail-row,
-.dd-review-card,
-.dd-date-header {
-  border-color: #334155;
-}
-
-.dd-search-input,
-.dd-form-group input,
-.dd-form-group textarea,
-.dd-form-group select,
-.dd-tabs .dd-tab {
-  background: #0f172a;
-  color: #e5e7eb;
-  border-color: #475569;
-}
-
-.dd-search-input::placeholder,
-.dd-form-group input::placeholder,
-.dd-form-group textarea::placeholder {
-  color: #94a3b8;
-}
-
-.dd-tab.active,
-.dd-add-btn,
-.dd-submit-btn,
-.dd-btn.confirm,
-.dd-btn.report,
-.dd-btn-sm.view,
-.dd-btn-view-slots,
-.dd-save-photo-btn,
-.dd-pagination-btn {
-  background: #2563eb;
-  color: #ffffff;
-  border-color: #1d4ed8;
-}
-
-.dd-add-btn:hover,
-.dd-submit-btn:hover,
-.dd-btn.confirm:hover,
-.dd-btn.report:hover,
-.dd-btn-sm.view:hover,
-.dd-btn-view-slots:hover,
-.dd-save-photo-btn:hover,
-.dd-pagination-btn:hover {
-  background: #1d4ed8;
-}
-
-.dd-btn.decline,
-.dd-btn.delete,
-.dd-btn-delete-all,
-.dd-review-delete-btn {
-  background: #991b1b;
-  color: #fee2e2;
-  border-color: #ef4444;
-}
-
-.dd-btn.cancel,
-.dd-photo-upload-btn {
-  background: #334155;
-  color: #f8fafc;
-  border-color: #475569;
-}
-
-.dd-footer {
-  background: #0f172a;
-}
-
-/* Button style update: white background, black text, no hover effect */
-.dd-page button,
-.dd-page .dd-add-btn,
-.dd-page .dd-submit-btn,
-.dd-page .dd-btn,
-.dd-page .dd-btn-sm,
-.dd-page .dd-btn-view-slots,
-.dd-page .dd-btn-delete-all,
-.dd-page .dd-save-photo-btn,
-.dd-page .dd-photo-upload-btn,
-.dd-page .dd-pagination-btn,
-.dd-page .dd-review-delete-btn {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border: 1px solid #000000 !important;
-  box-shadow: none !important;
-  transform: none !important;
-  transition: none !important;
-}
-
-.dd-page button:hover,
-.dd-page .dd-add-btn:hover,
-.dd-page .dd-submit-btn:hover,
-.dd-page .dd-btn:hover,
-.dd-page .dd-btn-sm:hover,
-.dd-page .dd-btn-view-slots:hover,
-.dd-page .dd-btn-delete-all:hover,
-.dd-page .dd-save-photo-btn:hover,
-.dd-page .dd-photo-upload-btn:hover,
-.dd-page .dd-pagination-btn:hover,
-.dd-page .dd-review-delete-btn:hover {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border-color: #000000 !important;
-  box-shadow: none !important;
-  transform: none !important;
-}
-
-/* Final gradient setup for Doctor dashboard */
-.dd-page {
-  background: linear-gradient(180deg, #081228 0%, #101d3a 100%) !important;
-  min-height: 100vh;
-}
-
-.dd-hospital-section,
-.dd-panel,
-.dd-date-group,
-.dd-slot-card,
-.dd-review-card,
-.dd-review-modal,
-.dd-report-modal {
-  background: #13213f !important;
-  border: 1px solid #2b3f68 !important;
-}
-
-.dd-panel-title,
-.dd-hospital-name,
-.dd-detail-row span,
-.dd-mini-val,
-.dd-table th,
-.dd-table td,
-.dd-date-label,
-.dd-slot-time-range,
-.dd-review-top strong {
-  color: #f8fafc !important;
-}
-
-.dd-hospital-details p,
-.dd-detail-row label,
-.dd-mini-label,
-.dd-empty,
-.dd-review-comment,
-.dd-review-date {
-  color: #c7d2fe !important;
-}
-
-.dd-table thead,
-.dd-table tbody tr:hover,
-.dd-date-header,
-.dd-hstat,
-.dd-mini-stat,
-.dd-slots-list-container {
-  background: #0e1a33 !important;
-}
-
-.dd-page button,
-.dd-page .dd-add-btn,
-.dd-page .dd-submit-btn,
-.dd-page .dd-btn,
-.dd-page .dd-btn-sm,
-.dd-page .dd-btn-view-slots,
-.dd-page .dd-btn-delete-all,
-.dd-page .dd-save-photo-btn,
-.dd-page .dd-photo-upload-btn,
-.dd-page .dd-pagination-btn,
-.dd-page .dd-review-delete-btn {
-  background: #ffffff !important;
-  color: #000000 !important;
-  border: 1px solid #000000 !important;
-}
-
-/* Final black theme override for Doctor dashboard */
-.dd-page {
-  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
-}
-
-.dd-page .dash-sidebar {
-  background: linear-gradient(180deg, #000000 0%, #050505 100%) !important;
-  border-color: #1a1a1a !important;
-}
-
-.dd-hospital-section,
-.dd-panel,
-.dd-date-group,
-.dd-slot-card,
-.dd-review-card,
-.dd-review-modal,
-.dd-report-modal,
-.dash-graph-card,
-.dash-profile-card,
-.dash-profile-row,
-.dash-profile-stat {
-  background: #0a0a0a !important;
-  border-color: #1f1f1f !important;
-}
-
-.dd-table thead,
-.dd-table tbody tr:hover,
-.dd-date-header,
-.dd-hstat,
-.dd-mini-stat,
-.dd-slots-list-container,
-.dash-line-chart,
-.dash-pie-chart::after {
-  background: #050505 !important;
-  border-color: #1f1f1f !important;
-}
-
-.dash-line-grid {
-  stroke: #202020 !important;
-}
-
-/* Final white theme override for Doctor dashboard */
-.dd-page {
-  background: #ffffff !important;
-}
-
-.dd-page .dash-sidebar {
-  background: #ffffff !important;
-  border-color: #d1d5db !important;
-}
-
-.dd-hospital-section,
-.dd-panel,
-.dd-date-group,
-.dd-slot-card,
-.dd-review-card,
-.dd-review-modal,
-.dd-report-modal,
-.dash-graph-card,
-.dash-profile-card,
-.dash-profile-row,
-.dash-profile-stat {
-  background: #ffffff !important;
-  border-color: #d1d5db !important;
-}
-
-.dd-table thead,
-.dd-table tbody tr:hover,
-.dd-date-header,
-.dd-hstat,
-.dd-mini-stat,
-.dd-slots-list-container,
-.dash-line-chart,
-.dash-pie-chart::after {
-  background: #f9fafb !important;
-  border-color: #d1d5db !important;
-}
-
-.dd-page .dd-panel-title,
-.dd-page .dd-hospital-name,
-.dd-page .dd-detail-row span,
-.dd-page .dd-mini-val,
-.dd-page .dd-table th,
-.dd-page .dd-table td,
-.dd-page .dd-date-label,
-.dd-page .dd-slot-time-range,
-.dd-page .dd-review-top strong,
-.dd-page .dash-profile-title,
-.dd-page .dash-profile-row span,
-.dd-page .dash-profile-stat strong {
-  color: #111827 !important;
-}
-
-.dd-page .dd-hospital-details p,
-.dd-page .dd-detail-row label,
-.dd-page .dd-mini-label,
-.dd-page .dd-empty,
-.dd-page .dd-review-comment,
-.dd-page .dd-review-date,
-.dd-page .dash-profile-subtitle,
-.dd-page .dash-profile-row label,
-.dd-page .dash-profile-stat span,
-.dd-page .dash-sidebar-title,
-.dd-page .dash-sidebar-footnote {
-  color: #6b7280 !important;
-}
-
-.dd-page button,
-.dd-page .dd-add-btn,
-.dd-page .dd-submit-btn,
-.dd-page .dd-btn,
-.dd-page .dd-btn-sm,
-.dd-page .dd-btn-view-slots,
-.dd-page .dd-btn-delete-all,
-.dd-page .dd-save-photo-btn,
-.dd-page .dd-photo-upload-btn,
-.dd-page .dd-pagination-btn,
-.dd-page .dd-review-delete-btn,
-.dd-page .dash-sidebar-btn {
-  background: #000000 !important;
-  color: #ffffff !important;
-  border: 1px solid #000000 !important;
-}
-
-.dd-page button:hover,
-.dd-page .dd-add-btn:hover,
-.dd-page .dd-submit-btn:hover,
-.dd-page .dd-btn:hover,
-.dd-page .dd-btn-sm:hover,
-.dd-page .dd-btn-view-slots:hover,
-.dd-page .dd-btn-delete-all:hover,
-.dd-page .dd-save-photo-btn:hover,
-.dd-page .dd-photo-upload-btn:hover,
-.dd-page .dd-pagination-btn:hover,
-.dd-page .dd-review-delete-btn:hover,
-.dd-page .dash-sidebar-btn:hover {
-  background: #000000 !important;
-  color: #ffffff !important;
-  border-color: #000000 !important;
-}
-
-/* Authoritative final Doctor palette override */
-.dd-page {
-  background: #f6f8fb !important;
-  color: #0f172a !important;
-}
-
-.dd-page .dash-sidebar {
-  background: #ffffff !important;
-  border: 1px solid #dbe3ee !important;
-}
-
-.dd-page .dash-sidebar-title,
-.dd-page .dash-sidebar-footnote {
-  color: #475569 !important;
-}
-
-.dd-page .dash-sidebar-btn {
-  background: #ffffff !important;
-  color: #2A7FFF !important;
-  border: 1px solid #2A7FFF !important;
-}
-
-.dd-page .dash-sidebar-btn.active,
-.dd-page .dash-sidebar-btn:hover,
-.dd-page .dash-sidebar-logout {
-  background: #2A7FFF !important;
-  color: #ffffff !important;
-  border-color: #1F5FCC !important;
-}
-
-.dd-page .dash-graph-card,
-.dd-page .dash-profile-card,
-.dd-page .dash-profile-row,
-.dd-page .dash-profile-stat,
-.dd-page .dd-panel,
-.dd-page .dd-hospital-section,
-.dd-page .dd-date-group,
-.dd-page .dd-review-card {
-  background: #ffffff !important;
-  border-color: #dbe3ee !important;
-}
-
-.dd-page .dash-graph-card h3,
-.dd-page .dash-graph-card p,
-.dd-page .dash-line-labels span,
-.dd-page .dash-pie-legend li,
-.dd-page .dash-pie-value {
-  color: #1e293b !important;
-}
-
-.dd-page .dash-line-chart,
-.dd-page .dash-pie-chart::after {
-  background: #f8fbff !important;
-  border-color: #dbe7ff !important;
-}
-
-.dd-page .dash-line-grid {
-  stroke: #d6e4ff !important;
-}
-
-.dd-page .dd-review-modal {
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
-  border: 1px solid #dbe3ee !important;
-}
-
-.dd-page .dd-review-hero {
-  background: linear-gradient(135deg, #eef5ff 0%, #f8fbff 100%) !important;
-  border-bottom: 1px solid #dbe3ee !important;
-}
-
-.dd-page .dd-review-hero-copy h3,
-.dd-page .dd-review-modal .modal-header h2 {
-  color: #0f172a !important;
-}
-
-.dd-page .dd-review-hero-copy p,
-.dd-page .dd-review-date {
-  color: #64748b !important;
-}
-
-.dd-page .dd-review-message-card {
-  background: #f8fafc !important;
-  border: 1px solid #dbe3ee !important;
-}
-
-.dd-page .dd-review-message-card h4 {
-  color: #334155 !important;
-}
-
-.dd-page .dd-review-message-card p,
-.dd-page .dd-review-comment {
-  color: #1e293b !important;
-}
-
-.dd-page .dd-review-rating-panel {
-  background: linear-gradient(180deg, #0f2b57 0%, #153b73 100%) !important;
-  color: #ffffff !important;
-}
-
-.dd-page .dd-review-rating-panel p {
-  color: #dbeafe !important;
-}
-
-.dd-page .dd-review-modal-actions .dd-btn.cancel {
-  background: #f1f5f9 !important;
-  color: #1e293b !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-.dd-page .dd-review-modal-actions .dd-btn.cancel:hover {
-  background: #e2e8f0 !important;
-  color: #0f172a !important;
-  border-color: #94a3b8 !important;
-}
-
-.dd-page .dd-form-group input,
-.dd-page .dd-form-group textarea,
-.dd-page .dd-form-group select,
-.dd-page .dd-search-input {
-  background: #ffffff !important;
-  color: #111827 !important;
-  border: 1px solid #d1d5db !important;
-  color-scheme: light;
-}
-
-.dd-page .dd-form-group input::placeholder,
-.dd-page .dd-form-group textarea::placeholder,
-.dd-page .dd-search-input::placeholder {
-  color: #6b7280 !important;
-}
-
-.dd-page .dd-form-group input:focus,
-.dd-page .dd-form-group textarea:focus,
-.dd-page .dd-form-group select:focus,
-.dd-page .dd-search-input:focus {
-  border-color: #2A7FFF !important;
-  box-shadow: 0 0 0 3px rgba(42, 127, 255, 0.15) !important;
-}
-
-.dd-page .dd-submit-btn,
-.dd-page .dd-btn.submit,
-.dd-page .dd-btn.confirm,
-.dd-page .dd-add-btn,
-.dd-page .dd-save-photo-btn {
-  background: #28A745 !important;
-  color: #ffffff !important;
-  border: 1px solid #218838 !important;
-}
-
-.dd-page .dd-btn.report,
-.dd-page .dd-btn-sm.view,
-.dd-page .dd-btn-view-slots,
-.dd-page .dd-slot-num,
-.dd-page .dd-slot-number-badge,
-.dd-page .dd-selected-tag {
-  background: #2A7FFF !important;
-  color: #ffffff !important;
-  border-color: #1F5FCC !important;
-}
-
-.dd-page .dd-btn.edit,
-.dd-page .dd-btn-sm.edit {
-  background: #FF9800 !important;
-  color: #ffffff !important;
-  border-color: #E68900 !important;
-}
-
-.dd-page .dd-btn.decline,
-.dd-page .dd-btn.delete,
-.dd-page .dd-btn-delete-all,
-.dd-page .dd-review-delete-btn,
-.dd-page .dd-btn-sm.del {
-  background: #DC3545 !important;
-  color: #ffffff !important;
-  border-color: #C82333 !important;
-}
-
-.dd-page .dd-btn.decline:hover,
-.dd-page .dd-btn.delete:hover,
-.dd-page .dd-btn-delete-all:hover,
-.dd-page .dd-review-delete-btn:hover,
-.dd-page .dd-btn-sm.del:hover {
-  background: #C82333 !important;
-  color: #ffffff !important;
-  border-color: #A71D2A !important;
-}
-
-.dd-page .dd-btn.report:hover,
-.dd-page .dd-btn-sm.view:hover,
-.dd-page .dd-btn-view-slots:hover,
-.dd-page .dd-save-photo-btn:hover,
-.dd-page .dd-add-btn:hover,
-.dd-page .dd-submit-btn:hover,
-.dd-page .dash-sidebar-btn:hover,
-.dd-page .dash-sidebar-btn.active:hover,
-.dd-page .dash-sidebar-logout:hover {
-  background: #1F5FCC !important;
-  color: #ffffff !important;
-  border-color: #174A99 !important;
-}
-
-.dd-page .dd-btn.confirm:hover,
-.dd-page .dd-btn.approve:hover {
-  background: #218838 !important;
-  border-color: #1E7E34 !important;
-}
-
-.dd-page .dd-btn.edit:hover,
-.dd-page .dd-btn-sm.edit:hover {
-  background: #E68900 !important;
-  border-color: #CC7A00 !important;
-}
-
-/* Final fixes: appointment tabs and pagination must not be black */
-.dd-page .dd-tab {
-  background: #f1f5f9 !important;
-  color: #334155 !important;
-  border: 1px solid #cbd5e1 !important;
-}
-
-.dd-page .dd-tab:hover {
-  background: #e2e8f0 !important;
-  color: #1e293b !important;
-  border-color: #94a3b8 !important;
-}
-
-.dd-page .dd-tab.active {
-  background: #2A7FFF !important;
-  color: #ffffff !important;
-  border-color: #1F5FCC !important;
-}
-
-.dd-page .dd-tab-count {
-  background: rgba(15, 23, 42, 0.12) !important;
-  color: #1e293b !important;
-}
-
-.dd-page .dd-tab.active .dd-tab-count {
-  background: rgba(255, 255, 255, 0.24) !important;
-  color: #ffffff !important;
-}
-
-.dd-page .dd-pagination-btn {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%) !important;
-  color: #ffffff !important;
-  border: 1px solid #1F5FCC !important;
-}
-
-.dd-page .dd-pagination-btn:hover:not(:disabled) {
-  background: #1F5FCC !important;
-  color: #ffffff !important;
-  border-color: #174A99 !important;
-}
-
-.dd-page .dd-pagination-btn:disabled {
-  background: #94a3b8 !important;
-  color: #ffffff !important;
-  border-color: #94a3b8 !important;
-}
-
-/* Final button color override: keep doctor dashboard buttons blue */
-.dd-page button,
-.dd-page .dash-sidebar-btn,
-.dd-page .dd-add-btn,
-.dd-page .dd-submit-btn,
-.dd-page .dd-btn,
-.dd-page .dd-btn-sm,
-.dd-page .dd-save-btn,
-.dd-page .dd-cancel-btn,
-.dd-page .dd-save-photo-btn,
-.dd-page .dd-photo-upload-btn,
-.dd-page .dd-edit-profile-btn,
-.dd-page .dd-pagination-btn,
-.dd-page .dd-review-delete-btn {
-  background: #2A7FFF !important;
-  color: #ffffff !important;
-  border: 1px solid #1F5FCC !important;
-}
-
-.dd-page button:hover,
-.dd-page .dash-sidebar-btn:hover,
-.dd-page .dd-add-btn:hover,
-.dd-page .dd-submit-btn:hover,
-.dd-page .dd-btn:hover,
-.dd-page .dd-btn-sm:hover,
-.dd-page .dd-save-btn:hover,
-.dd-page .dd-cancel-btn:hover,
-.dd-page .dd-save-photo-btn:hover,
-.dd-page .dd-photo-upload-btn:hover,
-.dd-page .dd-edit-profile-btn:hover,
-.dd-page .dd-pagination-btn:hover,
-.dd-page .dd-review-delete-btn:hover {
-  background: #1F5FCC !important;
-  color: #ffffff !important;
-  border-color: #174A99 !important;
-}
-

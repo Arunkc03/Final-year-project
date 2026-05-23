@@ -3,6 +3,25 @@ const API_HOST = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 const API_BASE_URL = `${API_HOST.replace(/\/+$/,'')}/api`;
 const STORAGE_URL = `${API_HOST.replace(/\/+$/,'')}/storage`;
 
+// Helper function to create authenticated request options
+const createAuthHeaders = (token, additionalHeaders = {}) => {
+  const headers = {
+    ...additionalHeaders,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+  
+  // Only add Authorization header if token exists
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    // Log missing tokens to help debug 401 errors
+    console.warn('⚠️ API call made without token. Current localStorage token:', localStorage.getItem('token'));
+  }
+  
+  return headers;
+};
+
 const api = {
   // Storage URL for images
   getStorageUrl: () => STORAGE_URL,
@@ -91,22 +110,26 @@ const api = {
   logout: async (token) => {
     const res = await fetch(`${API_BASE_URL}/logout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
 
   // Dashboard endpoints
   getDashboard: async (dashboardRoute, token) => {
+    const headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    // Only add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const res = await fetch(`${API_BASE_URL}${dashboardRoute}`, {
-      headers: { 
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
+      headers,
       credentials: 'include',
     });
     
@@ -128,19 +151,30 @@ const api = {
   },
 
   getAdmins: async (token) => {
+    if (!token) {
+      console.error('❌ getAdmins: No token provided');
+      return { status: 'error', message: 'Authentication required', data: [] };
+    }
+    
     const res = await fetch(`${API_BASE_URL}/admins`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
-    return res.json();
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      console.error('❌ getAdmins failed:', { status: res.status, data });
+    }
+    
+    return data;
   },
 
   updateAdmin: async (id, data, token) => {
     const res = await fetch(`${API_BASE_URL}/admins/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -149,22 +183,37 @@ const api = {
   deleteAdmin: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/admins/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
 
   getPatients: async (token) => {
+    if (!token) {
+      console.error('❌ getPatients: No token provided');
+      return { status: 'error', message: 'Authentication required', data: [] };
+    }
+    
     const res = await fetch(`${API_BASE_URL}/users?role=patient`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
-    return res.json();
+    
+    const data = await res.json();
+    
+    if (!res.ok) {
+      console.error('❌ getPatients failed:', { status: res.status, data });
+    }
+    
+    return data;
   },
 
   deletePatient: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/users/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -187,20 +236,39 @@ const api = {
   },
 
   getDoctorsAdmin: async (token) => {
-    const headers = { 'Authorization': `Bearer ${token}` };
+    if (!token) {
+      console.error('❌ getDoctorsAdmin: No token provided');
+      return {
+        status: 'error',
+        message: 'Authentication required - no token found',
+        data: [],
+      };
+    }
+
+    const headers = createAuthHeaders(token);
     const candidateEndpoints = ['/system/doctors', '/doctors'];
     let lastPayload = null;
+    let lastErrorStatus = null;
 
     for (const endpoint of candidateEndpoints) {
       try {
-        const res = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
+        console.log(`📡 Fetching doctors from ${endpoint} with token:`, token.substring(0, 20) + '...');
+        const res = await fetch(`${API_BASE_URL}${endpoint}`, { 
+          headers,
+          credentials: 'include',
+        });
         const payload = await res.json();
         lastPayload = payload;
+        lastErrorStatus = res.status;
 
         if (res.ok && payload?.status === 'success') {
+          console.log(`✅ Successfully fetched doctors from ${endpoint}`);
           return payload;
+        } else if (!res.ok) {
+          console.warn(`⚠️ ${endpoint} returned status ${res.status}:`, payload);
         }
       } catch (error) {
+        console.error(`❌ Error fetching from ${endpoint}:`, error);
         lastPayload = {
           status: 'error',
           message: error?.message || 'Failed to fetch doctors',
@@ -210,7 +278,8 @@ const api = {
 
     return lastPayload || {
       status: 'error',
-      message: 'Failed to fetch doctors',
+      message: `Failed to fetch doctors (last status: ${lastErrorStatus})`,
+      data: [],
     };
   },
 
@@ -229,10 +298,8 @@ const api = {
   createHospital: async (data, token) => {
     const res = await fetch(`${API_BASE_URL}/hospitals`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -241,11 +308,8 @@ const api = {
   updateHospital: async (id, data, token) => {
     const res = await fetch(`${API_BASE_URL}/hospitals/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -254,9 +318,8 @@ const api = {
   deleteHospital: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/hospitals/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -264,12 +327,17 @@ const api = {
   updateHospitalWithImage: async (id, formData, token) => {
     // Use POST with _method=PUT for FormData (Laravel method spoofing)
     formData.append('_method', 'PUT');
+    const headers = { 'Accept': 'application/json' };
+    
+    // Only add Authorization header if token exists
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
     const res = await fetch(`${API_BASE_URL}/hospitals/${id}`, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers,
+      credentials: 'include',
       body: formData,
     });
     return res.json();
@@ -278,11 +346,14 @@ const api = {
   // Doctor endpoints (admin-protected)
   createDoctor: async (data, token) => {
     const isFormData = data instanceof FormData;
-    const headers = { 'Authorization': `Bearer ${token}` };
-    if (!isFormData) headers['Content-Type'] = 'application/json';
+    const headers = createAuthHeaders(token);
+    if (isFormData) {
+      delete headers['Content-Type'];
+    }
     const res = await fetch(`${API_BASE_URL}/doctors`, {
       method: 'POST',
       headers,
+      credentials: 'include',
       body: isFormData ? data : JSON.stringify(data),
     });
     return res.json();
@@ -290,7 +361,8 @@ const api = {
 
   getDoctorAdmin: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/doctors/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -298,7 +370,8 @@ const api = {
   deleteDoctor: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/doctors/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -310,11 +383,14 @@ const api = {
       ? `${API_BASE_URL}/doctors/${id}/update`
       : `${API_BASE_URL}/doctors/${id}`;
     const method = isFormData ? 'POST' : 'PUT';
-    const headers = { 'Authorization': `Bearer ${token}` };
-    if (!isFormData) headers['Content-Type'] = 'application/json';
+    const headers = createAuthHeaders(token);
+    if (isFormData) {
+      delete headers['Content-Type'];
+    }
     const res = await fetch(url, {
       method,
       headers,
+      credentials: 'include',
       body: isFormData ? data : JSON.stringify(data),
     });
     return res.json();
@@ -322,11 +398,14 @@ const api = {
 
   updateHospitalDoctor: async (hospitalId, doctorId, data, token) => {
     const isFormData = data instanceof FormData;
-    const headers = { 'Authorization': `Bearer ${token}` };
-    if (!isFormData) headers['Content-Type'] = 'application/json';
+    const headers = createAuthHeaders(token);
+    if (isFormData) {
+      delete headers['Content-Type'];
+    }
     const res = await fetch(`${API_BASE_URL}/hospitals/${hospitalId}/doctors/${doctorId}`, {
       method: 'PUT',
       headers,
+      credentials: 'include',
       body: isFormData ? data : JSON.stringify(data),
     });
     return res.json();
@@ -335,14 +414,16 @@ const api = {
   // Report endpoints
   getReports: async (token) => {
     const res = await fetch(`${API_BASE_URL}/reports`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
 
   getReport: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/reports/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -350,9 +431,8 @@ const api = {
   uploadReport: async (formData, token) => {
     const res = await fetch(`${API_BASE_URL}/reports`, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: formData,
     });
     return res.json();
@@ -366,7 +446,8 @@ const api = {
   deleteReport: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/reports/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -374,10 +455,8 @@ const api = {
   reviewReport: async (id, data, token) => {
     const res = await fetch(`${API_BASE_URL}/reports/${id}/review`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -403,11 +482,8 @@ const api = {
     try {
       const res = await fetch(`${API_BASE_URL}/departments`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json',
-        },
+        headers: createAuthHeaders(token),
+        credentials: 'include',
         body: JSON.stringify(data),
       });
       
@@ -436,10 +512,8 @@ const api = {
   deleteDepartment: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/departments/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -447,14 +521,16 @@ const api = {
   // Appointment endpoints
   getAppointments: async (token) => {
     const res = await fetch(`${API_BASE_URL}/appointments`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
 
     // Some role-specific backends restrict /appointments for doctors.
     // Fallback to doctor endpoint to avoid 403 in doctor contexts.
     if (res.status === 403) {
       const doctorRes = await fetch(`${API_BASE_URL}/doctor/appointments`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: createAuthHeaders(token),
+        credentials: 'include',
       });
       return doctorRes.json();
     }
@@ -464,7 +540,8 @@ const api = {
 
   getDoctorAppointments: async (token) => {
     const res = await fetch(`${API_BASE_URL}/doctor/appointments`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -472,10 +549,8 @@ const api = {
   bookAppointment: async (data, token) => {
     const res = await fetch(`${API_BASE_URL}/appointments`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -484,10 +559,8 @@ const api = {
   acceptAppointment: async (id, notes, token) => {
     const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}/accept`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify({ notes }),
     });
     return res.json();
@@ -496,10 +569,8 @@ const api = {
   rejectAppointment: async (id, reason, token) => {
     const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}/reject`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify({ reason: reason || 'No reason provided' }),
     });
     return res.json();
@@ -508,10 +579,8 @@ const api = {
   cancelAppointment: async (id, notes, token) => {
     const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}/cancel`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify({
         reason: notes || 'Deleted by doctor from dashboard',
       }),
@@ -522,9 +591,8 @@ const api = {
   deleteDoctorAppointment: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/doctor/appointments/${id}`, {
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -532,14 +600,16 @@ const api = {
   // Schedule endpoints
   getSchedules: async (token) => {
     const res = await fetch(`${API_BASE_URL}/schedules`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
 
   getSchedule: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/schedules/${id}`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -547,10 +617,8 @@ const api = {
   createSchedule: async (data, token) => {
     const res = await fetch(`${API_BASE_URL}/schedules`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -559,10 +627,8 @@ const api = {
   updateSchedule: async (id, data, token) => {
     const res = await fetch(`${API_BASE_URL}/schedules/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
       body: JSON.stringify(data),
     });
     return res.json();
@@ -571,7 +637,8 @@ const api = {
   deleteSchedule: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/schedules/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -583,8 +650,11 @@ const api = {
 
   // Generic request method for flexible API calls
   request: async (endpoint, token) => {
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, { headers });
+    const headers = token ? createAuthHeaders(token) : {};
+    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+      headers,
+      credentials: token ? 'include' : 'omit',
+    });
     return res.json();
   },
 
@@ -603,10 +673,8 @@ const api = {
         
         const res = await fetch(`${API_BASE_URL}/khalti/initiate`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+          headers: createAuthHeaders(token),
+          credentials: 'include',
           body: JSON.stringify(data),
         });
         
@@ -665,7 +733,8 @@ const api = {
     // Lookup payment status
     lookup: async (paymentId, token) => {
       const res = await fetch(`${API_BASE_URL}/khalti/lookup/${paymentId}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+        headers: createAuthHeaders(token),
+        credentials: 'include',
       });
       return res.json();
     },
@@ -794,7 +863,8 @@ const api = {
   // Get authenticated user's own reviews (all statuses — for doctor/admin views)
   getMyReviews: async (token) => {
     const res = await fetch(`${API_BASE_URL}/reviews`, {
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },
@@ -803,7 +873,8 @@ const api = {
   deleteReview: async (id, token) => {
     const res = await fetch(`${API_BASE_URL}/reviews/${id}`, {
       method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` },
+      headers: createAuthHeaders(token),
+      credentials: 'include',
     });
     return res.json();
   },

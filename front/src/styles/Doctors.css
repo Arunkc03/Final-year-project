@@ -6,8 +6,8 @@
 }
 
 .page-header {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
-  color: white;
+  background: linear-gradient(135deg, #d0d0d0 0%, #c0c0c0 100%);
+  color: #000000;
   padding: 50px 40px;
   display: flex;
   justify-content: space-between;
@@ -23,6 +23,7 @@
   font-size: 36px;
   font-weight: 700;
   line-height: 1.2;
+  color: #000000;
 }
 
 .page-header p {
@@ -30,12 +31,13 @@
   opacity: 0.95;
   font-size: 15px;
   line-height: 1.5;
+  color: #000000;
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
+  background: #e0e0e0;
+  border: 1px solid #999;
+  color: #000000;
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
@@ -44,8 +46,8 @@
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: white;
+  background: #c0c0c0;
+  border-color: #666;
 }
 
 .page-content {
@@ -63,11 +65,11 @@
 
 .doctors-header h2 {
   margin: 0;
-  color: #333;
+  color: #000000;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
+  background: linear-gradient(135deg, #666666 0%, #555555 100%);
   color: white;
   border: none;
   padding: 10px 20px;
@@ -79,7 +81,7 @@
 
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(42, 127, 255, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:disabled {

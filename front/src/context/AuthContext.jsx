@@ -43,9 +43,20 @@ export const AuthProvider = ({ children }) => {
   }, [dashboardRoute]);
 
   const login = (userData, authToken, dashboard) => {
+    console.log('🔐 AuthContext.login() called with:', { userId: userData?.id, role: userData?.role });
+    
+    // Save to state
     setUser(userData);
     setToken(authToken);
     setDashboardRoute(dashboard);
+    
+    // Also save directly to localStorage immediately (don't rely on useEffect)
+    console.log('💾 Saving to localStorage immediately...');
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', authToken);
+    localStorage.setItem('dashboardRoute', dashboard);
+    console.log('✅ Data saved to localStorage');
+    console.log('📍 Verify localStorage.user:', localStorage.getItem('user'));
   };
 
   const logout = () => {

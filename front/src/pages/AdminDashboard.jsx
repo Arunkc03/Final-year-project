@@ -2,8 +2,8 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../services/api';
-import '../styles/AdminDashboard.css';
-import '../styles/DashboardWidgets.css';
+import { Stethoscope, User, Calendar, Building2, Clock, Star, BarChart3, Folder, Users, LogOut, CheckCircle, Plus, Edit, Mail, Phone, Hash, Upload } from 'lucide-react';
+// import '../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ const AdminDashboard = () => {
   const [deptFormLoading, setDeptFormLoading] = useState(false);
   const [deptFormError, setDeptFormError] = useState('');
   const [deptFormSuccess, setDeptFormSuccess] = useState('');
-  
+
   // Doctor form states
   const [showDoctorForm, setShowDoctorForm] = useState(false);
   const [doctorFormDept, setDoctorFormDept] = useState(null);
@@ -43,7 +43,7 @@ const AdminDashboard = () => {
   const [doctorFormLoading, setDoctorFormLoading] = useState(false);
   const [doctorFormError, setDoctorFormError] = useState('');
   const [doctorFormSuccess, setDoctorFormSuccess] = useState('');
-  
+
   // Doctor view/delete/edit states
   const [viewingDoctor, setViewingDoctor] = useState(null);
   const [showDoctorView, setShowDoctorView] = useState(false);
@@ -51,7 +51,7 @@ const AdminDashboard = () => {
   const [deletingDepartmentId, setDeletingDepartmentId] = useState(null);
   const [editingDoctorId, setEditingDoctorId] = useState(null);
 
-  // Hospital info / edit states
+  // Hospital info states
   const [hospitalInfo, setHospitalInfo] = useState(null);
   const [hospitalEditMode, setHospitalEditMode] = useState(false);
   const [hospitalFormData, setHospitalFormData] = useState({});
@@ -70,7 +70,7 @@ const AdminDashboard = () => {
   const [patientsLoading, setPatientsLoading] = useState(false);
   const [patientSearch, setPatientSearch] = useState('');
   const [deletingPatientId, setDeletingPatientId] = useState(null);
-  const [activeSection, setActiveSection] = useState('hospital');
+  const [activeSection, setActiveSection] = useState('overview');
   const [profileEditMode, setProfileEditMode] = useState(false);
   const [profileFormData, setProfileFormData] = useState({
     name: '',
@@ -167,17 +167,18 @@ const AdminDashboard = () => {
   };
 
   const handleDeletePatient = async (patientId) => {
-    if (!window.confirm('Are you sure you want to remove this patient? This action cannot be undone.')) return;
+    if (!window.confirm('Are you sure you want to remove this patient?')) return;
     setDeletingPatientId(patientId);
     try {
       const response = await api.deletePatient(patientId, token);
       if (response.status === 'success') {
         setPatients(prev => prev.filter(p => p.id !== patientId));
+        alert('Patient removed successfully');
       } else {
         alert(response.message || 'Failed to remove patient');
       }
     } catch (err) {
-      alert('Error removing patient: ' + (err.message || err));
+      alert('Error removing patient');
     } finally {
       setDeletingPatientId(null);
     }
@@ -186,7 +187,6 @@ const AdminDashboard = () => {
   const fetchAllReviews = async () => {
     setReviewsLoading(true);
     try {
-      // Use authenticated admin /reviews endpoint — returns all-status reviews for hospital
       const res = await api.getMyReviews(token);
       const list = res.data?.data || res.data || [];
       setAllReviews(list.map(r => ({
@@ -201,17 +201,18 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm('Delete this review? This cannot be undone.')) return;
+    if (!window.confirm('Delete this review?')) return;
     setDeletingReviewId(reviewId);
     try {
       const res = await api.deleteReview(reviewId, token);
       if (res.status === 'success') {
         setAllReviews(prev => prev.filter(r => r.id !== reviewId));
+        alert('Review deleted successfully');
       } else {
         alert(res.message || 'Failed to delete review');
       }
     } catch (err) {
-      alert('Error deleting review: ' + (err.message || err));
+      alert('Error deleting review');
     } finally {
       setDeletingReviewId(null);
     }
@@ -219,7 +220,7 @@ const AdminDashboard = () => {
 
   const handleHospitalFormChange = (e) => {
     const { name, value, type, files } = e.target;
-    if (type === 'file' && files[0]) {
+    if (type === 'file' && files && files[0]) {
       setHospitalImageFile(files[0]);
       const reader = new FileReader();
       reader.onloadend = () => setHospitalImagePreview(reader.result);
@@ -246,14 +247,12 @@ const AdminDashboard = () => {
       if (response.status === 'success') {
         setHospitalEditMode(false);
         fetchHospitalInfo(dashboardData.hospital_id);
+        alert('Hospital updated successfully');
       } else {
-        const errMsg = response.message
-          || (response.errors ? Object.values(response.errors).flat().join(', ') : '')
-          || 'Failed to update hospital';
-        setHospitalFormError(errMsg);
+        setHospitalFormError(response.message || 'Failed to update hospital');
       }
     } catch (err) {
-      setHospitalFormError('Error updating hospital: ' + (err.message || err));
+      setHospitalFormError('Error updating hospital');
     } finally {
       setHospitalFormLoading(false);
     }
@@ -292,9 +291,7 @@ const AdminDashboard = () => {
         hospital_id: dashboardData?.hospital_id,
         total_beds: deptFormData.total_beds ? parseInt(deptFormData.total_beds) : 0
       };
-      console.log('Creating department with data:', data);
       const response = await api.createDepartment(data, token);
-      console.log('Department creation response:', response);
       if (response.status === 'success') {
         setDeptFormSuccess('Department created successfully!');
         setDeptFormData({
@@ -305,18 +302,17 @@ const AdminDashboard = () => {
         });
         setShowDeptForm(false);
         fetchDepartments(dashboardData.hospital_id);
+        setTimeout(() => setDeptFormSuccess(''), 3000);
       } else {
         setDeptFormError(response.message || 'Failed to create department');
       }
     } catch (err) {
-      console.error('Department creation error:', err);
-      setDeptFormError(err.message || 'Error creating department');
+      setDeptFormError('Error creating department');
     } finally {
       setDeptFormLoading(false);
     }
   };
 
-  // Doctor form handlers
   const openDoctorForm = (dept) => {
     setDoctorFormDept(dept);
     setDoctorFormData({
@@ -330,6 +326,8 @@ const AdminDashboard = () => {
       experience_years: '',
       consultation_fee: '',
       bio: '',
+      image: null,
+      imagePreview: '',
     });
     setDoctorFormError('');
     setDoctorFormSuccess('');
@@ -338,21 +336,18 @@ const AdminDashboard = () => {
 
   const handleDoctorFormChange = (e) => {
     const { name, value, type, files } = e.target;
-    
-    if (type === 'file') {
+
+    if (type === 'file' && files && files[0]) {
       const file = files[0];
-      if (file) {
-        // Read file for preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setDoctorFormData(prev => ({ 
-            ...prev, 
-            image: file,
-            imagePreview: reader.result
-          }));
-        };
-        reader.readAsDataURL(file);
-      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setDoctorFormData(prev => ({
+          ...prev,
+          image: file,
+          imagePreview: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
     } else {
       setDoctorFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -365,50 +360,30 @@ const AdminDashboard = () => {
     setDoctorFormSuccess('');
 
     try {
-      // Use FormData for file upload
       const formData = new FormData();
       Object.keys(doctorFormData).forEach(key => {
         if (key !== 'imagePreview' && doctorFormData[key] !== null && doctorFormData[key] !== '') {
           formData.append(key, doctorFormData[key]);
         }
       });
-      
-      // Check if editing or creating
+
       let response;
       if (editingDoctorId) {
         response = await api.updateDoctor(editingDoctorId, formData, token);
       } else {
         response = await api.createDoctor(formData, token);
       }
-      
+
       if (response.status === 'success') {
-        const successMsg = editingDoctorId ? 'Doctor updated successfully!' : 'Doctor created successfully!';
-        setDoctorFormSuccess(successMsg);
-        setDoctorFormData({
-          name: '',
-          email: '',
-          password: '',
-          phone: '',
-          department_id: '',
-          license_number: '',
-          qualification: '',
-          experience_years: '',
-          consultation_fee: '',
-          bio: '',
-          image: null,
-          imagePreview: '',
-        });
-        setEditingDoctorId(null);
-        setShowDoctorForm(false);
-        setDoctorFormDept(null);
+        setDoctorFormSuccess(editingDoctorId ? 'Doctor updated successfully!' : 'Doctor created successfully!');
+        closeDoctorForm();
         fetchDepartments(dashboardData.hospital_id);
+        setTimeout(() => setDoctorFormSuccess(''), 3000);
       } else {
-        const errorMsg = response.message || response.errors?.email?.[0] || (editingDoctorId ? 'Failed to update doctor' : 'Failed to create doctor');
-        setDoctorFormError(errorMsg);
+        setDoctorFormError(response.message || 'Failed to save doctor');
       }
     } catch (err) {
-      const errorAction = editingDoctorId ? 'updating' : 'creating';
-      setDoctorFormError(`Error ${errorAction} doctor: ` + (err.message || err.toString()));
+      setDoctorFormError('Error saving doctor');
     } finally {
       setDoctorFormLoading(false);
     }
@@ -453,12 +428,9 @@ const AdminDashboard = () => {
       image: null,
       imagePreview: doctor.image ? `${api.getStorageUrl()}/${doctor.image}` : '',
     });
-    setDoctorFormError('');
-    setDoctorFormSuccess('');
     setShowDoctorForm(true);
   };
 
-  // View doctor
   const handleViewDoctor = (doctor) => {
     setViewingDoctor(doctor);
     setShowDoctorView(true);
@@ -469,11 +441,8 @@ const AdminDashboard = () => {
     setShowDoctorView(false);
   };
 
-  // Delete doctor
   const handleDeleteDoctor = async (doctorId) => {
-    if (!window.confirm('Are you sure you want to delete this doctor? This action cannot be undone.')) {
-      return;
-    }
+    if (!window.confirm('Delete this doctor?')) return;
     setDeletingDoctorId(doctorId);
     try {
       const response = await api.deleteDoctor(doctorId, token);
@@ -484,17 +453,14 @@ const AdminDashboard = () => {
         alert(response.message || 'Failed to delete doctor');
       }
     } catch (err) {
-      alert('Error deleting doctor: ' + (err.message || err.toString()));
+      alert('Error deleting doctor');
     } finally {
       setDeletingDoctorId(null);
     }
   };
 
   const handleDeleteDepartment = async (departmentId) => {
-    if (!window.confirm('Delete this department? It cannot be undone.')) {
-      return;
-    }
-
+    if (!window.confirm('Delete this department?')) return;
     setDeletingDepartmentId(departmentId);
     try {
       const response = await api.deleteDepartment(departmentId, token);
@@ -505,7 +471,7 @@ const AdminDashboard = () => {
         alert(response.message || 'Failed to delete department');
       }
     } catch (err) {
-      alert('Error deleting department: ' + (err.message || err));
+      alert('Error deleting department');
     } finally {
       setDeletingDepartmentId(null);
     }
@@ -518,24 +484,22 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
     try {
       await api.logout(token);
-    } catch {}
+    } catch (err) {
+      console.error('Logout error:', err);
+    }
     logout();
     navigate('/login');
   };
 
   const handleProfileInputChange = (e) => {
     const { name, value, type, files } = e.target;
-
-    if (type === 'file') {
-      const file = files?.[0];
-      if (!file) return;
-      setProfileAvatarFile(file);
+    if (type === 'file' && files && files[0]) {
+      setProfileAvatarFile(files[0]);
       const reader = new FileReader();
       reader.onloadend = () => setProfileAvatarPreview(reader.result);
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(files[0]);
       return;
     }
-
     setProfileFormData(prev => ({ ...prev, [name]: value }));
   };
 
@@ -564,7 +528,7 @@ const AdminDashboard = () => {
     try {
       const formData = new FormData();
       Object.entries(profileFormData).forEach(([key, value]) => {
-        formData.append(key, value || '');
+        if (value) formData.append(key, value);
       });
       if (profileAvatarFile) {
         formData.append('avatar', profileAvatarFile);
@@ -572,641 +536,781 @@ const AdminDashboard = () => {
 
       const response = await api.updateProfile(formData, token);
       if (response.status === 'success') {
-        updateUser(response.user);
+        if (updateUser) updateUser(response.user);
         setProfileAvatarFile(null);
         setProfileEditMode(false);
-        setProfileMessage({ type: 'success', text: response.message || 'Profile updated successfully' });
+        setProfileMessage({ type: 'success', text: 'Profile updated successfully' });
+        setTimeout(() => setProfileMessage({ type: '', text: '' }), 3000);
       } else {
         setProfileMessage({ type: 'error', text: response.message || 'Failed to update profile' });
       }
     } catch (err) {
-      setProfileMessage({ type: 'error', text: err.message || 'Error updating profile' });
+      setProfileMessage({ type: 'error', text: 'Error updating profile' });
     } finally {
       setProfileSaving(false);
     }
   };
 
-  const adminOverviewBars = [
-    { label: 'Doctors', value: dashboardData?.total_doctors || 0 },
-    { label: 'Patients', value: dashboardData?.total_patients || 0 },
-    { label: 'Appointments', value: dashboardData?.total_appointments || 0 },
-    { label: 'Reviews', value: allReviews.length || 0 },
-  ];
+  if (loading) return (
+    <div className="loading-container">
+      <div className="loader"></div>
+      <p>Loading dashboard...</p>
+    </div>
+  );
 
-  const adminOpsBars = [
-    { label: 'Departments', value: departments.length || 0 },
-    { label: 'Pending', value: dashboardData?.pending_appointments || 0 },
-    { label: 'Reports', value: dashboardData?.total_reports || 0 },
-    { label: 'Active Depts', value: departments.filter(d => d.status === 'active').length || 0 },
-  ];
-
-  const overviewMax = Math.max(1, ...adminOverviewBars.map(item => item.value));
-  const overviewPoints = adminOverviewBars
-    .map((item, idx) => {
-      const x = adminOverviewBars.length === 1 ? 50 : (idx * 100) / (adminOverviewBars.length - 1);
-      const y = 95 - (item.value / overviewMax) * 80;
-      return { x, y };
-    });
-  const overviewPath = overviewPoints.map(point => `${point.x},${point.y}`).join(' ');
-
-  const pieColors = ['#3b82f6', '#22c55e', '#f59e0b', '#a855f7'];
-  const opsTotal = Math.max(1, adminOpsBars.reduce((sum, item) => sum + item.value, 0));
-  let accumulated = 0;
-  const pieGradient = `conic-gradient(${adminOpsBars
-    .map((item, idx) => {
-      const start = (accumulated / opsTotal) * 360;
-      accumulated += item.value;
-      const end = (accumulated / opsTotal) * 360;
-      return `${pieColors[idx % pieColors.length]} ${start}deg ${end}deg`;
-    })
-    .join(', ')})`;
-
-  if (loading) return <div className="ad-loading">Loading dashboard...</div>;
   if (!user) return null;
 
+  const stats = [
+    { title: 'Total Doctors', value: dashboardData?.total_doctors || 0, Icon: Stethoscope, color: '#8B4513', bg: '#f5f0e8' },
+    { title: 'Total Patients', value: dashboardData?.total_patients || 0, Icon: User, color: '#10b981', bg: '#ecfdf5' },
+    { title: 'Appointments', value: dashboardData?.total_appointments || 0, Icon: Calendar, color: '#f59e0b', bg: '#fffbeb' },
+    { title: 'Departments', value: departments.length || 0, Icon: Building2, color: '#a0522d', bg: '#f9f5f0' },
+    { title: 'Pending Appointments', value: dashboardData?.pending_appointments || 0, Icon: Clock, color: '#ef4444', bg: '#fef2f2' },
+    { title: 'Total Reviews', value: allReviews.length || 0, Icon: Star, color: '#d97706', bg: '#fef3c7' },
+  ];
+
   return (
-    <div className="ad-page">
-      <div className="dash-shell">
-        <aside className="dash-sidebar">
-          <h3 className="dash-sidebar-title">Admin Navigation</h3>
-          <div className="dash-sidebar-nav">
-            <button className={`dash-sidebar-btn ${activeSection === 'profile' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('profile')}>My Profile</button>
-            <button className={`dash-sidebar-btn ${activeSection === 'hospital' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('hospital')}>Hospital</button>
-            <button className={`dash-sidebar-btn ${activeSection === 'departments' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('departments')}>Departments</button>
-            <button className={`dash-sidebar-btn ${activeSection === 'reviews' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('reviews')}>Reviews</button>
-            <button className={`dash-sidebar-btn ${activeSection === 'patients' ? 'active' : ''}`} type="button" onClick={() => handleSectionClick('patients')}>Patients</button>
+    <div className="admin-dashboard">
+      {/* Sidebar */}
+      <aside className="admin-sidebar">
+        <div className="sidebar-header">
+          <div className="logo">
+            <Building2 size={28} />
+            <h2>Doctor Sathi</h2>
           </div>
-          <div className="dash-sidebar-footer">
-            <button className="dash-sidebar-btn dash-sidebar-logout" type="button" onClick={handleLogout}>Logout</button>
-            <p className="dash-sidebar-footnote">Admin Panel</p>
-          </div>
-        </aside>
-
-        <div className="dash-main-content">
-      <section className="dash-analytics">
-        <div className="dash-graph-card">
-          <h3>Overview Graph</h3>
-          <p>Core hospital metrics</p>
-          <div className="dash-line-wrap">
-            <svg className="dash-line-chart" viewBox="0 0 100 100" preserveAspectRatio="none" aria-label="Overview line graph">
-              <line className="dash-line-grid" x1="0" y1="20" x2="100" y2="20" />
-              <line className="dash-line-grid" x1="0" y1="40" x2="100" y2="40" />
-              <line className="dash-line-grid" x1="0" y1="60" x2="100" y2="60" />
-              <line className="dash-line-grid" x1="0" y1="80" x2="100" y2="80" />
-              <polyline className="dash-line-path" points={overviewPath} />
-              {overviewPoints.map((point, idx) => (
-                <circle key={adminOverviewBars[idx].label} className="dash-line-point" cx={point.x} cy={point.y} r="1.8" />
-              ))}
-            </svg>
-            <div className="dash-line-labels">
-              {adminOverviewBars.map((item) => (
-                <span key={item.label}>{item.label}: {item.value}</span>
-              ))}
-            </div>
-          </div>
+          <p>Admin Portal</p>
         </div>
-        <div className="dash-graph-card">
-          <h3>Operations Pie Chart</h3>
-          <p>Department and workflow health</p>
-          <div className="dash-pie-wrap">
-            <div className="dash-pie-chart" style={{ background: pieGradient }} aria-label="Operations pie chart" />
-            <ul className="dash-pie-legend">
-              {adminOpsBars.map((item, idx) => (
-                <li key={item.label}>
-                  <span className="dash-pie-legend-name">
-                    <span className="dash-pie-dot" style={{ background: pieColors[idx % pieColors.length] }} />
-                    {item.label}
-                  </span>
-                  <span className="dash-pie-value">{item.value}</span>
-                </li>
-              ))}
-            </ul>
+
+        <nav className="sidebar-nav">
+          <div className={`nav-item ${activeSection === 'overview' ? 'active' : ''}`} onClick={() => handleSectionClick('overview')}>
+            <BarChart3 size={20} />
+            <span>Overview</span>
           </div>
+          <div className={`nav-item ${activeSection === 'profile' ? 'active' : ''}`} onClick={() => handleSectionClick('profile')}>
+            <User size={20} />
+            <span>My Profile</span>
+          </div>
+          <div className={`nav-item ${activeSection === 'hospital' ? 'active' : ''}`} onClick={() => handleSectionClick('hospital')}>
+            <Building2 size={20} />
+            <span>Hospital</span>
+          </div>
+          <div className={`nav-item ${activeSection === 'departments' ? 'active' : ''}`} onClick={() => handleSectionClick('departments')}>
+            <Folder size={20} />
+            <span>Departments</span>
+          </div>
+          <div className={`nav-item ${activeSection === 'reviews' ? 'active' : ''}`} onClick={() => handleSectionClick('reviews')}>
+            <Star size={20} />
+            <span>Reviews</span>
+          </div>
+          <div className={`nav-item ${activeSection === 'patients' ? 'active' : ''}`} onClick={() => handleSectionClick('patients')}>
+            <Users size={20} />
+            <span>Patients</span>
+          </div>
+        </nav>
+
+        <div className="sidebar-footer">
+          <button className="logout-btn" onClick={handleLogout}>
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+          <p className="footer-note">© 2024 MediCare HMS</p>
         </div>
-      </section>
+      </aside>
 
-      <section className="ad-profile-section" style={{ display: activeSection === 'profile' ? 'block' : 'none' }}>
-        <div className="ad-panel ad-profile-card">
-          <div className="ad-profile-header-row">
-            <h2 className="ad-panel-title ad-profile-title">My Information</h2>
-            {!profileEditMode ? (
-              <button type="button" className="ad-edit-profile-btn" onClick={() => setProfileEditMode(true)}>Edit Profile</button>
-            ) : null}
-          </div>
-
-          {profileMessage.text ? (
-            <div className={profileMessage.type === 'error' ? 'ad-form-error' : 'success-message'}>{profileMessage.text}</div>
-          ) : null}
-
-          {!profileEditMode ? (
-            <>
-              <div className="dash-profile-top ad-profile-head">
-                <div className="dash-profile-avatar ad-profile-avatar">
-                  {profileAvatarPreview ? (
-                    <img src={profileAvatarPreview} alt={user?.name || 'Admin'} className="ad-profile-avatar-img" />
-                  ) : (
-                    user?.name?.charAt(0)?.toUpperCase() || 'A'
-                  )}
-                </div>
-                <div>
-                  <h2 className="dash-profile-title">{user?.name || 'Admin'}</h2>
-                  <p className="dash-profile-subtitle">Administrator account overview</p>
-                </div>
-              </div>
-
-              <div className="dash-profile-details ad-profile-details-grid">
-                <div className="dash-profile-row"><label>Name</label><span>{user?.name || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Email</label><span>{user?.email || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Phone</label><span>{user?.phone || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Staff ID</label><span>{user?.identifier || 'N/A'}</span></div>
-                <div className="dash-profile-row"><label>Role</label><span>Admin</span></div>
-                <div className="dash-profile-row"><label>Hospital</label><span>{hospitalInfo?.name || 'N/A'}</span></div>
-              </div>
-            </>
-          ) : (
-            <form className="ad-profile-form" onSubmit={handleProfileSave}>
-              <div className="ad-admin-avatar-wrap ad-profile-head">
-                <div className="ad-admin-avatar ad-profile-avatar">
-                  {profileAvatarPreview ? (
-                    <img src={profileAvatarPreview} alt={profileFormData.name || 'Admin'} className="ad-profile-avatar-img" />
-                  ) : (
-                    profileFormData.name?.charAt(0)?.toUpperCase() || 'A'
-                  )}
-                </div>
-                <div className="ad-profile-avatar-actions">
-                  <span className="ad-admin-role-badge">Admin</span>
-                  <label className="ad-profile-upload-label">
-                    Change Photo
-                    <input type="file" accept="image/*" onChange={handleProfileInputChange} name="avatar" style={{ display: 'none' }} />
-                  </label>
-                </div>
-              </div>
-
-              <div className="ad-profile-form-grid">
-                <div className="ad-form-group">
-                  <label>Name</label>
-                  <input name="name" value={profileFormData.name} onChange={handleProfileInputChange} placeholder="Full name" />
-                </div>
-                <div className="ad-form-group">
-                  <label>Phone</label>
-                  <input name="phone" value={profileFormData.phone} onChange={handleProfileInputChange} placeholder="Phone number" />
-                </div>
-                <div className="ad-form-group">
-                  <label>Date of Birth</label>
-                  <input type="date" name="date_of_birth" value={profileFormData.date_of_birth} onChange={handleProfileInputChange} />
-                </div>
-                <div className="ad-form-group">
-                  <label>Gender</label>
-                  <select name="gender" value={profileFormData.gender} onChange={handleProfileInputChange}>
-                    <option value="">Select gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div className="ad-form-group ad-form-group--full">
-                  <label>Address</label>
-                  <input name="address" value={profileFormData.address} onChange={handleProfileInputChange} placeholder="Address" />
-                </div>
-                <div className="ad-form-group">
-                  <label>City</label>
-                  <input name="city" value={profileFormData.city} onChange={handleProfileInputChange} placeholder="City" />
-                </div>
-                <div className="ad-form-group">
-                  <label>State</label>
-                  <input name="state" value={profileFormData.state} onChange={handleProfileInputChange} placeholder="State" />
-                </div>
-                <div className="ad-form-group">
-                  <label>Postal Code</label>
-                  <input name="postal_code" value={profileFormData.postal_code} onChange={handleProfileInputChange} placeholder="Postal code" />
-                </div>
-                <div className="ad-form-group">
-                  <label>Email</label>
-                  <input value={user?.email || ''} disabled readOnly />
-                </div>
-              </div>
-
-              <div className="ad-form-actions">
-                <button type="button" className="ad-cancel-btn" onClick={handleProfileCancel}>Cancel</button>
-                <button type="submit" className="ad-save-btn" disabled={profileSaving}>{profileSaving ? 'Saving...' : 'Save Profile'}</button>
-              </div>
-            </form>
-          )}
-
-          <div className="dash-profile-stats ad-profile-stats-grid">
-            <div className="dash-profile-stat"><strong>{dashboardData?.total_doctors || 0}</strong><span>Doctors</span></div>
-            <div className="dash-profile-stat"><strong>{dashboardData?.total_patients || 0}</strong><span>Patients</span></div>
-            <div className="dash-profile-stat"><strong>{dashboardData?.pending_appointments || 0}</strong><span>Pending Appts</span></div>
-            <div className="dash-profile-stat"><strong>{dashboardData?.total_reports || 0}</strong><span>Reports</span></div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOSPITAL INFO SECTION ── */}
-      <section id="ad-hospital" className="ad-hospital-section" style={{ display: activeSection === 'hospital' ? 'block' : 'none' }}>
-        {!hospitalEditMode ? (
-          <div className="ad-hospital-view">
-            <div className="ad-hospital-img-wrap">
-              {hospitalInfo?.image ? (
-                <img
-                  src={hospitalImagePreview || `${api.getStorageUrl()}/${hospitalInfo.image}`}
-                  alt={hospitalInfo?.name}
-                  className="ad-hospital-img"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              ) : (
-                <div className="ad-hospital-img-placeholder">H</div>
-              )}
+      {/* Main Content */}
+      <main className="admin-main">
+        {/* Overview Section */}
+        <div className={`content-section ${activeSection === 'overview' ? 'active' : ''}`}>
+          <div className="page-header">
+            <div>
+              <h1>Dashboard Overview</h1>
+              <p>Welcome back, {user?.name || 'Admin'}! Here's what's happening today.</p>
             </div>
-            <div className="ad-hospital-details">
-              <h1 className="ad-hospital-name">{hospitalInfo?.name || 'Hospital'}</h1>
-              {hospitalInfo?.address && <p className="ad-hospital-addr">{hospitalInfo.address}</p>}
-              {hospitalInfo?.phone && <p className="ad-hospital-phone">{hospitalInfo.phone}</p>}
-              {hospitalInfo?.email && <p className="ad-hospital-email">{hospitalInfo.email}</p>}
-              {hospitalInfo?.description && <p className="ad-hospital-desc">{hospitalInfo.description}</p>}
-              <div className="ad-hospital-stats">
-                <span className="ad-hstat">{dashboardData?.total_doctors || 0} Doctors</span>
-                <span className="ad-hstat">{dashboardData?.total_patients || 0} Patients</span>
-                <span className="ad-hstat">{dashboardData?.total_appointments || 0} Appointments</span>
-              </div>
-            </div>
-            <button className="ad-edit-hospital-btn" onClick={() => setHospitalEditMode(true)}>
-              Edit Hospital
-            </button>
-          </div>
-        ) : (
-          <form className="ad-hospital-edit-form" onSubmit={handleHospitalUpdate}>
-            <h2 className="ad-edit-title">Edit Hospital Information</h2>
-            {hospitalFormError && <div className="ad-form-error">{hospitalFormError}</div>}
-            <div className="ad-form-grid">
-              <div className="ad-form-group">
-                <label>Hospital Name *</label>
-                <input name="name" value={hospitalFormData.name || ''} onChange={handleHospitalFormChange} required placeholder="Hospital name" />
-              </div>
-              <div className="ad-form-group">
-                <label>Phone</label>
-                <input name="phone" value={hospitalFormData.phone || ''} onChange={handleHospitalFormChange} placeholder="Phone number" />
-              </div>
-              <div className="ad-form-group">
-                <label>Email</label>
-                <input name="email" type="email" value={hospitalFormData.email || ''} onChange={handleHospitalFormChange} placeholder="contact@hospital.com" />
-              </div>
-              <div className="ad-form-group">
-                <label>Address</label>
-                <input name="address" value={hospitalFormData.address || ''} onChange={handleHospitalFormChange} placeholder="Hospital address" />
-              </div>
-              <div className="ad-form-group ad-form-group--full">
-                <label>Description</label>
-                <textarea name="description" value={hospitalFormData.description || ''} onChange={handleHospitalFormChange} rows="3" placeholder="About the hospital..." />
-              </div>
-              <div className="ad-form-group ad-form-group--full">
-                <label>Hospital Image</label>
-                {hospitalImagePreview && (
-                  <img src={hospitalImagePreview} alt="preview" className="ad-img-preview" />
-                )}
-                <input type="file" name="image" accept="image/*" onChange={handleHospitalFormChange} />
-              </div>
-            </div>
-            <div className="ad-form-actions">
-              <button type="button" className="ad-cancel-btn" onClick={() => { setHospitalEditMode(false); setHospitalFormError(''); }}>Cancel</button>
-              <button type="submit" className="ad-save-btn" disabled={hospitalFormLoading}>
-                {hospitalFormLoading ? 'Saving...' : 'Save Changes'}
+            <div className="header-actions">
+              <button className="btn-secondary" onClick={() => handleSectionClick('departments')}>
+                <Plus size={18} /> Quick Add
               </button>
             </div>
-          </form>
-        )}
-      </section>
+          </div>
 
-      {/* ── THREE PANELS ── */}
-      <div className="ad-panels" style={{ display: activeSection === 'departments' ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
+          <div className="stats-grid">
+            {stats.map((stat, index) => (
+              <div className="stat-card" key={index} style={{ borderLeftColor: stat.color }}>
+                <div className="stat-header">
+                  <div className="stat-icon" style={{ background: stat.bg, color: stat.color }}>
+                    <stat.Icon size={24} />
+                  </div>
+                  <span className="stat-value">{stat.value.toLocaleString()}</span>
+                </div>
+                <div className="stat-title">{stat.title}</div>
+              </div>
+            ))}
+          </div>
 
-        {/* ── PANEL 2 — Departments & Doctors ── */}
-        <div id="ad-departments" className="ad-panel ad-depts-panel">
-          <div className="ad-panel-header-row">
-            <h2 className="ad-panel-title">Departments and Doctors</h2>
-            <button className="ad-add-btn" onClick={() => setShowDeptForm(!showDeptForm)}>
-              {showDeptForm ? 'Cancel' : 'Add Dept / Doctor'}
+          <div className="charts-row">
+            <div className="chart-card">
+              <h3>Recent Activity</h3>
+              <div className="activity-list">
+                <div className="activity-item">
+                  <div className="activity-icon"><CheckCircle size={20} /></div>
+                  <div>
+                    <p className="activity-text">System ready for operations</p>
+                    <span className="activity-time">Just now</span>
+                  </div>
+                </div>
+                <div className="activity-item">
+                  <div className="activity-icon"><Stethoscope size={20} /></div>
+                  <div>
+                    <p className="activity-text">Total {dashboardData?.total_doctors || 0} doctors available</p>
+                    <span className="activity-time">Today</span>
+                  </div>
+                </div>
+                <div className="activity-item">
+                  <div className="activity-icon"><Calendar size={20} /></div>
+                  <div>
+                    <p className="activity-text">{dashboardData?.total_appointments || 0} total appointments scheduled</p>
+                    <span className="activity-time">This week</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="chart-card">
+              <h3>Quick Actions</h3>
+              <div className="quick-actions">
+                <button className="quick-action-btn" onClick={() => handleSectionClick('departments')}>
+                  <div className="action-icon"><Plus size={20} /></div>
+                  <div>
+                    <strong>Add Department</strong>
+                    <p>Create new department</p>
+                  </div>
+                </button>
+                <button className="quick-action-btn" onClick={() => {
+                  if (departments.length > 0) openDoctorForm(departments[0]);
+                  else alert('Please create a department first');
+                }}>
+                  <div className="action-icon"><Stethoscope size={20} /></div>
+                  <div>
+                    <strong>Add Doctor</strong>
+                    <p>Register new doctor</p>
+                  </div>
+                </button>
+                <button className="quick-action-btn" onClick={() => handleSectionClick('hospital')}>
+                  <div className="action-icon"><Edit size={20} /></div>
+                  <div>
+                    <strong>Edit Hospital</strong>
+                    <p>Update hospital info</p>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Profile Section */}
+        <div className={`content-section ${activeSection === 'profile' ? 'active' : ''}`}>
+          <div className="page-header">
+            <div>
+              <h1>My Profile</h1>
+              <p>Manage your account information</p>
+            </div>
+          </div>
+
+          <div className="profile-card">
+            {!profileEditMode ? (
+              <>
+                <div className="profile-header">
+                  <div className="profile-avatar">
+                    {profileAvatarPreview ? (
+                      <img src={profileAvatarPreview} alt={user?.name} />
+                    ) : (
+                      <div className="avatar-placeholder">{user?.name?.charAt(0) || 'A'}</div>
+                    )}
+                  </div>
+                  <div className="profile-info">
+                    <h2>{user?.name || 'Admin'}</h2>
+                    <p className="profile-role">Administrator</p>
+                    <button className="btn-edit" onClick={() => setProfileEditMode(true)}>
+                      <Edit size={16} /> Edit Profile
+                    </button>
+                  </div>
+                </div>
+                <div className="profile-details">
+                  <div className="detail-row">
+                    <label><Mail size={18} /> Email</label>
+                    <span>{user?.email || 'N/A'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label><Phone size={18} /> Phone</label>
+                    <span>{user?.phone || 'N/A'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label><Hash size={18} /> Staff ID</label>
+                    <span>{user?.identifier || 'N/A'}</span>
+                  </div>
+                  <div className="detail-row">
+                    <label><Building2 size={18} /> Hospital</label>
+                    <span>{hospitalInfo?.name || 'N/A'}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <form className="profile-form" onSubmit={handleProfileSave}>
+                {profileMessage.text && (
+                  <div className={`alert ${profileMessage.type === 'error' ? 'alert-error' : 'alert-success'}`}>
+                    {profileMessage.text}
+                  </div>
+                )}
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input type="text" name="name" value={profileFormData.name} onChange={handleProfileInputChange} />
+                </div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input type="text" name="phone" value={profileFormData.phone} onChange={handleProfileInputChange} />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" name="date_of_birth" value={profileFormData.date_of_birth} onChange={handleProfileInputChange} />
+                  </div>
+                  <div className="form-group">
+                    <label>Gender</label>
+                    <select name="gender" value={profileFormData.gender} onChange={handleProfileInputChange}>
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label>Profile Picture</label>
+                  <input type="file" accept="image/*" onChange={handleProfileInputChange} />
+                </div>
+                <div className="form-actions">
+                  <button type="button" className="btn-cancel" onClick={handleProfileCancel}>Cancel</button>
+                  <button type="submit" className="btn-save" disabled={profileSaving}>
+                    {profileSaving ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+
+        {/* Hospital Section - FIXED VERSION */}
+        <div className={`content-section ${activeSection === 'hospital' ? 'active' : ''}`}>
+          <div className="page-header">
+            <div>
+              <h1>Hospital Information</h1>
+              <p>Manage your hospital details and branding</p>
+            </div>
+            {!hospitalEditMode && (
+              <button className="btn-primary" onClick={() => setHospitalEditMode(true)}>
+                <Edit size={18} /> Edit Hospital
+              </button>
+            )}
+          </div>
+
+          {!hospitalEditMode ? (
+            <div className="hospital-main-card">
+              <div className="hospital-layout">
+                {/* Image Section */}
+                <div className="hospital-image-section">
+                  <div className="hospital-image-wrapper">
+                    {(hospitalInfo?.image || hospitalImagePreview) ? (
+                      <img
+                        src={hospitalImagePreview || `${api.getStorageUrl()}/${hospitalInfo.image}`}
+                        alt={hospitalInfo?.name || 'Hospital'}
+                        className="hospital-image"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1453&q=80';
+                        }}
+                      />
+                    ) : (
+                      <div className="hospital-image-placeholder">
+                        <img
+                          src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1453&q=80"
+                          alt="Hospital default"
+                          className="hospital-image"
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Info Section */}
+                <div className="hospital-info-section">
+                  <div className="hospital-header">
+                    <h2>{hospitalInfo?.name || 'Charak Memorial Hospital'}</h2>
+                    <div className="hospital-status">
+                      <span className="status-badge active">Active</span>
+                    </div>
+                  </div>
+
+                  <div className="hospital-details-grid">
+                    <div className="detail-item">
+                      <div className="detail-icon">📍</div>
+                      <div className="detail-content">
+                        <label>Location</label>
+                        <p>{hospitalInfo?.address || 'Pokhara-2, Lekhnath, Nepal'}</p>
+                      </div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="detail-icon">📞</div>
+                      <div className="detail-content">
+                        <label>Phone Number</label>
+                        <p>{hospitalInfo?.phone || '+977-1234567890'}</p>
+                        <small>Emergency: 102</small>
+                      </div>
+                    </div>
+
+                    <div className="detail-item">
+                      <div className="detail-icon">✉️</div>
+                      <div className="detail-content">
+                        <label>Email Address</label>
+                        <p>{hospitalInfo?.email || 'charak11@gmail.com'}</p>
+                      </div>
+                    </div>
+
+                    <div className="detail-item full-width">
+                      <div className="detail-icon">ℹ️</div>
+                      <div className="detail-content">
+                        <label>About Hospital</label>
+                        <p>{hospitalInfo?.description || 'City Hospital Pokhara is a leading healthcare facility committed to providing exceptional medical services with compassion and excellence.'}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="hospital-stats">
+                    <div className="stat">
+                      <div className="stat-value">{dashboardData?.total_doctors || 0}</div>
+                      <div className="stat-label">Doctors</div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-value">{dashboardData?.total_patients || 0}</div>
+                      <div className="stat-label">Patients</div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-value">{dashboardData?.total_appointments || 0}</div>
+                      <div className="stat-label">Appointments</div>
+                    </div>
+                    <div className="stat">
+                      <div className="stat-value">{departments.length || 0}</div>
+                      <div className="stat-label">Departments</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="hospital-edit-card">
+              <div className="edit-header">
+                <h3>✏️ Edit Hospital Information</h3>
+                <button className="close-edit" onClick={() => setHospitalEditMode(false)}>✕</button>
+              </div>
+
+              {hospitalFormError && <div className="alert alert-error">{hospitalFormError}</div>}
+
+              <form onSubmit={handleHospitalUpdate} className="hospital-edit-form">
+                <div className="form-group">
+                  <label>Hospital Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={hospitalFormData.name || ''}
+                    onChange={handleHospitalFormChange}
+                    placeholder="Enter hospital name"
+                    required
+                  />
+                </div>
+
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={hospitalFormData.phone || ''}
+                      onChange={handleHospitalFormChange}
+                      placeholder="Phone number"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Email Address</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={hospitalFormData.email || ''}
+                      onChange={handleHospitalFormChange}
+                      placeholder="Email address"
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Address</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={hospitalFormData.address || ''}
+                    onChange={handleHospitalFormChange}
+                    placeholder="Full address"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    name="description"
+                    value={hospitalFormData.description || ''}
+                    onChange={handleHospitalFormChange}
+                    rows="4"
+                    placeholder="Describe your hospital, services, mission, etc."
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Hospital Image</label>
+                  <div className="image-upload-area">
+                    {hospitalImagePreview && (
+                      <div className="image-preview-container">
+                        <img src={hospitalImagePreview} alt="Preview" className="image-preview" />
+                        <button
+                          type="button"
+                          className="remove-image"
+                          onClick={() => {
+                            setHospitalImageFile(null);
+                            setHospitalImagePreview('');
+                          }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    )}
+                    <label className="upload-btn">
+                      📁 {hospitalImagePreview ? 'Change Image' : 'Upload Image'}
+                      <input
+                        type="file"
+                        name="image"
+                        accept="image/*"
+                        onChange={handleHospitalFormChange}
+                        style={{ display: 'none' }}
+                      />
+                    </label>
+                    <p className="upload-hint">Recommended: 800x600px, JPG or PNG</p>
+                  </div>
+                </div>
+
+                <div className="form-actions">
+                  <button type="button" className="btn-cancel" onClick={() => {
+                    setHospitalEditMode(false);
+                    setHospitalFormError('');
+                    setHospitalImageFile(null);
+                    setHospitalImagePreview(hospitalInfo?.image ? `${api.getStorageUrl()}/${hospitalInfo.image}` : '');
+                  }}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="btn-save" disabled={hospitalFormLoading}>
+                    {hospitalFormLoading ? 'Saving...' : 'Save Changes'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
+
+        {/* Departments Section */}
+        <div className={`content-section ${activeSection === 'departments' ? 'active' : ''}`}>
+          <div className="page-header">
+            <div>
+              <h1>Departments</h1>
+              <p>Manage hospital departments and doctors</p>
+            </div>
+            <button className="btn-primary" onClick={() => setShowDeptForm(!showDeptForm)}>
+              {showDeptForm ? 'Cancel' : '+ Add Department'}
             </button>
           </div>
 
-          {/* Dept / Doctor creation form (existing) */}
           {showDeptForm && (
-            <div className="dept-form-container combined-form">
-              <h3>Add Department & Doctor</h3>
-              {deptFormError && <div className="error-message">{deptFormError}</div>}
-              {deptFormSuccess && <div className="success-message">{deptFormSuccess}</div>}
-              <div className="form-section">
-                <h4>Department Information</h4>
-                <form onSubmit={handleCreateDepartment} className="dept-form">
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Department Name *</label>
-                      <input type="text" name="name" value={deptFormData.name} onChange={handleDeptFormChange} placeholder="e.g., Cardiology" required />
-                    </div>
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Total Beds</label>
-                      <input type="number" name="total_beds" value={deptFormData.total_beds} onChange={handleDeptFormChange} placeholder="0" min="0" />
-                    </div>
-                    <div className="form-group">
-                      <label>Status</label>
-                      <select name="status" value={deptFormData.status} onChange={handleDeptFormChange}>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-group full-width">
-                    <label>Description</label>
-                    <textarea name="description" value={deptFormData.description} onChange={handleDeptFormChange} placeholder="Department description..." rows="2" />
-                  </div>
-                  <div className="form-actions">
-                    <button type="submit" disabled={deptFormLoading} className="submit-btn">
-                      {deptFormLoading ? 'Creating...' : 'Create Department'}
-                    </button>
-                  </div>
-                </form>
-              </div>
-              <div className="form-section doctor-section">
-                <h4>Add Doctor to Existing Department</h4>
-                <p className="section-hint">Select a department and add a doctor directly</p>
-                <div className="quick-add-doctor">
-                  <select className="dept-select" value={doctorFormData.department_id} onChange={(e) => setDoctorFormData(prev => ({ ...prev, department_id: e.target.value }))}>
-                    <option value="">-- Select Department --</option>
-                    {departments.map(dept => (
-                      <option key={dept.id} value={dept.id}>{dept.name}</option>
-                    ))}
-                  </select>
-                  {doctorFormData.department_id && (
-                    <button type="button" className="open-doctor-form-btn" onClick={() => {
-                      const selectedDept = departments.find(d => d.id == doctorFormData.department_id);
-                      if (selectedDept) openDoctorForm(selectedDept);
-                    }}>
-                      + Add Doctor
-                    </button>
-                  )}
+            <div className="form-card">
+              <h3>Create New Department</h3>
+              {deptFormError && <div className="alert alert-error">{deptFormError}</div>}
+              {deptFormSuccess && <div className="alert alert-success">{deptFormSuccess}</div>}
+              <form onSubmit={handleCreateDepartment}>
+                <div className="form-group">
+                  <label>Department Name *</label>
+                  <input type="text" name="name" value={deptFormData.name} onChange={handleDeptFormChange} required />
                 </div>
-              </div>
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea name="description" value={deptFormData.description} onChange={handleDeptFormChange} rows="3" />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>Total Beds</label>
+                    <input type="number" name="total_beds" value={deptFormData.total_beds} onChange={handleDeptFormChange} min="0" />
+                  </div>
+                  <div className="form-group">
+                    <label>Status</label>
+                    <select name="status" value={deptFormData.status} onChange={handleDeptFormChange}>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-actions">
+                  <button type="submit" className="btn-save" disabled={deptFormLoading}>
+                    {deptFormLoading ? 'Creating...' : 'Create Department'}
+                  </button>
+                </div>
+              </form>
             </div>
           )}
 
           {departments.length === 0 ? (
-            <div className="ad-empty-box">No departments yet. Click "+ Add Dept / Doctor" to create one.</div>
-          ) : departments.map(dept => (
-            <div className="ad-dept-block" key={dept.id}>
-              <div className="ad-dept-heading">
-                <div>
-                  <span className="ad-dept-name">{dept.name}</span>
-                  {dept.description && <span className="ad-dept-desc"> — {dept.description}</span>}
+            <div className="empty-state">
+              <div className="empty-icon">📁</div>
+              <p>No departments yet. Click "Add Department" to get started.</p>
+            </div>
+          ) : (
+            departments.map(dept => (
+              <div className="department-card" key={dept.id}>
+                <div className="dept-header">
+                  <div>
+                    <h3>{dept.name}</h3>
+                    {dept.description && <p className="dept-desc">{dept.description}</p>}
+                  </div>
+                  <div className="dept-actions">
+                    <span className={`status-badge ${dept.status}`}>{dept.status}</span>
+                    <button className="btn-icon" onClick={() => openDoctorForm(dept)} title="Add Doctor">
+                      + Doctor
+                    </button>
+                    <button className="btn-icon danger" onClick={() => handleDeleteDepartment(dept.id)} disabled={deletingDepartmentId === dept.id}>
+                      🗑️
+                    </button>
+                  </div>
                 </div>
-                <div className="ad-dept-right">
-                  <span className={`status-badge ${dept.status === 'active' ? 'active' : 'inactive'}`}>{dept.status || 'active'}</span>
-                  <button className="ad-add-doc-btn" onClick={() => openDoctorForm(dept)}>+ Doctor</button>
-                  <button
-                    className="ad-tbl-btn del"
-                    type="button"
-                    onClick={() => handleDeleteDepartment(dept.id)}
-                    disabled={deletingDepartmentId === dept.id}
-                  >
-                    {deletingDepartmentId === dept.id ? '...' : 'Delete Dept'}
-                  </button>
-                </div>
-              </div>
 
-              {(dept.doctors || []).length === 0 ? (
-                <p className="ad-no-doctors">No doctors in this department.</p>
-              ) : (
-                <div className="ad-doctor-table-wrap">
-                  <table className="ad-doctor-table">
-                    <thead>
-                      <tr>
-                        <th>NAME</th>
-                        <th>QUALIFICATION</th>
-                        <th>CONTACT</th>
-                        <th>EXPERIENCE</th>
-                        <th>FEE</th>
-                        <th>STATUS</th>
-                        <th>ACTIONS</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(dept.doctors || []).map(doctor => (
-                        <tr key={doctor.id}>
-                          <td>
-                            <div className="ad-doc-name-cell">
-                              <strong>{doctor.user?.name || doctor.name || 'Unknown'}</strong>
-                              {doctor.user?.identifier && <span className="ad-doc-id">{doctor.user.identifier}</span>}
-                            </div>
-                          </td>
-                          <td>{doctor.qualification || '—'}</td>
-                          <td>
-                            <div className="ad-doc-contact-cell">
-                              {doctor.user?.phone && <span>{doctor.user.phone}</span>}
-                              {doctor.user?.email && <span className="ad-doc-email">{doctor.user.email}</span>}
-                            </div>
-                          </td>
-                          <td>{doctor.experience_years ? `${doctor.experience_years} years` : '—'}</td>
-                          <td>{doctor.consultation_fee ? `Rs ${doctor.consultation_fee}` : '—'}</td>
-                          <td><span className="status-badge active">active</span></td>
-                          <td>
-                            <div className="ad-doc-actions-cell">
-                              <button className="ad-tbl-btn view" onClick={() => handleViewDoctor(doctor)}>View</button>
-                              <button className="ad-tbl-btn edit" onClick={() => handleEditDoctor(doctor, dept)}>Edit</button>
-                              <button className="ad-tbl-btn del" onClick={() => handleDeleteDoctor(doctor.id)} disabled={deletingDoctorId === doctor.id}>
+                {(dept.doctors || []).length === 0 ? (
+                  <p className="no-doctors">No doctors in this department.</p>
+                ) : (
+                  <div className="doctors-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          <th>Doctor Name</th>
+                          <th>Qualification</th>
+                          <th>Experience</th>
+                          <th>Fee</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(dept.doctors || []).map(doctor => (
+                          <tr key={doctor.id}>
+                            <td>
+                              <strong>{doctor.user?.name || doctor.name}</strong>
+                              <small>{doctor.user?.identifier}</small>
+                            </td>
+                            <td>{doctor.qualification || '—'}</td>
+                            <td>{doctor.experience_years ? `${doctor.experience_years} yrs` : '—'}</td>
+                            <td>{doctor.consultation_fee ? `Rs ${doctor.consultation_fee}` : '—'}</td>
+                            <td>
+                              <button className="btn-small" onClick={() => handleViewDoctor(doctor)}>View</button>
+                              <button className="btn-small" onClick={() => handleEditDoctor(doctor, dept)}>Edit</button>
+                              <button className="btn-small danger" onClick={() => handleDeleteDoctor(doctor.id)} disabled={deletingDoctorId === doctor.id}>
                                 {deletingDoctorId === doctor.id ? '...' : 'Delete'}
                               </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          ))}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
         </div>
 
-      </div>{/* end .ad-panels (2-col top row) */}
+        {/* Reviews Section */}
+        <div className={`content-section ${activeSection === 'reviews' ? 'active' : ''}`}>
+          <div className="page-header">
+            <div>
+              <h1>Patient Reviews</h1>
+              <p>Manage doctor reviews and feedback</p>
+            </div>
+          </div>
 
-      {/* ── BOTTOM ROW — Reviews + Patients ── */}
-      <div className="ad-bottom-row" style={{ display: (activeSection === 'reviews' || activeSection === 'patients') ? 'grid' : 'none', gridTemplateColumns: '1fr' }}>
-
-        {/* ── Reviews ── */}
-        <div id="ad-reviews" className="ad-panel ad-reviews-panel" style={{ display: activeSection === 'reviews' ? 'block' : 'none' }}>
-          <h2 className="ad-panel-title">Doctor Reviews</h2>
           {reviewsLoading ? (
-            <p className="ad-reviews-loading">Loading reviews...</p>
+            <div className="loading-state">Loading reviews...</div>
           ) : allReviews.length === 0 ? (
-            <p className="ad-empty-box">No reviews yet.</p>
-          ) : allReviews.map((review, idx) => (
-            <div className="ad-review-card" key={review.id || idx}>
-              <div className="ad-review-top">
-                <div>
-                  <span className="ad-review-patient">{review.patient?.name || 'Patient'}</span>
-                  <span className="ad-review-for"> for <strong>{review.doctorName}</strong></span>
-                </div>
-                <div className="ad-review-stars">
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <span key={i} className={i < review.rating ? 'star filled' : 'star empty'}>★</span>
-                  ))}
-                </div>
-              </div>
-              {review.comment && <p className="ad-review-comment">{review.comment}</p>}
-              <div className="ad-review-footer">
-                <span className="ad-review-dept">{review.deptName}</span>
-                <span className={`ad-review-status ad-review-status--${review.status || 'pending'}`}>
-                  {review.status || 'pending'}
-                </span>
-                <button
-                  className="ad-review-delete-btn"
-                  onClick={() => handleDeleteReview(review.id)}
-                  disabled={deletingReviewId === review.id}
-                  title="Delete review"
-                >
-                  {deletingReviewId === review.id ? '...' : 'Delete'}
-                </button>
-              </div>
+            <div className="empty-state">
+              <div className="empty-icon">⭐</div>
+              <p>No reviews yet.</p>
             </div>
-          ))}
+          ) : (
+            <div className="reviews-grid">
+              {allReviews.map(review => (
+                <div className="review-card" key={review.id}>
+                  <div className="review-header">
+                    <div>
+                      <strong>{review.patient?.name || 'Patient'}</strong>
+                      <span className="review-for"> for {review.doctorName}</span>
+                    </div>
+                    <div className="review-rating">
+                      {Array(5).fill().map((_, i) => (
+                        <span key={i} className={i < review.rating ? 'star filled' : 'star'}>★</span>
+                      ))}
+                    </div>
+                  </div>
+                  {review.comment && <p className="review-comment">{review.comment}</p>}
+                  <div className="review-footer">
+                    <span className="review-status">{review.status || 'pending'}</span>
+                    <button className="btn-small danger" onClick={() => handleDeleteReview(review.id)} disabled={deletingReviewId === review.id}>
+                      {deletingReviewId === review.id ? '...' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* ── Patients ── */}
-        <div id="ad-patients" className="ad-panel ad-patients-panel" style={{ display: activeSection === 'patients' ? 'block' : 'none' }}>
-          <h2 className="ad-panel-title">Hospital Patients</h2>
-          <input
-            type="text"
-            className="ad-patient-search"
-            placeholder="Search patients..."
-            value={patientSearch}
-            onChange={e => setPatientSearch(e.target.value)}
-          />
+        {/* Patients Section */}
+        <div className={`content-section ${activeSection === 'patients' ? 'active' : ''}`}>
+          <div className="page-header">
+            <div>
+              <h1>Patients</h1>
+              <p>View and manage hospital patients</p>
+            </div>
+            <div className="search-box">
+              <input
+                type="text"
+                placeholder="🔍 Search patients..."
+                value={patientSearch}
+                onChange={e => setPatientSearch(e.target.value)}
+              />
+            </div>
+          </div>
+
           {patientsLoading ? (
-            <p className="ad-reviews-loading">Loading patients...</p>
+            <div className="loading-state">Loading patients...</div>
           ) : patients.length === 0 ? (
-            <p className="ad-empty-box">No patients found.</p>
+            <div className="empty-state">
+              <div className="empty-icon">👥</div>
+              <p>No patients found.</p>
+            </div>
           ) : (
-            <div className="ad-patient-table-wrap">
-              <table className="ad-doctor-table">
+            <div className="patients-table-container">
+              <table className="patients-table">
                 <thead>
                   <tr>
-                    <th>NAME</th>
-                    <th>EMAIL</th>
-                    <th>PHONE</th>
-                    <th>JOINED</th>
-                    <th>ACTION</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Registered</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {patients
                     .filter(p => {
                       if (!patientSearch) return true;
-                      const q = patientSearch.toLowerCase();
-                      return (p.name || '').toLowerCase().includes(q)
-                        || (p.email || '').toLowerCase().includes(q)
-                        || (p.phone || '').toLowerCase().includes(q);
+                      const search = patientSearch.toLowerCase();
+                      return (p.name || '').toLowerCase().includes(search) ||
+                        (p.email || '').toLowerCase().includes(search) ||
+                        (p.phone || '').toLowerCase().includes(search);
                     })
-                    .map(p => (
-                    <tr key={p.id}>
-                      <td><strong>{p.name || 'N/A'}</strong></td>
-                      <td>{p.email || '—'}</td>
-                      <td>{p.phone || '—'}</td>
-                      <td>{p.created_at ? new Date(p.created_at).toLocaleDateString() : '—'}</td>
-                      <td>
-                        <button
-                          className="ad-tbl-btn del"
-                          onClick={() => handleDeletePatient(p.id)}
-                          disabled={deletingPatientId === p.id}
-                        >
-                          {deletingPatientId === p.id ? '...' : 'Remove'}
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                    .map(patient => (
+                      <tr key={patient.id}>
+                        <td><strong>{patient.name || 'N/A'}</strong></td>
+                        <td>{patient.email || '—'}</td>
+                        <td>{patient.phone || '—'}</td>
+                        <td>{patient.created_at ? new Date(patient.created_at).toLocaleDateString() : '—'}</td>
+                        <td>
+                          <button className="btn-small danger" onClick={() => handleDeletePatient(patient.id)} disabled={deletingPatientId === patient.id}>
+                            {deletingPatientId === patient.id ? '...' : 'Remove'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>
           )}
         </div>
+      </main>
 
-      </div>{/* end .ad-bottom-row */}
-
-      {/* ── Doctor Form Modal ── */}
+      {/* Doctor Form Modal */}
       {showDoctorForm && (
         <div className="modal-overlay" onClick={closeDoctorForm}>
-          <div className="modal-content doctor-form-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>{editingDoctorId ? 'Edit Doctor' : `Add Doctor to ${doctorFormDept?.name}`}</h2>
-              <button className="close-modal-btn" onClick={closeDoctorForm}>&times;</button>
+              <button className="modal-close" onClick={closeDoctorForm}>✕</button>
             </div>
-            {doctorFormError && <div className="error-message">{doctorFormError}</div>}
-            {doctorFormSuccess && <div className="success-message">{doctorFormSuccess}</div>}
-            <form onSubmit={handleCreateDoctor} className="doctor-form">
+            <form onSubmit={handleCreateDoctor}>
+              {doctorFormError && <div className="alert alert-error">{doctorFormError}</div>}
+              {doctorFormSuccess && <div className="alert alert-success">{doctorFormSuccess}</div>}
               <div className="form-row">
                 <div className="form-group">
                   <label>Full Name *</label>
-                  <input type="text" name="name" value={doctorFormData.name} onChange={handleDoctorFormChange} placeholder="Dr. John Smith" required />
+                  <input type="text" name="name" value={doctorFormData.name} onChange={handleDoctorFormChange} required />
                 </div>
                 <div className="form-group">
                   <label>Email *</label>
-                  <input type="email" name="email" value={doctorFormData.email} onChange={handleDoctorFormChange} placeholder="doctor@example.com" required />
+                  <input type="email" name="email" value={doctorFormData.email} onChange={handleDoctorFormChange} required />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label>Password {editingDoctorId ? '' : '*'}</label>
-                  <input type="password" name="password" value={doctorFormData.password} onChange={handleDoctorFormChange} placeholder={editingDoctorId ? 'Leave blank to keep current password' : 'Min 6 characters'} required={!editingDoctorId} minLength={editingDoctorId ? 0 : 6} />
+                  <label>Password {!editingDoctorId && '*'}</label>
+                  <input type="password" name="password" value={doctorFormData.password} onChange={handleDoctorFormChange} placeholder={editingDoctorId ? 'Leave blank to keep current' : 'Min 6 characters'} />
                 </div>
                 <div className="form-group">
                   <label>Phone</label>
-                  <input type="text" name="phone" value={doctorFormData.phone} onChange={handleDoctorFormChange} placeholder="+1234567890" />
+                  <input type="text" name="phone" value={doctorFormData.phone} onChange={handleDoctorFormChange} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label>License Number *</label>
-                  <input type="text" name="license_number" value={doctorFormData.license_number} onChange={handleDoctorFormChange} placeholder="MED-12345" required />
+                  <input type="text" name="license_number" value={doctorFormData.license_number} onChange={handleDoctorFormChange} required />
                 </div>
                 <div className="form-group">
                   <label>Qualification</label>
-                  <input type="text" name="qualification" value={doctorFormData.qualification} onChange={handleDoctorFormChange} placeholder="MD, MBBS, etc." />
+                  <input type="text" name="qualification" value={doctorFormData.qualification} onChange={handleDoctorFormChange} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
                   <label>Experience (Years)</label>
-                  <input type="number" name="experience_years" value={doctorFormData.experience_years} onChange={handleDoctorFormChange} placeholder="5" min="0" />
+                  <input type="number" name="experience_years" value={doctorFormData.experience_years} onChange={handleDoctorFormChange} min="0" />
                 </div>
                 <div className="form-group">
                   <label>Consultation Fee (Rs)</label>
-                  <input type="number" name="consultation_fee" value={doctorFormData.consultation_fee} onChange={handleDoctorFormChange} placeholder="100" min="0" />
+                  <input type="number" name="consultation_fee" value={doctorFormData.consultation_fee} onChange={handleDoctorFormChange} min="0" />
                 </div>
               </div>
-              <div className="form-group full-width">
+              <div className="form-group">
                 <label>Bio</label>
-                <textarea name="bio" value={doctorFormData.bio} onChange={handleDoctorFormChange} placeholder="Brief description about the doctor..." rows="3" />
+                <textarea name="bio" value={doctorFormData.bio} onChange={handleDoctorFormChange} rows="3" />
               </div>
-              <div className="form-group full-width">
-                <label>Doctor Image (Optional)</label>
-                <div className="image-upload-container">
-                  {doctorFormData.imagePreview ? (
-                    <div className="image-preview">
-                      <img src={doctorFormData.imagePreview} alt="Doctor preview" />
-                      <button type="button" className="remove-image-btn" onClick={() => setDoctorFormData(prev => ({ ...prev, image: null, imagePreview: '' }))}>Remove</button>
-                    </div>
-                  ) : (
-                    <label className="image-upload-label">
-                      <div className="upload-placeholder">Click to select image or drag and drop</div>
-                      <input type="file" name='image' accept="image/*" onChange={handleDoctorFormChange} style={{ display: 'none' }} />
-                    </label>
-                  )}
-                </div>
+              <div className="form-group">
+                <label>Profile Image</label>
+                {doctorFormData.imagePreview && <img src={doctorFormData.imagePreview} alt="Preview" className="image-preview" />}
+                <input type="file" accept="image/*" onChange={handleDoctorFormChange} />
               </div>
               <div className="form-actions">
-                <button type="button" onClick={closeDoctorForm} className="cancel-btn">Cancel</button>
-                <button type="submit" disabled={doctorFormLoading} className="submit-btn">
-                  {doctorFormLoading ? (editingDoctorId ? 'Updating...' : 'Creating...') : (editingDoctorId ? 'Update Doctor' : 'Create Doctor')}
+                <button type="button" className="btn-cancel" onClick={closeDoctorForm}>Cancel</button>
+                <button type="submit" className="btn-save" disabled={doctorFormLoading}>
+                  {doctorFormLoading ? (editingDoctorId ? 'Updating...' : 'Creating...') : (editingDoctorId ? 'Update' : 'Create')}
                 </button>
               </div>
             </form>
@@ -1214,46 +1318,59 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* ── Doctor View Modal ── */}
+      {/* Doctor View Modal */}
       {showDoctorView && viewingDoctor && (
         <div className="modal-overlay" onClick={closeDoctorView}>
-          <div className="modal-content doctor-view-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Doctor Details</h2>
-              <button className="close-modal-btn" onClick={closeDoctorView}>&times;</button>
+              <button className="modal-close" onClick={closeDoctorView}>✕</button>
             </div>
-            <div className="doctor-view-content">
-              <div className="doctor-view-avatar">
-                <span className="avatar-large">DR</span>
+            <div className="doctor-details">
+              <div className="detail-row">
+                <label>Name:</label>
+                <span>{viewingDoctor.user?.name || viewingDoctor.name}</span>
               </div>
-              <div className="doctor-view-details">
-                <div className="detail-row"><label>Name</label><span>{viewingDoctor.user?.name || viewingDoctor.name || 'N/A'}</span></div>
-                <div className="detail-row"><label>Email</label><span>{viewingDoctor.user?.email || viewingDoctor.email || 'N/A'}</span></div>
-                <div className="detail-row"><label>Doctor ID</label><span>{viewingDoctor.user?.identifier || 'N/A'}</span></div>
-                <div className="detail-row"><label>License Number</label><span>{viewingDoctor.license_number || 'N/A'}</span></div>
-                <div className="detail-row"><label>Qualification</label><span>{viewingDoctor.qualification || 'N/A'}</span></div>
-                <div className="detail-row"><label>Experience</label><span>{viewingDoctor.experience_years || 0} years</span></div>
-                <div className="detail-row"><label>Consultation Fee</label><span>Rs {viewingDoctor.consultation_fee || 0}</span></div>
-                <div className="detail-row"><label>Phone</label><span>{viewingDoctor.user?.phone || 'N/A'}</span></div>
-                <div className="detail-row"><label>Status</label>
-                  <span className={`status-badge ${viewingDoctor.is_active ? 'active' : 'inactive'}`}>{viewingDoctor.is_active ? 'Active' : 'Inactive'}</span>
+              <div className="detail-row">
+                <label>Email:</label>
+                <span>{viewingDoctor.user?.email || viewingDoctor.email}</span>
+              </div>
+              <div className="detail-row">
+                <label>License Number:</label>
+                <span>{viewingDoctor.license_number || 'N/A'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Qualification:</label>
+                <span>{viewingDoctor.qualification || 'N/A'}</span>
+              </div>
+              <div className="detail-row">
+                <label>Experience:</label>
+                <span>{viewingDoctor.experience_years || 0} years</span>
+              </div>
+              <div className="detail-row">
+                <label>Consultation Fee:</label>
+                <span>Rs {viewingDoctor.consultation_fee || 0}</span>
+              </div>
+              <div className="detail-row">
+                <label>Phone:</label>
+                <span>{viewingDoctor.user?.phone || 'N/A'}</span>
+              </div>
+              {viewingDoctor.bio && (
+                <div className="detail-row">
+                  <label>Bio:</label>
+                  <p>{viewingDoctor.bio}</p>
                 </div>
-                {viewingDoctor.bio && (
-                  <div className="detail-row full-width"><label>Bio</label><p>{viewingDoctor.bio}</p></div>
-                )}
-              </div>
-              <div className="modal-footer">
-                <button onClick={closeDoctorView} className="close-btn">Close</button>
-                <button onClick={() => { closeDoctorView(); handleDeleteDoctor(viewingDoctor.id); }} className="delete-btn-large">Delete Doctor</button>
-              </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn-cancel" onClick={closeDoctorView}>Close</button>
+              <button className="btn-danger" onClick={() => { closeDoctorView(); handleDeleteDoctor(viewingDoctor.id); }}>
+                Delete Doctor
+              </button>
             </div>
           </div>
         </div>
       )}
-
-      </div>
-      </div>
-
     </div>
   );
 };

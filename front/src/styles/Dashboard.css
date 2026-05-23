@@ -6,13 +6,13 @@
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
-  color: white;
+  background: linear-gradient(135deg, #d0d0d0 0%, #c0c0c0 100%);
+  color: #000000;
   padding: 20px 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(42, 127, 255, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .header-left {
@@ -24,16 +24,18 @@
 .header-left h1 {
   margin: 0;
   font-size: 28px;
+  color: #000000;
 }
 
 .role-badge {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.2);
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: #000000;
 }
 
 .header-right {
@@ -45,12 +47,13 @@
 .user-name {
   font-weight: 600;
   font-size: 16px;
+  color: #000000;
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  color: white;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  color: #000000;
   padding: 8px 16px;
   border-radius: 4px;
   cursor: pointer;
@@ -59,8 +62,8 @@
 }
 
 .logout-btn:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: white;
+  background: rgba(0, 0, 0, 0.3);
+  border-color: #000000;
 }
 
 .dashboard-content {
@@ -100,7 +103,7 @@
 
 .stat-card h3, .info-card h3 {
   margin: 0 0 15px;
-  color: #333;
+  color: #000000;
   font-size: 16px;
   font-weight: 600;
 }
@@ -109,17 +112,17 @@
   margin: 0;
   font-size: 36px;
   font-weight: 700;
-  color: #2A7FFF;
+  color: #666666;
 }
 
 .info-card p {
   margin: 10px 0;
-  color: #666;
+  color: #000000;
   font-size: 14px;
 }
 
 .info-card p strong {
-  color: #333;
+  color: #000000;
 }
 
 .action-buttons {
@@ -129,7 +132,7 @@
 }
 
 .action-btn {
-  background: linear-gradient(135deg, #2A7FFF 0%, #1F5FCC 100%);
+  background: linear-gradient(135deg, #666666 0%, #555555 100%);
   color: white;
   border: none;
   padding: 12px 24px;
@@ -142,7 +145,7 @@
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(42, 127, 255, 0.4);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 .loading {
@@ -151,6 +154,6 @@
   align-items: center;
   min-height: 100vh;
   font-size: 18px;
-  color: #2A7FFF;
+  color: #666666;
 }
 
