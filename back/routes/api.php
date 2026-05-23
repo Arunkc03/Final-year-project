@@ -161,7 +161,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // ========== AI RECOMMENDATIONS ==========
         
         });
-    });
 
     // ========== DOCTOR ROUTES ==========
     Route::middleware('role:doctor')->group(function () {
@@ -293,6 +292,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::get('/departments', [DepartmentController::class, 'systemDepartments'])->name('departments');
         });
     });
+});
 
 
 
